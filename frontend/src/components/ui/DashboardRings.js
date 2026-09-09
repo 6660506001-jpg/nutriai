@@ -115,20 +115,52 @@ export default function DashboardRings({
   const activityGoal = Math.max(250, Math.round(foodGoal * 0.2));
   const foodProgress = foodCals / foodGoal;
   const activityProgress = activityCals / activityGoal;
+  const netCals = foodCals - activityCals;
+  const foodOver = Math.max(0, foodCals - foodGoal);
+  const netRemaining = foodGoal - netCals;
 
   const summary = useMemo(() => {
-    const net = foodCals - activityCals;
-    const remaining = Math.max(0, foodGoal - net);
-    if (foodCals === 0 && activityCals === 0) return "เริ่มบันทึกวันนี้";
-    if (remaining > 0) return `เหลืออีก ~${remaining.toLocaleString("th-TH")} kcal`;
-    return "ถึงเป้าแล้ว";
-  }, [foodCals, activityCals, foodGoal]);
+    if (foodCals === 0 && activityCals === 0) {
+      return { main: "เริ่มบันทึกวันนี้", detail: null, tone: "neutral" };
+    }
+
+    if (netRemaining > 0) {
+      const main = `กินได้อีก ~${Math.round(netRemaining).toLocaleString("th-TH")} kcal`;
+      let detail = null;
+      if (foodOver > 0 && activityCals > 0) {
+        detail = `กินเกินเป้า ${foodOver.toLocaleString("th-TH")} · เผา ${activityCals.toLocaleString("th-TH")} · สุทธิ ${netCals.toLocaleString("th-TH")}`;
+      } else if (activityCals > 0) {
+        detail = `สุทธิ ${netCals.toLocaleString("th-TH")} kcal (หักเผาแล้ว)`;
+      }
+      return { main, detail, tone: "ok" };
+    }
+
+    if (netRemaining === 0) {
+      return {
+        main: "ถึงเป้าสุทธิแล้ว",
+        detail: activityCals > 0 ? `สุทธิ ${netCals.toLocaleString("th-TH")} kcal` : null,
+        tone: "ok",
+      };
+    }
+
+    return {
+      main: `เกินเป้าสุทธิ ~${Math.abs(Math.round(netRemaining)).toLocaleString("th-TH")} kcal`,
+      detail: activityCals > 0
+        ? `กิน ${foodCals.toLocaleString("th-TH")} · เผา ${activityCals.toLocaleString("th-TH")} · สุทธิ ${netCals.toLocaleString("th-TH")}`
+        : `กิน ${foodCals.toLocaleString("th-TH")} / เป้า ${foodGoal.toLocaleString("th-TH")}`,
+      tone: "over",
+    };
+  }, [foodCals, activityCals, foodGoal, foodOver, netCals, netRemaining]);
 
   const cx = 168;
   const cy = 52;
 
   return (
-    <div className={`dash-rings-wrap ${className}`.trim()} role="img" aria-label={`กินแล้ว ${foodCals} kcal จาก ${foodGoal} · กิจกรรม ${activityCals} kcal`}>
+    <div
+      className={`dash-rings-wrap ${className}`.trim()}
+      role="img"
+      aria-label={`กิน ${foodCals} kcal · เผา ${activityCals} kcal · สุทธิ ${netCals} kcal · ${summary.main}${summary.detail ? ` · ${summary.detail}` : ""}`}
+    >
       <svg
         className="dash-rings-svg"
         viewBox="0 0 336 104"
@@ -170,8 +202,14 @@ export default function DashboardRings({
           <span className="dash-rings-legend-dot" aria-hidden />
           <div>
             <span className="dash-rings-legend-label">กินแล้ว</span>
-            <strong>{foodCals.toLocaleString("th-TH")}</strong>
-            <small> / {foodGoal.toLocaleString("th-TH")} kcal</small>
+            <strong className={foodOver > 0 ? "dash-rings-value--over" : ""}>
+              {foodCals.toLocaleString("th-TH")}
+            </strong>
+            <small>
+              {foodOver > 0
+                ? ` / ${foodGoal.toLocaleString("th-TH")} (เกิน ${foodOver.toLocaleString("th-TH")})`
+                : ` / ${foodGoal.toLocaleString("th-TH")} kcal`}
+            </small>
           </div>
         </div>
         <div className="dash-rings-legend-item dash-rings-legend-item--activity">
@@ -183,7 +221,12 @@ export default function DashboardRings({
           </div>
         </div>
       </div>
-      <p className="dash-rings-summary">{summary}</p>
+      <div className={`dash-rings-summary dash-rings-summary--${summary.tone}`}>
+        <p className="dash-rings-summary-main">{summary.main}</p>
+        {summary.detail ? (
+          <p className="dash-rings-summary-detail">{summary.detail}</p>
+        ) : null}
+      </div>
     </div>
   );
 }

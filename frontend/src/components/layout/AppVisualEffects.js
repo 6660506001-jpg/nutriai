@@ -314,12 +314,37 @@ export default function AppVisualEffects() {
         color: var(--nutri-text-muted, #64748b);
       }
 
+      .dash-rings-value--over {
+        color: #dc2626;
+      }
+
       .dash-rings-summary {
         margin: 6px 0 0;
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--nutri-health-blue, #2563eb);
         text-align: center;
+      }
+
+      .dash-rings-summary-main {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.35;
+      }
+
+      .dash-rings-summary-detail {
+        margin: 4px 0 0;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.4;
+        color: var(--nutri-text-muted, #64748b);
+      }
+
+      .dash-rings-summary--ok .dash-rings-summary-main,
+      .dash-rings-summary--neutral .dash-rings-summary-main {
+        color: var(--nutri-health-blue, #2563eb);
+      }
+
+      .dash-rings-summary--over .dash-rings-summary-main {
+        color: #dc2626;
       }
 
       .dash-secondary-metrics {
