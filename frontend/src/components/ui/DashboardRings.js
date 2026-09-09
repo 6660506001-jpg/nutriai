@@ -2,17 +2,23 @@ import React, { useMemo } from "react";
 import { HiFire } from "react-icons/hi";
 import { MdDirectionsRun } from "react-icons/md";
 
-function ellipseCircumference(rx, ry) {
-  const h = ((rx - ry) ** 2) / ((rx + ry) ** 2);
-  return Math.PI * (rx + ry) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)));
-}
-
 function pointOnEllipse(cx, cy, rx, ry, progress) {
   const angle = progress * 2 * Math.PI - Math.PI / 2;
   return {
     x: cx + rx * Math.cos(angle),
     y: cy + ry * Math.sin(angle),
   };
+}
+
+function describeEllipseArc(cx, cy, rx, ry, progress) {
+  const clamped = Math.min(Math.max(progress, 0), 1);
+  if (clamped <= 0) return null;
+
+  const start = pointOnEllipse(cx, cy, rx, ry, 0);
+  const end = pointOnEllipse(cx, cy, rx, ry, clamped);
+  const largeArc = clamped > 0.5 ? 1 : 0;
+
+  return `M ${start.x.toFixed(2)} ${start.y.toFixed(2)} A ${rx} ${ry} 0 ${largeArc} 1 ${end.x.toFixed(2)} ${end.y.toFixed(2)}`;
 }
 
 function ActivityRing({
@@ -30,11 +36,11 @@ function ActivityRing({
   goal,
   unit = "kcal",
 }) {
-  const circ = ellipseCircumference(rx, ry);
-  const clamped = Math.min(Math.max(progress, 0), 1.001);
-  const offset = circ * (1 - Math.min(clamped, 1));
-  const tip = pointOnEllipse(cx, cy, rx, ry, Math.min(clamped, 1));
-  const pct = Math.round(Math.min(clamped, 1) * 100);
+  const clamped = Math.min(Math.max(progress, 0), 1);
+  const arcPath = describeEllipseArc(cx, cy, rx, ry, clamped);
+  const tip = pointOnEllipse(cx, cy, rx, ry, clamped || 0.001);
+  const pct = Math.round(clamped * 100);
+  const isComplete = clamped >= 0.999;
 
   return (
     <g className="dash-ring-group" aria-hidden>
@@ -49,20 +55,28 @@ function ActivityRing({
         strokeLinecap="round"
         strokeDasharray="3 7"
       />
-      <ellipse
-        cx={cx}
-        cy={cy}
-        rx={rx}
-        ry={ry}
-        fill="none"
-        stroke={color}
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeDasharray={circ}
-        strokeDashoffset={offset}
-        transform={`rotate(-90 ${cx} ${cy})`}
-        className="dash-ring-progress"
-      />
+      {isComplete ? (
+        <ellipse
+          cx={cx}
+          cy={cy}
+          rx={rx}
+          ry={ry}
+          fill="none"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          className="dash-ring-progress"
+        />
+      ) : arcPath ? (
+        <path
+          d={arcPath}
+          fill="none"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeLinecap="butt"
+          className="dash-ring-progress"
+        />
+      ) : null}
       {clamped > 0.03 && (
         <g transform={`translate(${tip.x} ${tip.y})`}>
           <circle r={strokeWidth * 0.68} fill={color} className="dash-ring-tip-badge" />
