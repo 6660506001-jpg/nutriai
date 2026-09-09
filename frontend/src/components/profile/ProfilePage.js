@@ -13,8 +13,6 @@ import { compressProfileImage } from "../../utils/compressProfileImage";
 import ProfileMacroBar from "../ui/ProfileMacroBar";
 import FoodAvoidanceEditor from "../ui/FoodAvoidanceEditor";
 import { normalizeFoodPreferences } from "../../utils/foodPreferences";
-import ShareAccessCard from "../ui/ShareAccessCard";
-
 export default function ProfilePage({
   user,
   setUser,
@@ -206,8 +204,6 @@ export default function ProfilePage({
       </div>
 
       {renderAccountActions("top")}
-
-      <ShareAccessCard variant="profile" />
 
       {showAvatarModal && user.profileImage ? (
         <div style={styles.avatarModalOverlay} onClick={() => setShowAvatarModal(false)}>

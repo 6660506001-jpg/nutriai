@@ -330,8 +330,6 @@ export default function AuthPage({
               </button>
             </p>
 
-            <ShareAccessCard variant="login" hideQrOnMobile />
-
           </div>
         </div>
       </div>
