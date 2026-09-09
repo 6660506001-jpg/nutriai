@@ -3903,13 +3903,13 @@ export default function AppVisualEffects() {
           padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
         }
         .app-sidebar--mobile .nav-link-pro {
-          padding: 10px 6px !important;
+          padding: 8px 2px !important;
           min-height: 52px;
-          gap: 5px !important;
+          gap: 4px !important;
         }
         .app-sidebar--mobile .nav-link-label-short {
-          font-size: 12px;
-          line-height: 1.2;
+          font-size: 10px;
+          line-height: 1.15;
         }
         .app-sidebar--mobile .nav-link-pro svg {
           width: 24px;
