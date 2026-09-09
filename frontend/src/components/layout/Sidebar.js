@@ -20,13 +20,13 @@ const MOBILE_NAV_ITEMS = [
   { id: "dashboard", icon: MdOutlineSpaceDashboard, label: "หน้าหลัก", short: "หลัก", hint: "สรุปวันนี้" },
   { id: "food", icon: MdRestaurant, label: "บันทึกอาหาร", short: "อาหาร", hint: "บันทึกมื้อ" },
   { id: "activity", icon: MdDirectionsRun, label: "กิจกรรม", short: "กิจกรรม", hint: "เผาแคล" },
+  { id: "meals", icon: MdMenuBook, label: "เมนู AI", short: "AI", hint: "แนะนำมื้อ" },
   { id: "history", icon: MdHistory, label: "ประวัติ", short: "ประวัติ", hint: "ดูแนวโน้ม" },
   { id: "profile", icon: HiOutlineUserCircle, label: "โปรไฟล์", short: "โปรไฟล์", hint: "ตั้งค่า" },
 ];
 
 function resolveMobileActiveTab(activeTab) {
   if (MOBILE_NAV_ITEMS.some((item) => item.id === activeTab)) return activeTab;
-  if (activeTab === "meals") return "dashboard";
   return activeTab;
 }
 

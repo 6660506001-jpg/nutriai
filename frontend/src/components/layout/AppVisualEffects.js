@@ -4073,12 +4073,20 @@ export default function AppVisualEffects() {
           gap: 4px !important;
         }
         .app-sidebar--mobile .nav-link-label-short {
-          font-size: 10px;
-          line-height: 1.15;
+          font-size: 9px;
+          line-height: 1.1;
         }
         .app-sidebar--mobile .nav-link-pro svg {
-          width: 24px;
-          height: 24px;
+          width: 22px;
+          height: 22px;
+        }
+        .app-sidebar--mobile .sidebar-links-wrap {
+          gap: 2px;
+          padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+        }
+        .app-sidebar--mobile .nav-link-pro {
+          padding: 7px 1px !important;
+          min-height: 50px;
         }
         .app-page-hint {
           display: none !important;
