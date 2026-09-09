@@ -26,6 +26,7 @@ import {
 } from "../../utils/foodPreferences";
 import { DashboardDaySummary } from "../ui/DailyLogDisplay";
 import { useIsMobile } from "../../hooks/useIsMobile";
+import DashboardQuickFab from "../ui/DashboardQuickFab";
 
 export default function Dashboard({
   user,
@@ -262,7 +263,7 @@ export default function Dashboard({
         </section>
       )}
 
-      {viewMode === "home" && (
+      {viewMode === "home" && !isMobile && (
         <DashboardStatusHero
           username={user.username}
           tdee={user.tdee}
@@ -272,8 +273,15 @@ export default function Dashboard({
           netCals={netCals}
           onLogFood={onNavigateToFood}
           onLogActivity={() => onNavigateToActivity()}
-          showActions={isMobile}
-          variant={isMobile ? "compact" : "full"}
+          showActions
+          variant="full"
+        />
+      )}
+
+      {viewMode === "home" && isMobile && (
+        <DashboardQuickFab
+          onLogFood={onNavigateToFood}
+          onLogActivity={() => onNavigateToActivity()}
         />
       )}
 

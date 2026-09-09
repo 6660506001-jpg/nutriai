@@ -1,8 +1,8 @@
-import React, { Suspense, lazy, useState, useEffect } from "react";
+import React, { Suspense, lazy, useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { HiOutlineUserCircle } from "react-icons/hi";
 import { MdOutlineSpaceDashboard, MdHistory, MdRestaurant, MdMenuBook, MdDirectionsRun, MdWavingHand, MdHelpOutline } from "react-icons/md";
-import { calculateHealthData } from "./utils/healthCalculations";
+import { calculateHealthData, calculateMacros } from "./utils/healthCalculations";
 import { applyTheme, getStoredAppearance, getStoredCustomPrimary, getStoredFollowDevice, getStoredThemeId, persistThemeSettings, subscribeSystemAppearance, unsubscribeSystemAppearance } from "./utils/applyTheme";
 import { applyDailyArchive } from "./utils/applyDailyArchive";
 import { styles } from "./styles/appStyles";
@@ -208,6 +208,22 @@ export default function App() {
     0,
   );
   const headerNetCals = headerFoodCals - headerActivityCals;
+  const headerMacroTotals = useMemo(
+    () => Object.values(dailyMeals || {}).flat().reduce(
+      (acc, item) => ({
+        protein: acc.protein + (Number(item?.protein) || 0),
+        carbs: acc.carbs + (Number(item?.carbs) || 0),
+        fat: acc.fat + (Number(item?.fat) || 0),
+      }),
+      { protein: 0, carbs: 0, fat: 0 },
+    ),
+    [dailyMeals],
+  );
+  const headerTdee = user ? calculateHealthData(user).tdee : 0;
+  const headerMacroTargets = useMemo(
+    () => calculateMacros(headerTdee),
+    [headerTdee],
+  );
 
   if (!isLoggedIn) {
     return (
@@ -330,6 +346,12 @@ export default function App() {
                     foodCals={headerFoodCals}
                     activityCals={headerActivityCals}
                     tdee={updatedUser.tdee}
+                    protein={headerMacroTotals.protein}
+                    carbs={headerMacroTotals.carbs}
+                    fat={headerMacroTotals.fat}
+                    targetProtein={headerMacroTargets.protein}
+                    targetCarbs={headerMacroTargets.carbs}
+                    targetFat={headerMacroTargets.fat}
                     className="app-header-dash-rings"
                   />
                 </div>

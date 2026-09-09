@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { HiFire } from "react-icons/hi";
 import { MdDirectionsRun } from "react-icons/md";
+import DashboardMacroStrip from "./DashboardMacroStrip";
 
 function pointOnEllipse(cx, cy, rx, ry, progress) {
   const angle = progress * 2 * Math.PI - Math.PI / 2;
@@ -109,6 +110,12 @@ export default function DashboardRings({
   foodCals = 0,
   activityCals = 0,
   tdee = 0,
+  protein = 0,
+  carbs = 0,
+  fat = 0,
+  targetProtein = 0,
+  targetCarbs = 0,
+  targetFat = 0,
   className = "",
 }) {
   const foodGoal = Math.max(Number(tdee) || 0, 1);
@@ -173,8 +180,8 @@ export default function DashboardRings({
           rx={148}
           ry={44}
           progress={foodProgress}
-          color="#FF375F"
-          trackColor="rgba(255, 55, 95, 0.14)"
+          color="#2563eb"
+          trackColor="rgba(37, 99, 235, 0.14)"
           strokeWidth={11}
           icon={HiFire}
           label="กินแล้ว"
@@ -187,8 +194,8 @@ export default function DashboardRings({
           rx={122}
           ry={34}
           progress={activityProgress}
-          color="#30D158"
-          trackColor="rgba(48, 209, 88, 0.14)"
+          color="#059669"
+          trackColor="rgba(5, 150, 105, 0.14)"
           strokeWidth={11}
           icon={MdDirectionsRun}
           label="กิจกรรม"
@@ -227,6 +234,15 @@ export default function DashboardRings({
           <p className="dash-rings-summary-detail">{summary.detail}</p>
         ) : null}
       </div>
+
+      <DashboardMacroStrip
+        protein={protein}
+        carbs={carbs}
+        fat={fat}
+        targetProtein={targetProtein}
+        targetCarbs={targetCarbs}
+        targetFat={targetFat}
+      />
     </div>
   );
 }

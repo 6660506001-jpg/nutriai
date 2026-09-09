@@ -37,7 +37,7 @@ export default function DashboardStatusHero({
         (showActions && (onLogFood || onLogActivity)) ? (
           <div className="dash-status-hero-actions dash-status-hero-actions--compact">
             {onLogFood ? (
-              <button type="button" className="dash-status-hero-cta" onClick={onLogFood}>
+              <button type="button" className="dash-status-hero-cta dash-status-hero-cta--food" onClick={onLogFood}>
                 + บันทึกอาหาร
               </button>
             ) : null}
@@ -62,7 +62,7 @@ export default function DashboardStatusHero({
             {(showActions && (onLogFood || onLogActivity)) ? (
               <div className="dash-status-hero-actions">
                 {onLogFood ? (
-                  <button type="button" className="dash-status-hero-cta" onClick={onLogFood}>
+                  <button type="button" className="dash-status-hero-cta dash-status-hero-cta--food" onClick={onLogFood}>
                     + บันทึกอาหาร
                   </button>
                 ) : null}

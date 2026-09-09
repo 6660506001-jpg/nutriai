@@ -31,6 +31,10 @@ export default function AppVisualEffects() {
         --nutri-health-blue: #2563eb;
         --nutri-health-green-soft: #ecfdf5;
         --nutri-health-blue-soft: #eff6ff;
+        --nutri-food-accent: #2563eb;
+        --nutri-food-accent-soft: rgba(37, 99, 235, 0.14);
+        --nutri-activity-accent: #059669;
+        --nutri-activity-accent-soft: rgba(5, 150, 105, 0.14);
         --nutri-radius-md: 14px;
         --nutri-radius-lg: 18px;
         --nutri-space-1: 8px;
@@ -118,17 +122,19 @@ export default function AppVisualEffects() {
         color: var(--nutri-health-blue, #2563eb);
       }
 
-      .dash-status-hero-cta {
+      .dash-status-hero-cta,
+      .dash-status-hero-cta--food {
         flex-shrink: 0;
         border: none;
         border-radius: 12px;
         padding: 10px 14px;
-        background: var(--nutri-health-green, #059669);
+        background: var(--nutri-food-accent, #2563eb);
         color: #fff;
         font-size: 13px;
         font-weight: 800;
         cursor: pointer;
         min-height: 44px;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
       }
 
       .dash-status-hero-actions {
@@ -140,7 +146,8 @@ export default function AppVisualEffects() {
       }
 
       .dash-status-hero-cta--activity {
-        background: var(--nutri-health-blue, #2563eb);
+        background: var(--nutri-activity-accent, #059669) !important;
+        box-shadow: 0 8px 20px rgba(5, 150, 105, 0.28) !important;
       }
 
       .dash-status-metrics {
@@ -286,11 +293,11 @@ export default function AppVisualEffects() {
       }
 
       .dash-rings-legend-item--food .dash-rings-legend-dot {
-        background: #FF375F;
+        background: var(--nutri-food-accent, #2563eb);
       }
 
       .dash-rings-legend-item--activity .dash-rings-legend-dot {
-        background: #30D158;
+        background: var(--nutri-activity-accent, #059669);
       }
 
       .dash-rings-legend-label {
@@ -340,11 +347,185 @@ export default function AppVisualEffects() {
 
       .dash-rings-summary--ok .dash-rings-summary-main,
       .dash-rings-summary--neutral .dash-rings-summary-main {
-        color: var(--nutri-health-blue, #2563eb);
+        color: var(--nutri-food-accent, #2563eb);
       }
 
       .dash-rings-summary--over .dash-rings-summary-main {
         color: #dc2626;
+      }
+
+      .dash-macro-strip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        margin-top: 8px;
+        opacity: 0.62;
+      }
+
+      .dash-macro-strip--active {
+        opacity: 1;
+      }
+
+      .dash-macro-strip-item {
+        min-width: 0;
+        padding: 6px 7px;
+        border-radius: 10px;
+        background: rgba(248, 250, 252, 0.92);
+        border: 1px solid var(--nutri-border, #e2e8f0);
+      }
+
+      .dash-macro-strip-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 4px;
+        margin-bottom: 4px;
+      }
+
+      .dash-macro-strip-label {
+        font-size: 9px;
+        font-weight: 800;
+        color: var(--nutri-text-muted, #64748b);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .dash-macro-strip-value {
+        font-size: 10px;
+        font-weight: 900;
+        color: var(--nutri-text-dark, #0f172a);
+        white-space: nowrap;
+      }
+
+      .dash-macro-strip-value small {
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--nutri-text-muted, #64748b);
+      }
+
+      .dash-macro-strip-track {
+        height: 4px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.22);
+        overflow: hidden;
+      }
+
+      .dash-macro-strip-fill {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        transition: width 0.35s ease;
+      }
+
+      .dash-macro-strip-item--protein .dash-macro-strip-fill {
+        background: #e11d48;
+      }
+
+      .dash-macro-strip-item--carbs .dash-macro-strip-fill {
+        background: #f59e0b;
+      }
+
+      .dash-macro-strip-item--fat .dash-macro-strip-fill {
+        background: #8b5cf6;
+      }
+
+      .dash-macro-strip-short {
+        display: block;
+        margin-top: 3px;
+        font-size: 8px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        color: var(--nutri-text-muted, #94a3b8);
+        text-transform: uppercase;
+      }
+
+      .dash-quick-fab {
+        position: fixed;
+        right: max(16px, env(safe-area-inset-right));
+        bottom: calc(72px + env(safe-area-inset-bottom));
+        z-index: 860;
+      }
+
+      .dash-quick-fab-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        border: none;
+        background: rgba(15, 23, 42, 0.22);
+        cursor: pointer;
+      }
+
+      .dash-quick-fab-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+      }
+
+      .dash-quick-fab-main {
+        width: 52px;
+        height: 52px;
+        border: none;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #0f172a;
+        color: #fff;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.32);
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+
+      .dash-quick-fab.is-open .dash-quick-fab-main {
+        transform: rotate(45deg);
+        background: #334155;
+      }
+
+      .dash-quick-fab-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        border-radius: 999px;
+        padding: 10px 14px 10px 12px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #fff;
+        cursor: pointer;
+        min-height: 42px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+        animation: dashQuickFabIn 0.18s ease;
+      }
+
+      @keyframes dashQuickFabIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .dash-quick-fab-option--food {
+        background: var(--nutri-food-accent, #2563eb);
+      }
+
+      .dash-quick-fab-option--activity {
+        background: var(--nutri-activity-accent, #059669);
+      }
+
+      @media (max-width: 900px) {
+        .app-main--mobile .dash-status-hero--compact {
+          display: none !important;
+        }
+
+        .app-main--mobile.app-main-tab-dashboard .dashboard-home-simple {
+          padding-bottom: calc(84px + env(safe-area-inset-bottom));
+        }
+      }
+
+      @media (min-width: 769px) {
+        .dash-quick-fab {
+          display: none;
+        }
       }
 
       .dash-secondary-metrics {
@@ -684,11 +865,11 @@ export default function AppVisualEffects() {
         border: none;
         border-radius: 999px;
         padding: 14px 18px;
-        background: var(--nutri-health-green, #059669);
+        background: var(--nutri-food-accent, #2563eb);
         color: #fff;
         font-size: 14px;
         font-weight: 900;
-        box-shadow: 0 12px 28px rgba(5, 150, 105, 0.35);
+        box-shadow: 0 12px 28px rgba(37, 99, 235, 0.35);
         cursor: pointer;
         min-height: 48px;
       }
@@ -1703,7 +1884,7 @@ export default function AppVisualEffects() {
         border: none;
         border-radius: 12px;
         padding: 12px 16px;
-        background: var(--nutri-health-green, #059669);
+        background: var(--nutri-food-accent, #2563eb);
         color: #fff;
         font-size: 14px;
         font-weight: 800;
@@ -1719,17 +1900,18 @@ export default function AppVisualEffects() {
       }
 
       .user-guide-start-btn--activity {
-        background: var(--nutri-health-blue, #2563eb);
+        background: var(--nutri-activity-accent, #059669);
       }
 
       .log-add-activity-fab {
-        background: var(--nutri-health-blue, #2563eb);
-        box-shadow: 0 12px 28px rgba(37, 99, 235, 0.35);
+        background: var(--nutri-activity-accent, #059669);
+        box-shadow: 0 12px 28px rgba(5, 150, 105, 0.35);
       }
 
       .log-quick-pick--activity.is-active,
       .log-meal-tab-activity.is-active {
-        border-color: color-mix(in srgb, var(--nutri-health-blue) 35%, transparent);
+        border-color: color-mix(in srgb, var(--nutri-activity-accent, #059669) 35%, transparent);
+        color: var(--nutri-activity-accent, #059669);
       }
 
       .app-header-help-btn {
@@ -1813,12 +1995,12 @@ export default function AppVisualEffects() {
         border-radius: 12px;
       }
       .home-action-card--food .home-action-card-icon {
-        color: #047857;
-        background: rgba(16, 185, 129, 0.12);
+        color: var(--nutri-food-accent, #2563eb);
+        background: var(--nutri-food-accent-soft, rgba(37, 99, 235, 0.14));
       }
       .home-action-card--activity .home-action-card-icon {
-        color: #1d4ed8;
-        background: rgba(59, 130, 246, 0.12);
+        color: var(--nutri-activity-accent, #059669);
+        background: var(--nutri-activity-accent-soft, rgba(5, 150, 105, 0.14));
       }
       .home-action-card--meals .home-action-card-icon {
         color: #c2410c;
@@ -1838,8 +2020,8 @@ export default function AppVisualEffects() {
         line-height: 1.45;
         color: #64748b;
       }
-      .home-action-card--food:hover { border-color: rgba(16, 185, 129, 0.35); }
-      .home-action-card--activity:hover { border-color: rgba(59, 130, 246, 0.35); }
+      .home-action-card--food:hover { border-color: rgba(37, 99, 235, 0.35); }
+      .home-action-card--activity:hover { border-color: rgba(5, 150, 105, 0.35); }
       .home-action-card--meals:hover { border-color: rgba(251, 146, 60, 0.4); }
 
       .dash-section-label {
@@ -5728,7 +5910,7 @@ export default function AppVisualEffects() {
         color: #fff;
       }
       .log-meal-tab-activity.is-active {
-        background: var(--nutri-success, #16a34a);
+        background: var(--nutri-activity-accent, #059669);
       }
       .log-panel {
         padding: 16px !important;
@@ -6031,8 +6213,8 @@ export default function AppVisualEffects() {
         color: #94a3b8;
       }
       .daily-total-value--food { color: var(--nutri-primary); }
-      .daily-total-value--burn { color: var(--nutri-success, #16a34a); }
-      .activity-totals-value--burn { color: var(--nutri-success, #16a34a); }
+      .daily-total-value--burn { color: var(--nutri-activity-accent, #059669); }
+      .activity-totals-value--burn { color: var(--nutri-activity-accent, #059669); }
       .daily-total-value--net { color: var(--nutri-primary); }
 
       .daily-meal-totals-row {
