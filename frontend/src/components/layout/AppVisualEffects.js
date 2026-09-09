@@ -3164,6 +3164,184 @@ export default function AppVisualEffects() {
           display: none;
         }
       }
+
+      .share-access-card {
+        margin-top: 20px;
+        padding: 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid var(--nutri-border, #e2e8f0);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      }
+      .share-access-card--login {
+        margin-top: 24px;
+        background: rgba(255, 255, 255, 0.14);
+        border-color: rgba(255, 255, 255, 0.28);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .share-access-card--pending {
+        background: rgba(255, 255, 255, 0.72);
+      }
+      .share-access-card-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .share-access-card-head svg {
+        flex-shrink: 0;
+        margin-top: 2px;
+        color: var(--nutri-primary, #db2777);
+      }
+      .share-access-card--login .share-access-card-head svg {
+        color: inherit;
+        opacity: 0.92;
+      }
+      .share-access-card-title {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--nutri-text-dark, #0f172a);
+        line-height: 1.35;
+      }
+      .share-access-card--login .share-access-card-title {
+        color: inherit;
+      }
+      .share-access-card-note {
+        margin: 4px 0 0;
+        font-size: 12px;
+        line-height: 1.45;
+        color: var(--nutri-text-muted, #64748b);
+      }
+      .share-access-card--login .share-access-card-note {
+        color: inherit;
+        opacity: 0.88;
+      }
+      .share-access-card-note code {
+        font-size: 11px;
+        padding: 1px 5px;
+        border-radius: 6px;
+        background: rgba(15, 23, 42, 0.06);
+      }
+      .share-access-card-body {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: center;
+      }
+      .share-access-qr-wrap {
+        flex-shrink: 0;
+        padding: 8px;
+        border-radius: 14px;
+        background: #fff;
+        border: 1px solid var(--nutri-border, #e2e8f0);
+      }
+      .share-access-qr {
+        display: block;
+        width: 160px;
+        height: 160px;
+        border-radius: 8px;
+      }
+      .share-access-qr-hint {
+        margin: 8px 0 0;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: center;
+        color: var(--nutri-text-muted, #64748b);
+      }
+      .share-access-card--login .share-access-qr-hint {
+        color: inherit;
+        opacity: 0.85;
+      }
+      .share-access-link-block {
+        flex: 1;
+        min-width: 180px;
+      }
+      .share-access-link {
+        display: block;
+        word-break: break-all;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--nutri-primary-dark, #be185d);
+        text-decoration: none;
+        margin-bottom: 10px;
+      }
+      .share-access-link:hover {
+        text-decoration: underline;
+      }
+      .share-access-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .share-access-btn {
+        min-height: 38px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--nutri-border, #e2e8f0);
+        background: #fff;
+        color: var(--nutri-text-dark, #0f172a);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        text-decoration: none;
+      }
+      .share-access-btn--primary {
+        background: var(--nutri-gradient-primary, linear-gradient(135deg, #db2777, #be185d));
+        border-color: transparent;
+        color: #fff;
+      }
+      .share-access-btn--ghost {
+        background: color-mix(in srgb, var(--nutri-primary) 8%, #fff);
+      }
+      .share-access-card--login .share-access-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.35);
+        color: inherit;
+      }
+      .share-access-card--login .share-access-btn--primary {
+        background: rgba(255, 255, 255, 0.92);
+        color: var(--nutri-primary-dark, #be185d);
+        border-color: transparent;
+      }
+      .share-access-card--login .share-access-link {
+        color: inherit;
+        opacity: 0.95;
+      }
+      .share-access-desktop-only {
+        display: block;
+      }
+      .share-access-mobile-only {
+        display: none;
+      }
+      @media (max-width: 860px) {
+        .share-access-desktop-only {
+          display: none !important;
+        }
+        .share-access-mobile-only {
+          display: block;
+          margin-top: 18px;
+        }
+        .share-access-card-body {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .share-access-qr-wrap {
+          align-self: center;
+        }
+        .share-access-actions {
+          flex-direction: column;
+        }
+        .share-access-btn {
+          width: 100%;
+        }
+      }
+
       .sidebar-logout-wrap {
         margin-top: auto;
         padding: 8px 0 12px;

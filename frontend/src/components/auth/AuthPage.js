@@ -3,7 +3,8 @@ import { HiCheckCircle, HiSparkles } from "react-icons/hi";
 import { Colors } from "../../constants/colors";
 import { styles } from "../../styles/appStyles";
 import { loginUser, registerUser } from "../../utils/authApi";
-import { getApiBaseUrl } from "../../constants/config";
+import { canSharePublicAppLink, getApiBaseUrl } from "../../constants/config";
+import ShareAccessCard from "../ui/ShareAccessCard";
 import { EMPTY_FOOD_PREFERENCES, hasFoodAvoidanceConfigured, normalizeFoodPreferences } from "../../utils/foodPreferences";
 import FoodAvoidanceEditor from "../ui/FoodAvoidanceEditor";
 import AppVisualEffects from "../layout/AppVisualEffects";
@@ -65,7 +66,11 @@ export default function AuthPage({
       })
       .catch(() => {
         if (!cancelled) {
-          setLoginError("เชื่อมต่อ backend ไม่ได้ — มือถือต้องอยู่ Wi‑Fi เดียวกับคอม");
+          setLoginError(
+            canSharePublicAppLink()
+              ? "เชื่อมต่อ backend ไม่ได้ — ตรวจ REACT_APP_API_BASE_URL บน Vercel"
+              : "เชื่อมต่อ backend ไม่ได้ — มือถือต้องอยู่ Wi‑Fi เดียวกับคอม"
+          );
         }
       });
     return () => { cancelled = true; };
@@ -180,6 +185,7 @@ export default function AuthPage({
                 <div style={styles.loginFeatureItem}><HiCheckCircle color={Colors.primaryLight} /> วิเคราะห์แคลอรี่และมาโครอัตโนมัติ</div>
                 <div style={styles.loginFeatureItem}><HiCheckCircle color={Colors.primaryLight} /> ติดตามแนวโน้มน้ำหนักรายสัปดาห์</div>
               </div>
+              <ShareAccessCard variant="login" className="share-access-desktop-only" />
             </div>
           </div>
 
@@ -324,6 +330,8 @@ export default function AuthPage({
                 {isLogin ? "สมัครสมาชิก" : "เข้าสู่ระบบ"}
               </button>
             </p>
+
+            <ShareAccessCard variant="login" className="share-access-mobile-only" />
           </div>
         </div>
       </div>
