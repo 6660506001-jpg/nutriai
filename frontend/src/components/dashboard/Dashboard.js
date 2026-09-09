@@ -25,6 +25,7 @@ import {
   normalizeFoodPreferences,
 } from "../../utils/foodPreferences";
 import { DashboardDaySummary } from "../ui/DailyLogDisplay";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 export default function Dashboard({
   user,
@@ -39,6 +40,7 @@ export default function Dashboard({
   onOpenGuide,
   viewMode = "home",
 }) {
+  const isMobile = useIsMobile();
   const mealPlanRef = React.useRef(null);
   const [aiOpen, setAiOpen] = useState(viewMode === "meals" || false);
   const [pendingFood, setPendingFood] = useState(null);
@@ -237,7 +239,7 @@ export default function Dashboard({
         </section>
       )}
 
-      {viewMode === "home" && !hasRecordsLogged && (
+      {viewMode === "home" && !hasRecordsLogged && !isMobile && (
         <section className="dash-welcome-banner" aria-label="เริ่มต้นใช้งาน">
           <div className="dash-welcome-banner-main">
             <div className="dash-welcome-banner-body">
@@ -270,11 +272,11 @@ export default function Dashboard({
           netCals={netCals}
           onLogFood={onNavigateToFood}
           onLogActivity={() => onNavigateToActivity()}
-          showActions={false}
+          showActions={isMobile}
         />
       )}
 
-      {viewMode === "home" && (
+      {viewMode === "home" && !isMobile && (
         <HomeActionGrid
           foodCals={foodCals}
           activityCals={activityCals}
@@ -285,7 +287,7 @@ export default function Dashboard({
         />
       )}
 
-      {viewMode === "home" && (
+      {viewMode === "home" && !isMobile && (
         <div className="dash-body-section">
           <p className="dash-section-label">ข้อมูลร่างกาย</p>
           <div className="dash-secondary-metrics">

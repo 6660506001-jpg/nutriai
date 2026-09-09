@@ -30,6 +30,7 @@ import {
   normalizeFoodPreferences,
 } from "./utils/foodPreferences";
 import { formatTodayLabel } from "./utils/logDisplay";
+import { useIsMobile } from "./hooks/useIsMobile";
 
 const TAB_ICONS = {
   dashboard: MdOutlineSpaceDashboard,
@@ -81,6 +82,7 @@ export default function App() {
   const [activityLaunchPreset, setActivityLaunchPreset] = useState(null);
   const [showUserGuide, setShowUserGuide] = useState(false);
   const [showFoodPrefsModal, setShowFoodPrefsModal] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!isLoggedIn || !user?.username) return;
@@ -98,10 +100,11 @@ export default function App() {
   useEffect(() => {
     if (!isLoggedIn || !user?.username) return;
     if (showFoodPrefsModal) return;
+    if (isMobile) return;
     if (!hasSeenUserGuide(user.username)) {
       setShowUserGuide(true);
     }
-  }, [isLoggedIn, user?.username, showFoodPrefsModal]);
+  }, [isLoggedIn, user?.username, showFoodPrefsModal, isMobile]);
 
   useEffect(() => {
     if (!isLoggedIn || !user?.username) return;
@@ -158,7 +161,9 @@ export default function App() {
       markFoodPrefsSetupDone(username);
     }
     setIsLoggedIn(true);
-    setCurrentTab("dashboard");
+    const hasNoLogsToday = !Object.values(archived.dailyMeals).some((meal) => meal.length > 0);
+    const openFoodFirst = isMobile || hasNoLogsToday;
+    setCurrentTab(openFoodFirst ? "food" : "dashboard");
   };
 
   const handleSaveFoodPreferences = (nextPreferences) => {
@@ -291,7 +296,7 @@ export default function App() {
           onOpenGuide={() => setShowUserGuide(true)}
         />
         <main
-          className={`app-main nutri-page-bg app-main-tab-${currentTab}`}
+          className={`app-main nutri-page-bg app-main-tab-${currentTab}${isMobile ? " app-main--mobile" : ""}`}
           style={styles.mainArea}
         >
           <header className="app-header app-header-context" style={styles.header}>
@@ -341,7 +346,7 @@ export default function App() {
               <MdWavingHand className="app-header-wave" aria-hidden />
             </div>
           </header>
-          <AppPageHint text={pageMeta.hint} />
+          {!isMobile ? <AppPageHint text={pageMeta.hint} /> : null}
           <div className="app-scroll" style={styles.scrollContent}>
             <Suspense fallback={<TabLoading />}>
             {(currentTab === "dashboard" || currentTab === "meals") && (
@@ -403,6 +408,8 @@ export default function App() {
                 activities={activities}
                 onLogout={handleLogout}
                 onOpenGuide={() => setShowUserGuide(true)}
+                onNavigateToFood={handleNavigateToFood}
+                onNavigateToActivity={() => handleNavigateToActivity()}
               />
             )}
             </Suspense>

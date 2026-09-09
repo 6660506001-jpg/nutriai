@@ -20,15 +20,14 @@ export const styles = {
     zIndex: 100,
     boxShadow: Shadows.sidebar
   },
-  mainArea: { flex: 1, marginLeft: '260px', minWidth: 0, overflowX: 'clip' },
+  mainArea: { flex: 1, minWidth: 0, overflowX: 'clip' },
   header: {
     background: '#ffffff',
-    padding: '18px 40px',
     borderBottom: '1px solid #e2e8f0',
     textAlign: 'right'
   },
   headerTitle: { fontSize: '18px', fontWeight: '800', color: '#1E293B', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' },
-  scrollContent: { padding: '34px' },
+  scrollContent: {},
   pageLayout: { maxWidth: '1200px', margin: '0 auto' },
   logo: {
     fontSize: '27px',

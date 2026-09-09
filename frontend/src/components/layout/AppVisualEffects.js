@@ -861,6 +861,12 @@ export default function AppVisualEffects() {
         min-height: 100vh;
         min-width: 0;
         overflow-x: clip;
+        margin-left: 260px;
+      }
+      .app-scroll {
+        padding: 34px;
+        max-width: 100%;
+        box-sizing: border-box;
       }
       .app-main > .app-header,
       .app-main > .app-scroll {
@@ -3892,6 +3898,40 @@ export default function AppVisualEffects() {
           min-height: 48px;
           border-radius: 10px !important;
         }
+        .app-sidebar--mobile .sidebar-links-wrap {
+          gap: 4px;
+          padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
+        }
+        .app-sidebar--mobile .nav-link-pro {
+          padding: 10px 6px !important;
+          min-height: 52px;
+          gap: 5px !important;
+        }
+        .app-sidebar--mobile .nav-link-label-short {
+          font-size: 12px;
+          line-height: 1.2;
+        }
+        .app-sidebar--mobile .nav-link-pro svg {
+          width: 24px;
+          height: 24px;
+        }
+        .app-page-hint {
+          display: none !important;
+        }
+        .profile-page .share-access-card {
+          display: none;
+        }
+        .profile-quick-links {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+          margin-bottom: 10px;
+        }
+        .profile-action-btn--primary {
+          background: var(--nutri-gradient-primary, linear-gradient(135deg, #db2777, #be185d));
+          border-color: transparent;
+          color: #fff;
+        }
         .app-sidebar .nav-link-active {
           box-shadow: inset 0 3px 0 #F472B6 !important;
           background: rgba(255, 255, 255, 0.1) !important;
@@ -4089,6 +4129,131 @@ export default function AppVisualEffects() {
         .theme-mode-toggle button svg {
           width: 14px;
           height: 14px;
+        }
+      }
+
+      @media (max-width: 901px) and (min-width: 769px) {
+        .app-header-context {
+          grid-template-columns: 1fr auto;
+          gap: 10px 12px;
+          padding: max(14px, env(safe-area-inset-top)) 20px 14px !important;
+        }
+        .app-header-meta {
+          grid-column: 1 / -1;
+          justify-content: flex-start;
+        }
+        .app-header-page-tagline {
+          margin-left: 0;
+          max-width: none;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .app-header-context {
+          grid-template-columns: 1fr auto;
+          gap: 8px;
+          padding: max(10px, env(safe-area-inset-top)) 12px 10px !important;
+        }
+        .app-header-page-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 10px;
+        }
+        .app-header-page-title {
+          font-size: 17px;
+        }
+        .app-header-user-text {
+          display: none;
+        }
+        .app-header-user-card {
+          padding: 4px !important;
+          border-radius: 50%;
+        }
+        .app-header-chip {
+          font-size: 10px;
+          padding: 4px 7px;
+        }
+        .app-scroll {
+          padding: 12px !important;
+          padding-left: max(12px, env(safe-area-inset-left)) !important;
+          padding-right: max(12px, env(safe-area-inset-right)) !important;
+        }
+        .responsive-card {
+          padding: 16px !important;
+          border-radius: 18px !important;
+        }
+        .profile-hero-responsive {
+          padding: 22px 16px !important;
+          border-radius: 22px !important;
+        }
+        .profile-hero-name {
+          font-size: 24px !important;
+        }
+        .profile-weight-chart-wrap {
+          height: 260px !important;
+        }
+        .sidebar-links-wrap {
+          gap: 0;
+          padding: 4px 2px calc(4px + env(safe-area-inset-bottom));
+        }
+        .app-sidebar .nav-link-pro {
+          padding: 6px 0 !important;
+          gap: 2px !important;
+          min-height: 44px;
+          border-radius: 8px !important;
+        }
+        .app-sidebar .nav-link-pro svg {
+          width: 22px;
+          height: 22px;
+        }
+        .nav-link-label-short {
+          font-size: 9px;
+          line-height: 1.1;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .share-access-qr {
+          width: 140px;
+          height: 140px;
+        }
+        .share-access-link-block {
+          min-width: 0;
+        }
+        .share-access-actions {
+          flex-direction: column;
+        }
+        .log-page-summary-metric {
+          min-width: calc(50% - 8px);
+          flex: 1 1 calc(50% - 8px);
+        }
+        .log-page-summary-metric-value {
+          font-size: 16px;
+        }
+        .what-if-simulator-panel {
+          padding: 12px !important;
+        }
+        .what-if-simulator-input {
+          font-size: 16px;
+        }
+        .what-if-swap-actions {
+          flex-direction: column;
+        }
+        .what-if-btn {
+          width: 100%;
+        }
+        .dashboard-quick-actions {
+          grid-template-columns: 1fr;
+        }
+        .user-guide-modal-card {
+          margin: 12px !important;
+          max-height: calc(100dvh - 24px) !important;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .app-sidebar--mobile .nav-link-label-short {
+          font-size: 10px;
         }
       }
 
@@ -4304,9 +4469,21 @@ export default function AppVisualEffects() {
         .app-header-page-tagline {
           display: none;
         }
+        .app-main--mobile .app-header-page-icon {
+          display: none;
+        }
+        .app-main--mobile .app-header-chip:not(.app-header-chip--accent) {
+          display: none;
+        }
+        .app-main--mobile .app-header-user-text {
+          display: none;
+        }
+        .app-main--mobile .app-header-user-card {
+          padding: 4px !important;
+          border-radius: 50%;
+        }
         .app-page-hint {
-          margin: 0 12px 10px;
-          padding: 10px 12px;
+          display: none !important;
         }
         .app-page-hint-text {
           font-size: 12px;
@@ -4344,6 +4521,50 @@ export default function AppVisualEffects() {
           position: sticky;
           top: 0;
           z-index: 6;
+        }
+        .log-page-food:not(.has-records) .log-page-block-search {
+          order: 1;
+        }
+        .log-page-food:not(.has-records) .log-page-block-tabs {
+          order: 2;
+        }
+        .log-page-food:not(.has-records) .log-page-block-summary {
+          order: 3;
+          position: static;
+        }
+        .log-page-food:not(.has-records) .log-page-block-summary .log-page-summary {
+          position: static;
+          box-shadow: none;
+        }
+        .log-page-food:not(.has-records) .log-page-block-hints,
+        .log-page-food:not(.has-records) .log-page-block-advice,
+        .log-page-food:not(.has-records) .log-page-block-notice {
+          display: none !important;
+        }
+        .log-quick-picks-hint {
+          margin: 0 0 8px;
+          font-size: 12px;
+          font-weight: 700;
+          color: var(--nutri-text-muted, #64748b);
+        }
+        .log-quick-picks-more {
+          width: 100%;
+          margin-top: 8px;
+          min-height: 44px;
+          border-radius: 12px;
+          border: 1px dashed var(--nutri-border, #e2e8f0);
+          background: #fff;
+          color: var(--nutri-text-muted, #64748b);
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .log-search-hero-input {
+          font-size: 16px !important;
+          min-height: 48px;
+        }
+        .log-meal-tab {
+          min-height: 44px;
         }
         .log-page-block-records { order: 4; }
         .log-page-block-suggestions { order: 5; }

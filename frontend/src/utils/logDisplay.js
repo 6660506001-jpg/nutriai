@@ -4,6 +4,14 @@ export { getTodayKey };
 
 export const MEAL_ORDER = ["มื้อเช้า", "มื้อกลางวัน", "มื้อเย็น"];
 
+/** เลือกมื้อตามเวลา — ลดขั้นตอนตอนบันทึกบนมือถือ */
+export const getMealPeriodByTime = (date = new Date()) => {
+  const hour = date.getHours();
+  if (hour < 11) return "มื้อเช้า";
+  if (hour < 15) return "มื้อกลางวัน";
+  return "มื้อเย็น";
+};
+
 export const getMealShort = (mealType) =>
   ({
     "มื้อเช้า": "เช้า",

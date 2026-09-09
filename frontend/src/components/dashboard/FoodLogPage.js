@@ -9,10 +9,12 @@ import {
 } from "../../utils/logSearchHelpers";
 import {
   MEAL_ORDER,
+  getMealPeriodByTime,
   mealTotalsFromDaily,
   stampLogMeta,
   sumCalories,
 } from "../../utils/logDisplay";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { analyzeThreeMealsSummary, buildActiveMealAdviceView } from "../../utils/mealRecommendations";
 import { getProfessionalPrediction } from "../../utils/aiPrediction";
 import { generateMenuRecommendations } from "../../utils/menuRecommendations";
@@ -68,6 +70,8 @@ export default function FoodLogPage({
   const recordsRef = React.useRef(null);
   const suggestionsRef = React.useRef(null);
   const searchInputRef = React.useRef(null);
+  const [showMoreQuickPicks, setShowMoreQuickPicks] = useState(false);
+  const isMobile = useIsMobile();
 
   const trimmedQuery = searchTerm.trim();
   const visibleSearchList = trimmedQuery ? searchList : [];
@@ -118,6 +122,21 @@ export default function FoodLogPage({
   React.useEffect(() => {
     setFilters((prev) => ({ ...prev, meal: activeMealTab }));
   }, [activeMealTab]);
+
+  React.useEffect(() => {
+    const allEmpty = !Object.values(dailyMeals).some((meal) => meal.length > 0);
+    if (allEmpty) {
+      setActiveMealTab(getMealPeriodByTime());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ตั้งมื้อเริ่มต้นครั้งแรกเท่านั้น
+  }, []);
+
+  React.useEffect(() => {
+    if (!isMobile) return undefined;
+    const timer = window.setTimeout(() => focusSearch(), 350);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- โฟกus เมื่อเปิดแท็บบนมือถือ
+  }, [isMobile]);
 
   const handleFilterClose = () => {
     if (filters.meal && filters.meal !== activeMealTab) {
@@ -245,6 +264,7 @@ export default function FoodLogPage({
         </div>
       ) : (
         <>
+          <p className="log-quick-picks-hint">แตะเมนูยอดนิยม หรือพิมพ์ชื่ออาหารด้านบน</p>
           <div className="log-quick-picks log-quick-picks--food">
             {THAI_FOOD_QUICK_PICKS.map((name) => (
               <button key={name} type="button" className="log-quick-pick" onClick={() => applyQuickPick(name)}>
@@ -252,22 +272,35 @@ export default function FoodLogPage({
               </button>
             ))}
           </div>
-          <div className="log-quick-picks log-quick-picks--fruits">
-            <span className="log-quick-picks-label">ผลไม้</span>
-            {THAI_FRUIT_QUICK_PICKS.map((name) => (
-              <button key={name} type="button" className="log-quick-pick log-quick-pick--fruit" onClick={() => applyQuickPick(name)}>
-                {name}
-              </button>
-            ))}
-          </div>
-          <div className="log-quick-picks log-quick-picks--drinks">
-            <span className="log-quick-picks-label">เครื่องดื่ม</span>
-            {THAI_DRINK_QUICK_PICKS.map((name) => (
-              <button key={name} type="button" className="log-quick-pick log-quick-pick--drink" onClick={() => applyQuickPick(name)}>
-                {name}
-              </button>
-            ))}
-          </div>
+          {(!isMobile || showMoreQuickPicks) && (
+            <>
+              <div className="log-quick-picks log-quick-picks--fruits">
+                <span className="log-quick-picks-label">ผลไม้</span>
+                {THAI_FRUIT_QUICK_PICKS.map((name) => (
+                  <button key={name} type="button" className="log-quick-pick log-quick-pick--fruit" onClick={() => applyQuickPick(name)}>
+                    {name}
+                  </button>
+                ))}
+              </div>
+              <div className="log-quick-picks log-quick-picks--drinks">
+                <span className="log-quick-picks-label">เครื่องดื่ม</span>
+                {THAI_DRINK_QUICK_PICKS.map((name) => (
+                  <button key={name} type="button" className="log-quick-pick log-quick-pick--drink" onClick={() => applyQuickPick(name)}>
+                    {name}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+          {isMobile && !showMoreQuickPicks ? (
+            <button
+              type="button"
+              className="log-quick-picks-more"
+              onClick={() => setShowMoreQuickPicks(true)}
+            >
+              + ผลไม้ / เครื่องดื่ม
+            </button>
+          ) : null}
         </>
       )}
     </section>
@@ -597,7 +630,7 @@ export default function FoodLogPage({
 
       {renderSearchPanel()}
 
-      {foodCals === 0 && (
+      {foodCals === 0 && !isMobile && (
         <div className="log-page-block log-page-block-hints">
           <QuickStartSteps
             title="วิธีบันทึกอาหาร"

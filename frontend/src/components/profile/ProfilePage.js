@@ -23,6 +23,8 @@ export default function ProfilePage({
   activities,
   onLogout,
   onOpenGuide,
+  onNavigateToFood,
+  onNavigateToActivity,
 }) {
   const fileInputRef = useRef(null);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
@@ -122,12 +124,27 @@ export default function ProfilePage({
   }, [showAvatarModal]);
 
   const renderAccountActions = (variant = "top") => {
-    if (!onOpenGuide && !onLogout) return null;
+    const showQuickLinks = variant !== "bottom" && (onNavigateToFood || onNavigateToActivity);
+    if (!onOpenGuide && !onLogout && !showQuickLinks) return null;
     return (
       <div className={`profile-account-actions profile-account-actions--${variant}`}>
         <p className="profile-account-actions-label">
           {variant === "bottom" ? "ออกจากบัญชี" : "บัญชีและความช่วยเหลือ"}
         </p>
+        {showQuickLinks ? (
+          <div className="profile-quick-links">
+            {onNavigateToFood ? (
+              <button type="button" className="profile-action-btn profile-action-btn--primary" onClick={onNavigateToFood}>
+                บันทึกอาหาร
+              </button>
+            ) : null}
+            {onNavigateToActivity ? (
+              <button type="button" className="profile-action-btn profile-action-btn--ghost" onClick={onNavigateToActivity}>
+                บันทึกกิจกรรม
+              </button>
+            ) : null}
+          </div>
+        ) : null}
         <div className="profile-mobile-actions">
           {onOpenGuide && variant !== "bottom" ? (
             <button type="button" className="profile-action-btn profile-action-btn--ghost" onClick={onOpenGuide}>
@@ -148,7 +165,7 @@ export default function ProfilePage({
 
   return (
     <div className="profile-page" style={styles.pageLayout}>
-      <div className="profile-hero-responsive profile-hero-card responsive-card" style={{...styles.card, background: Colors.aiCardBg, color: 'white', padding:'40px', position:'relative', borderRadius:'32px', marginBottom: '25px'}}>
+      <div className="profile-hero-responsive profile-hero-card responsive-card" style={{...styles.card, background: Colors.aiCardBg, color: 'white', position:'relative', borderRadius:'32px', marginBottom: '25px'}}>
         <div style={{position:'absolute', top:'20px', right:'20px'}}>
             {isEditing ? <button onClick={handleSave} style={styles.btnSave}>บันทึก</button> : <button onClick={() => setIsEditing(true)} style={styles.btnEditCircle}><MdEdit /></button>}
         </div>
