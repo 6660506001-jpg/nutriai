@@ -11,7 +11,6 @@ import BlurredFoodBackground from "../layout/BlurredFoodBackground";
 import LoginVisualEffects from "../layout/LoginVisualEffects";
 import LoginField from "../ui/LoginField";
 import ThemePicker from "../ui/ThemePicker";
-import ShareAccessCard from "../ui/ShareAccessCard";
 
 export default function AuthPage({
   onLogin,
