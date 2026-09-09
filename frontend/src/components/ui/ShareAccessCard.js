@@ -13,7 +13,7 @@ function buildQrImageUrl(url) {
   return `https://api.qrserver.com/v1/create-qr-code/?${params.toString()}`;
 }
 
-export default function ShareAccessCard({ variant = "profile", className = "" }) {
+export default function ShareAccessCard({ variant = "profile", className = "", hideQrOnMobile = false }) {
   const [shareUrl, setShareUrl] = useState(() => getPublicAppUrl());
   const [loading, setLoading] = useState(() => !getPublicAppUrl());
   const wifiOnly = isWifiOnlyShareUrl(shareUrl);
@@ -118,7 +118,7 @@ export default function ShareAccessCard({ variant = "profile", className = "" })
       </div>
 
       <div className="share-access-card-body">
-        <div className="share-access-qr-wrap">
+        <div className={`share-access-qr-wrap${hideQrOnMobile ? " share-access-qr-wrap--desktop-only" : ""}`}>
           <img
             src={qrUrl}
             alt="QR Code สำหรับเปิด NutriAI บนมือถือ"

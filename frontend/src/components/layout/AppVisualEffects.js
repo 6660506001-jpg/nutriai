@@ -3408,6 +3408,14 @@ export default function AppVisualEffects() {
         background: #fff;
         border: 1px solid var(--nutri-border, #e2e8f0);
       }
+      .share-access-qr-wrap--desktop-only {
+        display: block;
+      }
+      @media (max-width: 860px) {
+        .share-access-qr-wrap--desktop-only {
+          display: none !important;
+        }
+      }
       .share-access-qr {
         display: block;
         width: 160px;
@@ -4092,7 +4100,12 @@ export default function AppVisualEffects() {
           display: none !important;
         }
         .profile-page .share-access-card {
-          display: none;
+          margin-top: 12px;
+          padding: 14px;
+        }
+        .profile-page .share-access-qr {
+          width: 140px;
+          height: 140px;
         }
         .profile-quick-links {
           display: grid;

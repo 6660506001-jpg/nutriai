@@ -11,6 +11,7 @@ import BlurredFoodBackground from "../layout/BlurredFoodBackground";
 import LoginVisualEffects from "../layout/LoginVisualEffects";
 import LoginField from "../ui/LoginField";
 import ThemePicker from "../ui/ThemePicker";
+import ShareAccessCard from "../ui/ShareAccessCard";
 
 export default function AuthPage({
   onLogin,
@@ -328,6 +329,8 @@ export default function AuthPage({
                 {isLogin ? "สมัครสมาชิก" : "เข้าสู่ระบบ"}
               </button>
             </p>
+
+            <ShareAccessCard variant="login" hideQrOnMobile />
 
           </div>
         </div>
