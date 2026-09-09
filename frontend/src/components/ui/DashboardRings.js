@@ -10,15 +10,27 @@ function pointOnEllipse(cx, cy, rx, ry, progress) {
   };
 }
 
-function describeEllipseArc(cx, cy, rx, ry, progress) {
+/** Sample points along the ellipse so progress hugs the same path as the track ring. */
+function describeEllipseProgress(cx, cy, rx, ry, progress) {
   const clamped = Math.min(Math.max(progress, 0), 1);
   if (clamped <= 0) return null;
 
-  const start = pointOnEllipse(cx, cy, rx, ry, 0);
-  const end = pointOnEllipse(cx, cy, rx, ry, clamped);
-  const largeArc = clamped > 0.5 ? 1 : 0;
+  const startAngle = -Math.PI / 2;
+  const sweep = clamped * 2 * Math.PI;
+  const steps = Math.max(24, Math.ceil(100 * clamped));
+  const coords = [];
 
-  return `M ${start.x.toFixed(2)} ${start.y.toFixed(2)} A ${rx} ${ry} 0 ${largeArc} 1 ${end.x.toFixed(2)} ${end.y.toFixed(2)}`;
+  for (let i = 0; i <= steps; i += 1) {
+    const angle = startAngle + (i / steps) * sweep;
+    coords.push({
+      x: cx + rx * Math.cos(angle),
+      y: cy + ry * Math.sin(angle),
+    });
+  }
+
+  return coords
+    .map(({ x, y }, index) => `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`)
+    .join(" ");
 }
 
 function ActivityRing({
@@ -37,7 +49,7 @@ function ActivityRing({
   unit = "kcal",
 }) {
   const clamped = Math.min(Math.max(progress, 0), 1);
-  const arcPath = describeEllipseArc(cx, cy, rx, ry, clamped);
+  const arcPath = describeEllipseProgress(cx, cy, rx, ry, clamped);
   const tip = pointOnEllipse(cx, cy, rx, ry, clamped || 0.001);
   const pct = Math.round(clamped * 100);
   const isComplete = clamped >= 0.999;
@@ -73,7 +85,8 @@ function ActivityRing({
           fill="none"
           stroke={color}
           strokeWidth={strokeWidth}
-          strokeLinecap="butt"
+          strokeLinecap="round"
+          strokeLinejoin="round"
           className="dash-ring-progress"
         />
       ) : null}
