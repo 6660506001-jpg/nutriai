@@ -4750,6 +4750,27 @@ export default function AppVisualEffects() {
         .log-page-block-records { order: 4; }
         .log-page-block-suggestions { order: 5; }
         .log-page-block-hints { order: 6; }
+        .log-page.is-searching .log-page-block-summary,
+        .log-page.is-searching .log-page-block-tabs,
+        .log-page.is-searching .log-page-block-records,
+        .log-page.is-searching .log-page-block-suggestions,
+        .log-page.is-searching .log-page-block-advice,
+        .log-page.is-searching .log-page-block-notice,
+        .log-page.is-searching .log-add-food-fab {
+          display: none !important;
+        }
+        .log-page.is-searching .log-page-block-search {
+          order: 1 !important;
+          position: sticky;
+          top: 0;
+          z-index: 20;
+        }
+        .log-page.is-searching .log-search-results--live {
+          max-height: min(72dvh, calc(100dvh - 100px));
+        }
+        .log-page.is-searching .log-search-panel-pro.is-search-active {
+          padding-bottom: 16px !important;
+        }
         .log-page.has-save-notice .log-add-food-fab {
           display: none;
         }
@@ -5161,14 +5182,16 @@ export default function AppVisualEffects() {
         gap: 10px;
         padding-bottom: 8px;
       }
-      .log-page-block-summary { order: 1; }
-      .log-page-block-tabs { order: 2; }
-      .log-page-block-records { order: 3; }
-      .log-page-block-suggestions { order: 4; }
-      .log-page-block-search { order: 5; }
-      .log-page-block-hints { order: 6; }
-      .log-page-block-notice { order: 7; }
-      .log-page-block-advice { order: 8; }
+      @media (min-width: 901px) {
+        .log-page-block-summary { order: 1; }
+        .log-page-block-tabs { order: 2; }
+        .log-page-block-records { order: 3; }
+        .log-page-block-suggestions { order: 4; }
+        .log-page-block-search { order: 5; }
+        .log-page-block-hints { order: 6; }
+        .log-page-block-notice { order: 7; }
+        .log-page-block-advice { order: 8; }
+      }
 
       .log-panel-records--top {
         padding-top: 12px;

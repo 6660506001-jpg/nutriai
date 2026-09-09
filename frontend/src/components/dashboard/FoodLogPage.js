@@ -138,6 +138,14 @@ export default function FoodLogPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- โฟกus เมื่อเปิดแท็บบนมือถือ
   }, [isMobile]);
 
+  React.useEffect(() => {
+    if (!isMobile || !trimmedQuery) return undefined;
+    const timer = window.setTimeout(() => {
+      searchInputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [isMobile, trimmedQuery]);
+
   const handleFilterClose = () => {
     if (filters.meal && filters.meal !== activeMealTab) {
       setActiveMealTab(filters.meal);
@@ -568,7 +576,7 @@ export default function FoodLogPage({
   };
 
   return (
-    <div className={`log-page log-page-food${foodCals > 0 ? " has-records" : ""}${saveNotice ? " has-save-notice" : ""}`}>
+    <div className={`log-page log-page-food${foodCals > 0 ? " has-records" : ""}${saveNotice ? " has-save-notice" : ""}${trimmedQuery ? " is-searching" : ""}`}>
       <div className="log-page-block log-page-block-summary">
         <LogPageSummary
           mode="food"
