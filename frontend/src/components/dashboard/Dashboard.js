@@ -273,6 +273,7 @@ export default function Dashboard({
           onLogFood={onNavigateToFood}
           onLogActivity={() => onNavigateToActivity()}
           showActions={isMobile}
+          variant={isMobile ? "compact" : "full"}
         />
       )}
 

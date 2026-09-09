@@ -157,6 +157,171 @@ export default function AppVisualEffects() {
         color: var(--nutri-text-muted, #64748b);
       }
 
+      .dash-status-hero--compact {
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+      }
+
+      .dash-status-hero-actions--compact {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        min-width: 0;
+        width: 100%;
+      }
+
+      .dash-status-hero-actions--compact .dash-status-hero-cta {
+        width: 100%;
+        min-height: 48px;
+      }
+
+      .app-header--dash-rings {
+        display: block !important;
+        padding: max(12px, env(safe-area-inset-top)) 14px 10px !important;
+        background: #fff;
+        border-bottom: 1px solid var(--nutri-border, #e2e8f0);
+      }
+
+      .app-header-dash-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+
+      .app-header-dash-top .app-header-page-title {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+      }
+
+      .app-header-help-btn--icon {
+        width: 40px;
+        height: 40px;
+        padding: 0 !important;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .app-header-dash-rings-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+      }
+
+      .app-header-avatar--rings {
+        width: 52px;
+        height: 52px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 800;
+        color: #fff;
+        background: var(--nutri-gradient-primary, linear-gradient(135deg, #db2777, #be185d));
+        box-shadow: 0 4px 14px rgba(219, 39, 119, 0.25);
+      }
+
+      .app-header-avatar--rings .app-header-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .dash-rings-wrap {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .dash-rings-svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        min-height: 88px;
+      }
+
+      .dash-ring-progress {
+        transition: stroke-dashoffset 0.45s ease;
+      }
+
+      .dash-ring-tip-icon {
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .dash-rings-legend {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 2px;
+      }
+
+      .dash-rings-legend-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        min-width: 0;
+      }
+
+      .dash-rings-legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-top: 5px;
+        flex-shrink: 0;
+      }
+
+      .dash-rings-legend-item--food .dash-rings-legend-dot {
+        background: #FF375F;
+      }
+
+      .dash-rings-legend-item--activity .dash-rings-legend-dot {
+        background: #30D158;
+      }
+
+      .dash-rings-legend-label {
+        display: block;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--nutri-text-muted, #64748b);
+        line-height: 1.2;
+      }
+
+      .dash-rings-legend-item strong {
+        font-size: 15px;
+        font-weight: 900;
+        color: var(--nutri-text-dark, #0f172a);
+        letter-spacing: -0.02em;
+      }
+
+      .dash-rings-legend-item small {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--nutri-text-muted, #64748b);
+      }
+
+      .dash-rings-summary {
+        margin: 6px 0 0;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--nutri-health-blue, #2563eb);
+        text-align: center;
+      }
+
       .dash-secondary-metrics {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));

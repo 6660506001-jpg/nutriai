@@ -31,6 +31,7 @@ import {
 } from "./utils/foodPreferences";
 import { formatTodayLabel } from "./utils/logDisplay";
 import { useIsMobile } from "./hooks/useIsMobile";
+import DashboardRings from "./components/ui/DashboardRings";
 
 const TAB_ICONS = {
   dashboard: MdOutlineSpaceDashboard,
@@ -261,6 +262,7 @@ export default function App() {
     || Object.values(dailyMeals).some((meal) => meal.length > 0)
     || activities.length > 0;
   const isFirstTimeUser = !hasAnyLogHistory;
+  const showDashboardRings = isMobile && currentTab === "dashboard";
 
   return (
     <Router>
@@ -299,52 +301,88 @@ export default function App() {
           className={`app-main nutri-page-bg app-main-tab-${currentTab}${isMobile ? " app-main--mobile" : ""}`}
           style={styles.mainArea}
         >
-          <header className="app-header app-header-context" style={styles.header}>
-            <div className="app-header-text">
-              <div className="app-header-title-row">
-                <span className="app-header-page-icon" aria-hidden>
-                  <PageIcon size={22} />
-                </span>
-                <h1 className="app-header-page-title">{pageMeta.title}</h1>
-              </div>
-              <p className="app-header-page-tagline">{pageMeta.tagline}</p>
-            </div>
-            <div className="app-header-meta">
-              <span className="app-header-chip app-header-chip--date">{todayLabel}</span>
-              {!isFirstTimeUser && (
-                <>
-                  <span className="app-header-chip">TDEE {updatedUser.tdee || 0} kcal</span>
-                  <span className="app-header-chip app-header-chip--accent">
-                    กินสุทธิ {headerNetCals} kcal
+          <header
+            className={`app-header app-header-context${showDashboardRings ? " app-header--dash-rings" : ""}`}
+            style={styles.header}
+          >
+            {showDashboardRings ? (
+              <>
+                <div className="app-header-dash-top">
+                  <h1 className="app-header-page-title">{pageMeta.title}</h1>
+                  <button
+                    type="button"
+                    className="app-header-help-btn app-header-help-btn--icon"
+                    onClick={() => setShowUserGuide(true)}
+                    aria-label="วิธีใช้งาน"
+                  >
+                    <MdHelpOutline size={20} aria-hidden />
+                  </button>
+                </div>
+                <div className="app-header-dash-rings-row">
+                  <span className="app-header-avatar app-header-avatar--rings">
+                    {user.profileImage ? (
+                      <img src={user.profileImage} alt="" className="app-header-avatar-img" />
+                    ) : (
+                      getUserInitials(user.username)
+                    )}
                   </span>
-                </>
-              )}
-              <button
-                type="button"
-                className="app-header-help-btn"
-                onClick={() => setShowUserGuide(true)}
-                aria-label="วิธีใช้งาน"
-              >
-                <MdHelpOutline size={18} aria-hidden />
-                <span>วิธีใช้</span>
-              </button>
-            </div>
-            <div className="app-header-user app-header-user-card">
-              <span className="app-header-avatar">
-                {user.profileImage ? (
-                  <img src={user.profileImage} alt="" className="app-header-avatar-img" />
-                ) : (
-                  getUserInitials(user.username)
-                )}
-              </span>
-              <span className="app-header-user-text">
-                <strong>{user.username}</strong>
-                <small>
-                  {isFirstTimeUser ? "เริ่มจากแท็บ「อาหาร」" : "ยินดีต้อนรับกลับ"}
-                </small>
-              </span>
-              <MdWavingHand className="app-header-wave" aria-hidden />
-            </div>
+                  <DashboardRings
+                    foodCals={headerFoodCals}
+                    activityCals={headerActivityCals}
+                    tdee={updatedUser.tdee}
+                    className="app-header-dash-rings"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="app-header-text">
+                  <div className="app-header-title-row">
+                    <span className="app-header-page-icon" aria-hidden>
+                      <PageIcon size={22} />
+                    </span>
+                    <h1 className="app-header-page-title">{pageMeta.title}</h1>
+                  </div>
+                  <p className="app-header-page-tagline">{pageMeta.tagline}</p>
+                </div>
+                <div className="app-header-meta">
+                  <span className="app-header-chip app-header-chip--date">{todayLabel}</span>
+                  {!isFirstTimeUser && (
+                    <>
+                      <span className="app-header-chip">TDEE {updatedUser.tdee || 0} kcal</span>
+                      <span className="app-header-chip app-header-chip--accent">
+                        กินสุทธิ {headerNetCals} kcal
+                      </span>
+                    </>
+                  )}
+                  <button
+                    type="button"
+                    className="app-header-help-btn"
+                    onClick={() => setShowUserGuide(true)}
+                    aria-label="วิธีใช้งาน"
+                  >
+                    <MdHelpOutline size={18} aria-hidden />
+                    <span>วิธีใช้</span>
+                  </button>
+                </div>
+                <div className="app-header-user app-header-user-card">
+                  <span className="app-header-avatar">
+                    {user.profileImage ? (
+                      <img src={user.profileImage} alt="" className="app-header-avatar-img" />
+                    ) : (
+                      getUserInitials(user.username)
+                    )}
+                  </span>
+                  <span className="app-header-user-text">
+                    <strong>{user.username}</strong>
+                    <small>
+                      {isFirstTimeUser ? "เริ่มจากแท็บ「อาหาร」" : "ยินดีต้อนรับกลับ"}
+                    </small>
+                  </span>
+                  <MdWavingHand className="app-header-wave" aria-hidden />
+                </div>
+              </>
+            )}
           </header>
           {!isMobile ? <AppPageHint text={pageMeta.hint} /> : null}
           <div className="app-scroll" style={styles.scrollContent}>

@@ -14,7 +14,9 @@ export default function DashboardStatusHero({
   onLogFood,
   onLogActivity,
   showActions = true,
+  variant = "full",
 }) {
+  const isCompact = variant === "compact";
   const greeting = (() => {
     const hour = new Date().getHours();
     if (hour < 12) return "สวัสดีตอนเช้า";
@@ -30,18 +32,10 @@ export default function DashboardStatusHero({
       : "ถึงเป้าแล้ว — มื้อถัดไปควรเบาลง";
 
   return (
-    <section className="dash-status-hero" aria-label="สรุปสถานะวันนี้">
-      <header className="dash-status-hero-head">
-        <div>
-          <p className="dash-status-hero-date">{formatTodayLabel()}</p>
-          <h2 className="dash-status-hero-greeting">
-            {greeting}
-            {username ? `, ${username}` : ""}
-          </h2>
-          <p className="dash-status-hero-status">{statusText}</p>
-        </div>
-        {(showActions && (onLogFood || onLogActivity)) ? (
-          <div className="dash-status-hero-actions">
+    <section className={`dash-status-hero${isCompact ? " dash-status-hero--compact" : ""}`} aria-label="สรุปสถานะวันนี้">
+      {isCompact ? (
+        (showActions && (onLogFood || onLogActivity)) ? (
+          <div className="dash-status-hero-actions dash-status-hero-actions--compact">
             {onLogFood ? (
               <button type="button" className="dash-status-hero-cta" onClick={onLogFood}>
                 + บันทึกอาหาร
@@ -53,32 +47,59 @@ export default function DashboardStatusHero({
               </button>
             ) : null}
           </div>
-        ) : null}
-      </header>
+        ) : null
+      ) : (
+        <>
+          <header className="dash-status-hero-head">
+            <div>
+              <p className="dash-status-hero-date">{formatTodayLabel()}</p>
+              <h2 className="dash-status-hero-greeting">
+                {greeting}
+                {username ? `, ${username}` : ""}
+              </h2>
+              <p className="dash-status-hero-status">{statusText}</p>
+            </div>
+            {(showActions && (onLogFood || onLogActivity)) ? (
+              <div className="dash-status-hero-actions">
+                {onLogFood ? (
+                  <button type="button" className="dash-status-hero-cta" onClick={onLogFood}>
+                    + บันทึกอาหาร
+                  </button>
+                ) : null}
+                {onLogActivity ? (
+                  <button type="button" className="dash-status-hero-cta dash-status-hero-cta--activity" onClick={onLogActivity}>
+                    + บันทึกกิจกรรม
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </header>
 
-      {target > 0 && (
-        <CalorieProgress
-          consumed={netCals}
-          target={target}
-          label="ความคืบหน้า"
-        />
-      )}
+          {target > 0 && (
+            <CalorieProgress
+              consumed={netCals}
+              target={target}
+              label="ความคืบหน้า"
+            />
+          )}
 
-      <div className="dash-status-metrics">
-        <MetricCard label="เป้าหมาย/วัน" value={tdee || "—"} unit="kcal" tooltip={STAT_TOOLTIPS.tdee} compact />
-        <MetricCard label="กินแล้ว" value={foodCals} unit="kcal" variant="primary" compact />
-        <MetricCard
-          label="เหลือ"
-          value={remaining}
-          unit="kcal"
-          tooltip={STAT_TOOLTIPS.remainingCal}
-          variant="success"
-          compact
-        />
-      </div>
+          <div className="dash-status-metrics">
+            <MetricCard label="เป้าหมาย/วัน" value={tdee || "—"} unit="kcal" tooltip={STAT_TOOLTIPS.tdee} compact />
+            <MetricCard label="กินแล้ว" value={foodCals} unit="kcal" variant="primary" compact />
+            <MetricCard
+              label="เหลือ"
+              value={remaining}
+              unit="kcal"
+              tooltip={STAT_TOOLTIPS.remainingCal}
+              variant="success"
+              compact
+            />
+          </div>
 
-      {activityCals > 0 && (
-        <p className="dash-status-hero-burn">เผาแล้ว {activityCals} kcal · สุทธิ {netCals} kcal</p>
+          {activityCals > 0 && (
+            <p className="dash-status-hero-burn">เผาแล้ว {activityCals} kcal · สุทธิ {netCals} kcal</p>
+          )}
+        </>
       )}
     </section>
   );
