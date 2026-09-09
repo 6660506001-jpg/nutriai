@@ -62,19 +62,7 @@ export default function WhatIfFoodSimulator({
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [
-    query,
-    totalEaten.cal,
-    totalEaten.p,
-    totalEaten.c,
-    totalEaten.f,
-    macros.protein,
-    macros.carbs,
-    macros.fat,
-    recommendationTargets?.calMin,
-    recommendationTargets?.calMax,
-    recommendationTargets?.canRecommend,
-  ]);
+  }, [query, totalEaten, macros, recommendationTargets]);
 
   const hasLoggedFood = (totalEaten?.cal || 0) > 0;
 

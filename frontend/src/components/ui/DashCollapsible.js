@@ -36,7 +36,7 @@ export default function DashCollapsible({
     if (isControlled || alwaysStartCollapsed || !collapseOnMobile) return undefined;
 
     const media = window.matchMedia(`(max-width: ${mobileBreakpoint}px)`);
-    const sync = () => setOpen(!media.matches);
+    const sync = () => setInternalOpen(!media.matches);
     sync();
     media.addEventListener("change", sync);
     return () => media.removeEventListener("change", sync);

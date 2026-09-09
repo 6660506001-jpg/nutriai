@@ -114,7 +114,7 @@ const extractAddons = (text, items) => {
         remaining = remaining.replace(keyword, " ");
       }
     });
-  return remaining.replace(/\s+/g, " ").trim(), extras;
+  return [remaining.replace(/\s+/g, " ").trim(), extras];
 };
 
 const matchTemplate = (text) => {

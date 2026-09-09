@@ -26,7 +26,6 @@ import {
   markFoodPrefsSetupDone,
 } from "./utils/foodPreferencesStorage";
 import {
-  EMPTY_FOOD_PREFERENCES,
   hasFoodAvoidanceConfigured,
   normalizeFoodPreferences,
 } from "./utils/foodPreferences";
