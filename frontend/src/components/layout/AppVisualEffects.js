@@ -3337,12 +3337,7 @@ export default function AppVisualEffects() {
       }
 
       .share-access-card {
-        margin-top: 20px;
-        padding: 16px;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.92);
-        border: 1px solid var(--nutri-border, #e2e8f0);
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+        display: none !important;
       }
       .share-access-card--login {
         margin-top: 24px;
