@@ -20,7 +20,6 @@ import MenuRecommendationPrefs from "../ui/MenuRecommendationPrefs";
 import { canSaveFoodEntry } from "../../utils/foodEstimator";
 import {
   appendFoodPreference,
-  inferDislikeKeywordFromMenu,
   normalizeFoodPreferences,
 } from "../../utils/foodPreferences";
 import { DashboardDaySummary } from "../ui/DailyLogDisplay";
@@ -283,9 +282,7 @@ export default function Dashboard({
   };
 
   const handleDislikeRecommendedMenu = async (menu) => {
-    const keyword = inferDislikeKeywordFromMenu(menu.name);
-    const nextPreferences = appendFoodPreference(user?.foodPreferences, "dislike", keyword);
-    await refreshMenusWithPreferences(nextPreferences, {
+    await refreshMenusWithPreferences(normalizeFoodPreferences(user?.foodPreferences), {
       excludeMenuNames: [menu.name, ...menuRecommendations.map((item) => item.name)],
     });
   };
@@ -551,7 +548,7 @@ export default function Dashboard({
             />
             {menuLoading && <p className="dash-ai-menu-loading">กำลังคำนวณเมนู...</p>}
             {!menuLoading && menuRecommendations.length === 0 && (
-              <p className="dash-ai-menu-empty">ไม่พบเมนูในช่วงนี้ — ลองเปลี่ยนโหมดหรือลดรายการไม่ชอบ</p>
+              <p className="dash-ai-menu-empty">ไม่พบเมนูในช่วงนี้ — ลองเปลี่ยนโหมด เซเว่น/ตามสั่ง หรือลบคำว่าไม่ชอบที่กว้างเกินไป เช่น ไก่ ทั้งหมวด</p>
             )}
             {!menuLoading && menuRecommendations.map((menu, index) => (
               <MenuRecommendationCard

@@ -1,6 +1,12 @@
 import { loadThaiFoods } from "./foodEstimator";
 import { excludePorkMenus, excludePorkThaiFoodItems } from "./foodExclusions";
-import { filterMenusByPreferences, filterExcludedMenuNames, getPreferenceScoreBoost } from "./foodPreferences";
+import {
+  filterMenusByPreferences,
+  filterExcludedMenuNames,
+  getPreferenceScoreBoost,
+  normalizeFoodPreferences,
+  relaxFoodPreferences,
+} from "./foodPreferences";
 import { getOutOfHomeCatalog } from "./outOfHomeMenus";
 
 export { VENUE_MODES } from "./outOfHomeMenus";
@@ -131,6 +137,11 @@ const scoreMenu = (menu, targets) => {
 
   score += getPreferenceScoreBoost(menu, targets.foodPreferences);
 
+  const { dislikes } = normalizeFoodPreferences(targets.foodPreferences);
+  if (dislikes.some((keyword) => String(keyword).includes("คาร์บ"))) {
+    score -= Math.max(0, menu.carbs - 18) * 2.4;
+  }
+
   return score;
 };
 
@@ -256,21 +267,35 @@ const scoreHomeMenuPool = async (targets) => {
     .sort((a, b) => b.score - a.score);
 };
 
+const pickFromScored = (scored, targets) => {
+  if (targets.bestOnly) {
+    const best = pickBestScoredMenu(scored, targets);
+    return best ? [best] : [];
+  }
+  return pickDiverseTop3(scored, targets);
+};
+
+const withWiderWindow = (targets) => ({
+  ...targets,
+  calMin: Math.max(120, (Number(targets.calMin) || 220) - 80),
+  calMax: (Number(targets.calMax) || 260) + 160,
+});
+
 export const generateMenuRecommendations = async (targets, venueMode = "home") => {
   if (!targets?.canRecommend) return [];
 
   if (venueMode === "seven" || venueMode === "tamsung") {
     const catalog = excludePorkMenus(getOutOfHomeCatalog(venueMode));
-    if (targets.bestOnly) {
-      const calMin = targets.calMin;
-      const calMax = targets.calMax;
-      const scored = catalog
+    const scoreOutOfHome = (nextTargets) => {
+      const calMin = nextTargets.calMin;
+      const calMax = nextTargets.calMax;
+      return catalog
         .map((menu) => ({
           ...menu,
           id: `${menu.venue}-${menu.name}`,
           portionLabel: menu.orderTip || "เซ็ตแนะนำ",
           source: menu.venue,
-          score: scoreMenu(menu, targets),
+          score: scoreMenu(menu, nextTargets),
         }))
         .sort((a, b) => {
           const aInWindow = a.calories >= calMin - 30 && a.calories <= calMax + 30;
@@ -278,16 +303,32 @@ export const generateMenuRecommendations = async (targets, venueMode = "home") =
           if (aInWindow !== bInWindow) return bInWindow - aInWindow;
           return b.score - a.score;
         });
-      const best = pickBestScoredMenu(scored, targets);
-      return best ? [best] : [];
-    }
-    return pickOutOfHomeTop3(catalog, targets);
+    };
+
+    let picked = pickFromScored(scoreOutOfHome(targets), targets);
+    if (picked.length) return picked;
+
+    const relaxed = { ...withWiderWindow(targets), foodPreferences: relaxFoodPreferences(targets.foodPreferences) };
+    picked = pickFromScored(scoreOutOfHome(relaxed), relaxed);
+    if (picked.length) return picked;
+
+    const lastResort = { ...relaxed, foodPreferences: { likes: normalizeFoodPreferences(targets.foodPreferences).likes, dislikes: [] } };
+    return pickFromScored(scoreOutOfHome(lastResort), lastResort);
   }
 
-  const scored = excludePorkMenus(await scoreHomeMenuPool(targets));
-  if (targets.bestOnly) {
-    const best = pickBestScoredMenu(scored, targets);
-    return best ? [best] : [];
-  }
-  return pickDiverseTop3(scored, targets);
+  let scored = excludePorkMenus(await scoreHomeMenuPool(targets));
+  let picked = pickFromScored(scored, targets);
+  if (picked.length) return picked;
+
+  const relaxed = { ...withWiderWindow(targets), foodPreferences: relaxFoodPreferences(targets.foodPreferences) };
+  scored = excludePorkMenus(await scoreHomeMenuPool(relaxed));
+  picked = pickFromScored(scored, relaxed);
+  if (picked.length) return picked;
+
+  const lastResort = {
+    ...relaxed,
+    foodPreferences: { likes: normalizeFoodPreferences(targets.foodPreferences).likes, dislikes: [] },
+  };
+  scored = excludePorkMenus(await scoreHomeMenuPool(lastResort));
+  return pickFromScored(scored, lastResort);
 };

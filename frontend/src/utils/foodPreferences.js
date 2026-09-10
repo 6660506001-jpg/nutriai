@@ -68,7 +68,8 @@ const expandKeyword = (keyword) => {
     return [key, "ไก่", "ปลา", "อกไก่", "ทูน่า", "ไข่"];
   }
   if (key.includes("คาร์บ")) {
-    return [key, "ข้าว", "เส้น", "ก๋วย", "บะหมี่", "แป้ง"];
+    // ใช้ลดคะแนนในตัวแนะนำ ไม่แบนชื่อที่มีข้าว/เส้น เพราะจะเหลือเมนูไทยไม่กี่รายการ
+    return [key];
   }
   if (key.includes("ของหวาน") || key.includes("หวาน")) {
     return [key, "หวาน", "ชานม", "เค้ก", "ไอศกรีม", "ขนม"];
@@ -216,10 +217,34 @@ const menuNameExcluded = (menuName, excludeNames) => {
 export const filterExcludedMenuNames = (menus, excludeNames) =>
   (menus || []).filter((menu) => !menuNameExcluded(menu.name, excludeNames));
 
+/** ไม่ชอบที่ทับกับชอบ หรือเป็นสไตล์กว้าง (คาร์บสูง) ไม่ใช้ตัดเมนูทิ้ง */
+export const getHardDislikeKeywords = (preferences) => {
+  const { likes, dislikes } = normalizeFoodPreferences(preferences);
+  const likeSet = new Set(likes.map((item) => item.trim().toLowerCase()));
+  return dislikes.filter((keyword) => {
+    const key = String(keyword || "").trim().toLowerCase();
+    if (!key) return false;
+    if (likeSet.has(key)) return false;
+    if (key.includes("คาร์บ")) return false;
+    return true;
+  });
+};
+
 export const filterMenusByPreferences = (menus, preferences) => {
-  const { dislikes } = normalizeFoodPreferences(preferences);
-  if (!dislikes.length) return menus;
-  return (menus || []).filter((menu) => !menuMatchesKeywords(menu, dislikes));
+  const hardDislikes = getHardDislikeKeywords(preferences);
+  if (!hardDislikes.length) return menus;
+  return (menus || []).filter((menu) => !menuMatchesKeywords(menu, hardDislikes));
+};
+
+export const relaxFoodPreferences = (preferences) => {
+  const { likes } = normalizeFoodPreferences(preferences);
+  const hardDislikes = getHardDislikeKeywords(preferences).filter((keyword) => {
+    const key = String(keyword || "").trim();
+    if (key.length > 12) return false;
+    if (FOOD_DISLIKE_PRESETS.includes(key) || FOOD_ALLERGY_PRESETS.includes(key)) return true;
+    return key.length <= 4;
+  });
+  return { likes, dislikes: hardDislikes };
 };
 
 export const getPreferenceScoreBoost = (menu, preferences) => {

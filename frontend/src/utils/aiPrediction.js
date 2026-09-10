@@ -146,8 +146,8 @@ const buildRecommendationTargets = ({
     };
   }
 
-  const mealWindowMin = clamp(Math.round(remainingCal * 0.28), 220, 900);
-  const mealWindowMax = clamp(Math.round(remainingCal * 0.55), mealWindowMin + 40, 1200);
+  const mealWindowMin = clamp(Math.round(remainingCal * 0.22), 180, 900);
+  const mealWindowMax = clamp(Math.round(remainingCal * 0.62), mealWindowMin + 100, 1200);
 
   return {
     canRecommend: true,
@@ -307,8 +307,8 @@ export const getProfessionalPrediction = ({ tdee, foodCals, activityCals, macros
     };
   }
 
-  const mealWindowMin = clamp(Math.round(remainingCal * 0.28), 220, 900);
-  const mealWindowMax = clamp(Math.round(remainingCal * 0.55), mealWindowMin + 40, 1200);
+  const mealWindowMin = clamp(Math.round(remainingCal * 0.22), 180, 900);
+  const mealWindowMax = clamp(Math.round(remainingCal * 0.62), mealWindowMin + 100, 1200);
 
   const macroFocus = (() => {
     if (remainingProtein >= 18) return { key: "protein", label: "โปรตีน", detail: `ยังขาดอีกประมาณ ${fmt(remainingProtein)}g` };
