@@ -13,7 +13,7 @@ export default function DashboardHomeMenuPick({
   canRecommend = true,
 }) {
   return (
-    <section className="dash-home-menu-pick" aria-label="เมนูแนะนำมื้อถัดไป">
+    <section className="dash-home-menu-pick dash-home-menu-block" aria-label="เมนูแนะนำมื้อถัดไป">
       <div className="dash-home-menu-pick-head">
         <div>
           <h2 className="dash-home-menu-pick-title">เมนูที่ AI เห็นว่าเหมาะที่สุด</h2>

@@ -2,7 +2,7 @@ import React from "react";
 import MetricCard from "./MetricCard";
 import { STAT_TOOLTIPS } from "../../constants/statTooltips";
 
-export default function DashboardHomeSummary({
+function useHomeSummaryMetrics({
   weight,
   bmi,
   bmiStatus,
@@ -11,26 +11,41 @@ export default function DashboardHomeSummary({
   activityCals = 0,
   netCals = 0,
   target = 0,
-  adviceTitle,
-  adviceDetail,
-  adviceSubline,
-  homeMenuSlot = null,
 }) {
   const goal = target || tdee || 0;
   const remaining = goal > 0 ? goal - netCals : 0;
   const remainingDisplay = remaining > 0 ? Math.round(remaining) : 0;
   const overBy = remaining < 0 ? Math.round(Math.abs(remaining)) : 0;
-
   const intakeNote =
     activityCals > 0
       ? `กิน ${foodCals.toLocaleString("th-TH")} · เผา ${activityCals.toLocaleString("th-TH")} · สุทธิ ${netCals.toLocaleString("th-TH")}`
       : null;
+  return { remainingDisplay, overBy, intakeNote };
+}
 
-  const adviceLead = adviceTitle && adviceTitle !== "คำแนะนำการบริโภคอาหาร" ? adviceTitle : null;
-  const adviceBody = [adviceLead, adviceDetail, adviceSubline].filter(Boolean).join(" ");
+export function DashboardHomeStats({
+  weight,
+  bmi,
+  bmiStatus,
+  tdee = 0,
+  foodCals = 0,
+  activityCals = 0,
+  netCals = 0,
+  target = 0,
+}) {
+  const { remainingDisplay, overBy, intakeNote } = useHomeSummaryMetrics({
+    weight,
+    bmi,
+    bmiStatus,
+    tdee,
+    foodCals,
+    activityCals,
+    netCals,
+    target,
+  });
 
   return (
-    <section className="dash-home-summary" aria-label="ข้อมูลสรุปหน้าหลัก">
+    <section className="dash-home-summary dash-home-stats-block" aria-label="ข้อมูลสรุป">
       <header className="dash-home-summary-head">
         <h2 className="dash-home-summary-title">ข้อมูลสรุป</h2>
         <p className="dash-home-summary-desc">น้ำหนัก · BMI · TDEE · พลังงานวันนี้</p>
@@ -82,19 +97,38 @@ export default function DashboardHomeSummary({
       </div>
 
       {intakeNote ? <p className="dash-home-summary-net">{intakeNote}</p> : null}
-
-      {homeMenuSlot ? <div className="dash-home-summary-menu">{homeMenuSlot}</div> : null}
-
-      <article className="dash-home-summary-advice">
-        <h3 className="dash-home-summary-advice-title">คำแนะนำการบริโภคอาหาร</h3>
-        {adviceBody ? (
-          <p className="dash-home-summary-advice-body">{adviceBody}</p>
-        ) : (
-          <p className="dash-home-summary-advice-body dash-home-summary-advice-body--muted">
-            บันทึกมื้ออาหารวันนี้เพื่อรับคำแนะนำที่เหมาะกับแคลและมาโครของคุณ
-          </p>
-        )}
-      </article>
     </section>
+  );
+}
+
+export function DashboardHomeAdvice({ adviceTitle, adviceDetail, adviceSubline }) {
+  const adviceLead = adviceTitle && adviceTitle !== "คำแนะนำการบริโภคอาหาร" ? adviceTitle : null;
+  const adviceBody = [adviceLead, adviceDetail, adviceSubline].filter(Boolean).join(" ");
+
+  return (
+    <article className="dash-home-summary-advice dash-home-advice-block" aria-label="คำแนะนำการบริโภคอาหาร">
+      <h3 className="dash-home-summary-advice-title">คำแนะนำการบริโภคอาหาร</h3>
+      {adviceBody ? (
+        <p className="dash-home-summary-advice-body">{adviceBody}</p>
+      ) : (
+        <p className="dash-home-summary-advice-body dash-home-summary-advice-body--muted">
+          บันทึกมื้ออาหารวันนี้เพื่อรับคำแนะนำที่เหมาะกับแคลและมาโครของคุณ
+        </p>
+      )}
+    </article>
+  );
+}
+
+/** @deprecated use DashboardHomeStats + DashboardHomeAdvice */
+export default function DashboardHomeSummary(props) {
+  return (
+    <>
+      <DashboardHomeStats {...props} />
+      <DashboardHomeAdvice
+        adviceTitle={props.adviceTitle}
+        adviceDetail={props.adviceDetail}
+        adviceSubline={props.adviceSubline}
+      />
+    </>
   );
 }

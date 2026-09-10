@@ -4999,11 +4999,27 @@ export default function AppVisualEffects() {
         flex-direction: column;
         gap: 12px;
       }
-      .dash-home-summary-menu {
-        margin-top: 14px;
+      .dash-home-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
       }
-      .dash-home-summary-menu .dash-home-menu-pick {
+      .dash-home-stack .dash-home-stats-block {
+        order: 1;
+      }
+      .dash-home-stack .dash-home-menu-pick {
+        order: 2;
         margin-top: 0;
+      }
+      .dash-home-stack .dash-home-advice-block {
+        order: 3;
+        margin: 0;
+        padding: 14px;
+        border-radius: var(--nutri-radius-lg, 18px);
+        background: #fff;
+        border: 1px solid var(--nutri-border, #e2e8f0);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
       }
       .dashboard-home-simple .dash-stats-compact {
         margin-bottom: 0;

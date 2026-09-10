@@ -26,7 +26,7 @@ import {
 import { DashboardDaySummary } from "../ui/DailyLogDisplay";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import DashboardQuickFab from "../ui/DashboardQuickFab";
-import DashboardHomeSummary from "../ui/DashboardHomeSummary";
+import { DashboardHomeStats, DashboardHomeAdvice } from "../ui/DashboardHomeSummary";
 import DashboardHomeMenuPick from "../ui/DashboardHomeMenuPick";
 
 export default function Dashboard({
@@ -396,32 +396,34 @@ export default function Dashboard({
       )}
 
       {viewMode === "home" && (
-        <DashboardHomeSummary
-          weight={user.weight}
-          bmi={bmi}
-          bmiStatus={bmiStatus}
-          tdee={user.tdee}
-          foodCals={foodCals}
-          activityCals={activityCals}
-          netCals={netCals}
-          target={weightControlTarget || user.tdee}
-          adviceTitle={analysis.focusTitle}
-          adviceDetail={analysis.focusDetail || analysis.headline}
-          adviceSubline={analysis.macroSummary || analysis.subline}
-          homeMenuSlot={(
-            <DashboardHomeMenuPick
-              menu={bestAiMenu}
-              loading={menuLoading && !bestAiMenu}
-              mealLabel={activeMealTab}
-              aiHint={analysis.action}
-              canRecommend={canRecommendMenus}
-              onSelect={handleAddRecommendedMenu}
-              onDislike={handleDislikeRecommendedMenu}
-              onMore={handleOpenAllAiMenus}
-              onRefresh={handleRefreshHomeAiMenu}
-            />
-          )}
-        />
+        <div className="dash-home-stack" data-home-layout="stats-menu-advice">
+          <DashboardHomeStats
+            weight={user.weight}
+            bmi={bmi}
+            bmiStatus={bmiStatus}
+            tdee={user.tdee}
+            foodCals={foodCals}
+            activityCals={activityCals}
+            netCals={netCals}
+            target={weightControlTarget || user.tdee}
+          />
+          <DashboardHomeMenuPick
+            menu={bestAiMenu}
+            loading={menuLoading && !bestAiMenu}
+            mealLabel={activeMealTab}
+            aiHint={analysis.action}
+            canRecommend={canRecommendMenus}
+            onSelect={handleAddRecommendedMenu}
+            onDislike={handleDislikeRecommendedMenu}
+            onMore={handleOpenAllAiMenus}
+            onRefresh={handleRefreshHomeAiMenu}
+          />
+          <DashboardHomeAdvice
+            adviceTitle={analysis.focusTitle}
+            adviceDetail={analysis.focusDetail || analysis.headline}
+            adviceSubline={analysis.macroSummary || analysis.subline}
+          />
+        </div>
       )}
 
       {viewMode === "home" && !isMobile && (
