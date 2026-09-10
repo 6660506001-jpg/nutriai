@@ -396,20 +396,6 @@ export default function Dashboard({
       )}
 
       {viewMode === "home" && (
-        <DashboardHomeMenuPick
-          menu={bestAiMenu}
-          loading={menuLoading && !bestAiMenu}
-          mealLabel={activeMealTab}
-          aiHint={analysis.action}
-          canRecommend={canRecommendMenus}
-          onSelect={handleAddRecommendedMenu}
-          onDislike={handleDislikeRecommendedMenu}
-          onMore={handleOpenAllAiMenus}
-          onRefresh={handleRefreshHomeAiMenu}
-        />
-      )}
-
-      {viewMode === "home" && (
         <DashboardHomeSummary
           weight={user.weight}
           bmi={bmi}
@@ -422,6 +408,20 @@ export default function Dashboard({
           adviceTitle={analysis.focusTitle}
           adviceDetail={analysis.focusDetail || analysis.headline}
           adviceSubline={analysis.macroSummary || analysis.subline}
+        />
+      )}
+
+      {viewMode === "home" && (
+        <DashboardHomeMenuPick
+          menu={bestAiMenu}
+          loading={menuLoading && !bestAiMenu}
+          mealLabel={activeMealTab}
+          aiHint={analysis.action}
+          canRecommend={canRecommendMenus}
+          onSelect={handleAddRecommendedMenu}
+          onDislike={handleDislikeRecommendedMenu}
+          onMore={handleOpenAllAiMenus}
+          onRefresh={handleRefreshHomeAiMenu}
         />
       )}
 
