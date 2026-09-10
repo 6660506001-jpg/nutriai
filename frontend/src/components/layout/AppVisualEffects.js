@@ -4999,11 +4999,11 @@ export default function AppVisualEffects() {
         flex-direction: column;
         gap: 12px;
       }
-      .dashboard-view-home .dash-home-summary {
-        order: 10;
+      .dash-home-summary-menu {
+        margin-top: 14px;
       }
-      .dashboard-view-home .dash-home-menu-pick {
-        order: 20;
+      .dash-home-summary-menu .dash-home-menu-pick {
+        margin-top: 0;
       }
       .dashboard-home-simple .dash-stats-compact {
         margin-bottom: 0;

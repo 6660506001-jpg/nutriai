@@ -408,20 +408,19 @@ export default function Dashboard({
           adviceTitle={analysis.focusTitle}
           adviceDetail={analysis.focusDetail || analysis.headline}
           adviceSubline={analysis.macroSummary || analysis.subline}
-        />
-      )}
-
-      {viewMode === "home" && (
-        <DashboardHomeMenuPick
-          menu={bestAiMenu}
-          loading={menuLoading && !bestAiMenu}
-          mealLabel={activeMealTab}
-          aiHint={analysis.action}
-          canRecommend={canRecommendMenus}
-          onSelect={handleAddRecommendedMenu}
-          onDislike={handleDislikeRecommendedMenu}
-          onMore={handleOpenAllAiMenus}
-          onRefresh={handleRefreshHomeAiMenu}
+          homeMenuSlot={(
+            <DashboardHomeMenuPick
+              menu={bestAiMenu}
+              loading={menuLoading && !bestAiMenu}
+              mealLabel={activeMealTab}
+              aiHint={analysis.action}
+              canRecommend={canRecommendMenus}
+              onSelect={handleAddRecommendedMenu}
+              onDislike={handleDislikeRecommendedMenu}
+              onMore={handleOpenAllAiMenus}
+              onRefresh={handleRefreshHomeAiMenu}
+            />
+          )}
         />
       )}
 

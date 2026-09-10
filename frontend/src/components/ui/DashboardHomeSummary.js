@@ -14,6 +14,7 @@ export default function DashboardHomeSummary({
   adviceTitle,
   adviceDetail,
   adviceSubline,
+  homeMenuSlot = null,
 }) {
   const goal = target || tdee || 0;
   const remaining = goal > 0 ? goal - netCals : 0;
@@ -81,6 +82,8 @@ export default function DashboardHomeSummary({
       </div>
 
       {intakeNote ? <p className="dash-home-summary-net">{intakeNote}</p> : null}
+
+      {homeMenuSlot ? <div className="dash-home-summary-menu">{homeMenuSlot}</div> : null}
 
       <article className="dash-home-summary-advice">
         <h3 className="dash-home-summary-advice-title">คำแนะนำการบริโภคอาหาร</h3>
