@@ -9,7 +9,6 @@ import {
 } from "../../utils/logSearchHelpers";
 import {
   MEAL_ORDER,
-  getMealPeriodByTime,
   mealTotalsFromDaily,
   stampLogMeta,
   sumCalories,
@@ -123,13 +122,6 @@ export default function FoodLogPage({
     setFilters((prev) => ({ ...prev, meal: activeMealTab }));
   }, [activeMealTab]);
 
-  React.useEffect(() => {
-    const allEmpty = !Object.values(dailyMeals).some((meal) => meal.length > 0);
-    if (allEmpty) {
-      setActiveMealTab(getMealPeriodByTime());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- ตั้งมื้อเริ่มต้นครั้งแรกเท่านั้น
-  }, []);
 
   React.useEffect(() => {
     if (!isMobile) return undefined;

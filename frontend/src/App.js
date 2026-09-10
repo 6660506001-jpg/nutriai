@@ -21,7 +21,7 @@ import { PAGE_META } from "./constants/pageMeta";
 import { EMPTY_MEALS, loadUserSession, saveUserSession, clearLegacySessionKeys } from "./utils/userStorage";
 import { loadUserDataFromCloud, saveUserDataToCloud } from "./utils/syncApi";
 import { clearSyncPassword, getSyncPassword, setSyncPassword } from "./utils/syncCredentials";
-import { packCloudPayload, resolveSessionOnLogin } from "./utils/sessionCloudMerge";
+import { packCloudPayload, resolveSessionOnLogin, sessionHasLogData } from "./utils/sessionCloudMerge";
 import { stripSimulatedHistory } from "./utils/dailyArchive";
 import { hasSeenUserGuide, markUserGuideSeen } from "./utils/userGuideStorage";
 import {
@@ -32,7 +32,7 @@ import {
   hasFoodAvoidanceConfigured,
   normalizeFoodPreferences,
 } from "./utils/foodPreferences";
-import { formatTodayLabel } from "./utils/logDisplay";
+import { formatTodayLabel, getMealPeriodByTime, MEAL_ORDER } from "./utils/logDisplay";
 import { useIsMobile } from "./hooks/useIsMobile";
 import DashboardRings from "./components/ui/DashboardRings";
 
@@ -82,7 +82,7 @@ export default function App() {
   const [dailyMeals, setDailyMeals] = useState(() => ({ ...EMPTY_MEALS }));
   const [historyData, setHistoryData] = useState([]);
   const [activities, setActivities] = useState([]);
-  const [activeMealTab, setActiveMealTab] = useState("มื้อเช้า");
+  const [activeMealTab, setActiveMealTab] = useState(getMealPeriodByTime);
   const [activityLaunchPreset, setActivityLaunchPreset] = useState(null);
   const [showUserGuide, setShowUserGuide] = useState(false);
   const [showFoodPrefsModal, setShowFoodPrefsModal] = useState(false);
@@ -212,7 +212,13 @@ export default function App() {
           );
         }
       } catch {
-        /* ใช้ข้อมูลในเครื่องถ้า cloud ไม่พร้อม */
+        if (sessionHasLogData(localSession)) {
+          await saveUserDataToCloud(
+            username,
+            password,
+            packCloudPayload({ ...localSession, user: pickSession.user }),
+          ).catch(() => {});
+        }
       }
     }
 
@@ -355,7 +361,12 @@ export default function App() {
     setDailyMeals({ ...dailyMeals, [mealType]: updated });
   };
 
-  const handleNavigateToFood = () => setCurrentTab("food");
+  const handleNavigateToFood = (mealTab) => {
+    if (typeof mealTab === "string" && MEAL_ORDER.includes(mealTab)) {
+      setActiveMealTab(mealTab);
+    }
+    setCurrentTab("food");
+  };
 
   const handleNavigateToDashboard = () => setCurrentTab("dashboard");
 
@@ -415,43 +426,43 @@ export default function App() {
           style={styles.mainArea}
         >
           <header
-            className={`app-header app-header-context${showDashboardRings ? " app-header--dash-rings" : ""}`}
-            style={styles.header}
+            className={`app-header${showDashboardRings ? " app-header--dash-rings" : " app-header-context"}`}
+            style={showDashboardRings ? undefined : styles.header}
           >
             {showDashboardRings ? (
               <>
                 <div className="app-header-dash-top">
                   <h1 className="app-header-page-title">{pageMeta.title}</h1>
-                  <button
-                    type="button"
-                    className="app-header-help-btn app-header-help-btn--icon"
-                    onClick={() => setShowUserGuide(true)}
-                    aria-label="วิธีใช้งาน"
-                  >
-                    <MdHelpOutline size={20} aria-hidden />
-                  </button>
+                  <div className="app-header-dash-top-end">
+                    <span className="app-header-avatar app-header-avatar--rings">
+                      {user.profileImage ? (
+                        <img src={user.profileImage} alt="" className="app-header-avatar-img" />
+                      ) : (
+                        getUserInitials(user.username)
+                      )}
+                    </span>
+                    <button
+                      type="button"
+                      className="app-header-help-btn app-header-help-btn--icon"
+                      onClick={() => setShowUserGuide(true)}
+                      aria-label="วิธีใช้งาน"
+                    >
+                      <MdHelpOutline size={20} aria-hidden />
+                    </button>
+                  </div>
                 </div>
-                <div className="app-header-dash-rings-row">
-                  <span className="app-header-avatar app-header-avatar--rings">
-                    {user.profileImage ? (
-                      <img src={user.profileImage} alt="" className="app-header-avatar-img" />
-                    ) : (
-                      getUserInitials(user.username)
-                    )}
-                  </span>
-                  <DashboardRings
-                    foodCals={headerFoodCals}
-                    activityCals={headerActivityCals}
-                    tdee={updatedUser.tdee}
-                    protein={headerMacroTotals.protein}
-                    carbs={headerMacroTotals.carbs}
-                    fat={headerMacroTotals.fat}
-                    targetProtein={headerMacroTargets.protein}
-                    targetCarbs={headerMacroTargets.carbs}
-                    targetFat={headerMacroTargets.fat}
-                    className="app-header-dash-rings"
-                  />
-                </div>
+                <DashboardRings
+                  foodCals={headerFoodCals}
+                  activityCals={headerActivityCals}
+                  tdee={updatedUser.tdee}
+                  protein={headerMacroTotals.protein}
+                  carbs={headerMacroTotals.carbs}
+                  fat={headerMacroTotals.fat}
+                  targetProtein={headerMacroTargets.protein}
+                  targetCarbs={headerMacroTargets.carbs}
+                  targetFat={headerMacroTargets.fat}
+                  className="app-header-dash-rings"
+                />
               </>
             ) : (
               <>

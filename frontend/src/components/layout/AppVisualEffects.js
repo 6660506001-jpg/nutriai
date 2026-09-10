@@ -186,6 +186,7 @@ export default function AppVisualEffects() {
 
       .app-header--dash-rings {
         display: block !important;
+        text-align: left !important;
         padding: max(12px, env(safe-area-inset-top)) 14px 10px !important;
         background: #fff;
         border-bottom: 1px solid var(--nutri-border, #e2e8f0);
@@ -217,23 +218,23 @@ export default function AppVisualEffects() {
         flex-shrink: 0;
       }
 
-      .app-header-dash-rings-row {
+      .app-header-dash-top-end {
         display: flex;
         align-items: center;
-        gap: 6px;
-        min-width: 0;
+        gap: 8px;
+        flex-shrink: 0;
       }
 
       .app-header-avatar--rings {
-        width: 52px;
-        height: 52px;
+        width: 40px;
+        height: 40px;
         flex-shrink: 0;
         border-radius: 50%;
         overflow: hidden;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 16px;
+        font-size: 13px;
         font-weight: 800;
         color: #fff;
         background: var(--nutri-gradient-primary, linear-gradient(135deg, #db2777, #be185d));
@@ -247,15 +248,75 @@ export default function AppVisualEffects() {
       }
 
       .dash-rings-wrap {
-        flex: 1;
+        width: 100%;
         min-width: 0;
+      }
+
+      .dash-rings-donut {
+        position: relative;
+        width: min(220px, 68vw);
+        margin: 4px auto 0;
+        aspect-ratio: 1;
       }
 
       .dash-rings-svg {
         width: 100%;
         height: auto;
         display: block;
-        min-height: 88px;
+        overflow: visible;
+      }
+
+      .dash-rings-center {
+        position: absolute;
+        inset: 18%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        pointer-events: none;
+      }
+
+      .dash-rings-center-label {
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.2;
+        color: var(--nutri-text-muted, #64748b);
+      }
+
+      .dash-rings-center-value {
+        margin: 2px 0 0;
+        font-size: clamp(26px, 8vw, 34px);
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        color: var(--nutri-text-dark, #0f172a);
+      }
+
+      .dash-rings-center-unit {
+        margin-top: 2px;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--nutri-text-muted, #64748b);
+      }
+
+      .dash-rings-center--ok .dash-rings-center-value,
+      .dash-rings-center--neutral .dash-rings-center-value {
+        color: var(--nutri-food-accent, #2563eb);
+      }
+
+      .dash-rings-center--over .dash-rings-center-label,
+      .dash-rings-center--over .dash-rings-center-value {
+        color: #dc2626;
+      }
+
+      .dash-rings-caption {
+        margin: 6px 0 0;
+        text-align: center;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.4;
+        color: var(--nutri-text-muted, #64748b);
       }
 
       .dash-ring-progress {
@@ -274,7 +335,7 @@ export default function AppVisualEffects() {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 8px;
-        margin-top: 2px;
+        margin-top: 8px;
       }
 
       .dash-rings-legend-item {
@@ -322,35 +383,6 @@ export default function AppVisualEffects() {
       }
 
       .dash-rings-value--over {
-        color: #dc2626;
-      }
-
-      .dash-rings-summary {
-        margin: 6px 0 0;
-        text-align: center;
-      }
-
-      .dash-rings-summary-main {
-        margin: 0;
-        font-size: 13px;
-        font-weight: 800;
-        line-height: 1.35;
-      }
-
-      .dash-rings-summary-detail {
-        margin: 4px 0 0;
-        font-size: 11px;
-        font-weight: 600;
-        line-height: 1.4;
-        color: var(--nutri-text-muted, #64748b);
-      }
-
-      .dash-rings-summary--ok .dash-rings-summary-main,
-      .dash-rings-summary--neutral .dash-rings-summary-main {
-        color: var(--nutri-food-accent, #2563eb);
-      }
-
-      .dash-rings-summary--over .dash-rings-summary-main {
         color: #dc2626;
       }
 
@@ -504,8 +536,25 @@ export default function AppVisualEffects() {
         to { opacity: 1; transform: translateY(0); }
       }
 
-      .dash-quick-fab-option--food {
+      .dash-quick-fab-option--food,
+      .dash-quick-fab-option--meal {
         background: var(--nutri-food-accent, #2563eb);
+      }
+
+      .dash-quick-fab-option--meal span {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 6px;
+      }
+
+      .dash-quick-fab-option--meal small {
+        font-size: 10px;
+        font-weight: 800;
+        opacity: 0.88;
+      }
+
+      .dash-quick-fab-option--meal.is-suggested {
+        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28), 0 0 0 2px #fff, 0 0 0 4px var(--nutri-food-accent, #2563eb);
       }
 
       .dash-quick-fab-option--activity {
@@ -4873,6 +4922,11 @@ export default function AppVisualEffects() {
           gap: 8px;
           padding: max(10px, env(safe-area-inset-top)) 12px 10px !important;
         }
+        .app-header.app-header--dash-rings {
+          display: block !important;
+          text-align: left !important;
+          padding: max(12px, env(safe-area-inset-top)) 14px 10px !important;
+        }
         .app-header-page-icon {
           width: 32px;
           height: 32px;
@@ -7530,6 +7584,18 @@ export default function AppVisualEffects() {
         .activity-totals-bar {
           grid-template-columns: 1fr;
         }
+      }
+
+      .app-header.app-header--dash-rings {
+        display: block !important;
+        text-align: left !important;
+      }
+      .app-header--dash-rings .dash-rings-donut,
+      .app-header--dash-rings .dash-rings-svg {
+        width: 220px !important;
+        height: 220px !important;
+        max-width: 100%;
+        aspect-ratio: 1 / 1 !important;
       }
     `}</style>
   );

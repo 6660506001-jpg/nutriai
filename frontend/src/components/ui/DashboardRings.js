@@ -2,43 +2,20 @@ import React, { useMemo } from "react";
 import { HiFire } from "react-icons/hi";
 import { MdDirectionsRun } from "react-icons/md";
 import DashboardMacroStrip from "./DashboardMacroStrip";
+import "./DashboardRings.css";
 
-function pointOnEllipse(cx, cy, rx, ry, progress) {
+function pointOnCircle(cx, cy, r, progress) {
   const angle = progress * 2 * Math.PI - Math.PI / 2;
   return {
-    x: cx + rx * Math.cos(angle),
-    y: cy + ry * Math.sin(angle),
+    x: cx + r * Math.cos(angle),
+    y: cy + r * Math.sin(angle),
   };
-}
-
-/** Sample points along the ellipse so progress hugs the same path as the track ring. */
-function describeEllipseProgress(cx, cy, rx, ry, progress) {
-  const clamped = Math.min(Math.max(progress, 0), 1);
-  if (clamped <= 0) return null;
-
-  const startAngle = -Math.PI / 2;
-  const sweep = clamped * 2 * Math.PI;
-  const steps = Math.max(24, Math.ceil(100 * clamped));
-  const coords = [];
-
-  for (let i = 0; i <= steps; i += 1) {
-    const angle = startAngle + (i / steps) * sweep;
-    coords.push({
-      x: cx + rx * Math.cos(angle),
-      y: cy + ry * Math.sin(angle),
-    });
-  }
-
-  return coords
-    .map(({ x, y }, index) => `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`)
-    .join(" ");
 }
 
 function ActivityRing({
   cx,
   cy,
-  rx,
-  ry,
+  r,
   progress,
   color,
   trackColor,
@@ -50,44 +27,36 @@ function ActivityRing({
   unit = "kcal",
 }) {
   const clamped = Math.min(Math.max(progress, 0), 1);
-  const arcPath = describeEllipseProgress(cx, cy, rx, ry, clamped);
-  const tip = pointOnEllipse(cx, cy, rx, ry, clamped || 0.001);
+  const circumference = 2 * Math.PI * r;
+  const dashOffset = circumference * (1 - clamped);
+  const tip = pointOnCircle(cx, cy, r, clamped || 0.001);
   const pct = Math.round(clamped * 100);
   const isComplete = clamped >= 0.999;
 
   return (
     <g className="dash-ring-group" aria-hidden>
-      <ellipse
+      <circle
         cx={cx}
         cy={cy}
-        rx={rx}
-        ry={ry}
+        r={r}
         fill="none"
         stroke={trackColor}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeDasharray="3 7"
       />
-      {isComplete ? (
-        <ellipse
+      {clamped > 0 ? (
+        <circle
           cx={cx}
           cy={cy}
-          rx={rx}
-          ry={ry}
+          r={r}
           fill="none"
           stroke={color}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
-          className="dash-ring-progress"
-        />
-      ) : arcPath ? (
-        <path
-          d={arcPath}
-          fill="none"
-          stroke={color}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          strokeDasharray={isComplete ? undefined : circumference}
+          strokeDashoffset={isComplete ? undefined : dashOffset}
+          transform={`rotate(-90 ${cx} ${cy})`}
           className="dash-ring-progress"
         />
       ) : null}
@@ -128,81 +97,109 @@ export default function DashboardRings({
 
   const summary = useMemo(() => {
     if (foodCals === 0 && activityCals === 0) {
-      return { main: "เริ่มบันทึกวันนี้", detail: null, tone: "neutral" };
+      return {
+        label: "พลังงานคงเหลือ",
+        value: Math.round(foodGoal).toLocaleString("th-TH"),
+        detail: "เริ่มบันทึกวันนี้",
+        tone: "neutral",
+      };
     }
 
     if (netRemaining > 0) {
-      const main = `กินได้อีก ~${Math.round(netRemaining).toLocaleString("th-TH")} kcal`;
-      let detail = null;
-      if (foodOver > 0 && activityCals > 0) {
-        detail = `กินเกินเป้า ${foodOver.toLocaleString("th-TH")} · เผา ${activityCals.toLocaleString("th-TH")} · สุทธิ ${netCals.toLocaleString("th-TH")}`;
-      } else if (activityCals > 0) {
-        detail = `สุทธิ ${netCals.toLocaleString("th-TH")} kcal (หักเผาแล้ว)`;
-      }
-      return { main, detail, tone: "ok" };
+      return {
+        label: "กินได้อีก",
+        value: Math.round(netRemaining).toLocaleString("th-TH"),
+        detail: activityCals > 0
+          ? `สุทธิ ${netCals.toLocaleString("th-TH")} kcal (หักเผาแล้ว)`
+          : null,
+        tone: "ok",
+      };
     }
 
     if (netRemaining === 0) {
       return {
-        main: "ถึงเป้าสุทธิแล้ว",
+        label: "ถึงเป้าแล้ว",
+        value: "0",
         detail: activityCals > 0 ? `สุทธิ ${netCals.toLocaleString("th-TH")} kcal` : null,
         tone: "ok",
       };
     }
 
     return {
-      main: `เกินเป้าสุทธิ ~${Math.abs(Math.round(netRemaining)).toLocaleString("th-TH")} kcal`,
+      label: "เกินเป้า",
+      value: Math.abs(Math.round(netRemaining)).toLocaleString("th-TH"),
       detail: activityCals > 0
-        ? `กิน ${foodCals.toLocaleString("th-TH")} · เผา ${activityCals.toLocaleString("th-TH")} · สุทธิ ${netCals.toLocaleString("th-TH")}`
-        : `กิน ${foodCals.toLocaleString("th-TH")} / เป้า ${foodGoal.toLocaleString("th-TH")}`,
+        ? `กิน ${foodCals.toLocaleString("th-TH")} · เผา ${activityCals.toLocaleString("th-TH")}`
+        : `กิน ${foodCals.toLocaleString("th-TH")} / ${foodGoal.toLocaleString("th-TH")}`,
       tone: "over",
     };
-  }, [foodCals, activityCals, foodGoal, foodOver, netCals, netRemaining]);
+  }, [foodCals, activityCals, foodGoal, netCals, netRemaining]);
 
-  const cx = 168;
-  const cy = 52;
+  const cx = 110;
+  const cy = 110;
 
   return (
     <div
       className={`dash-rings-wrap ${className}`.trim()}
       role="img"
-      aria-label={`กิน ${foodCals} kcal · เผา ${activityCals} kcal · สุทธิ ${netCals} kcal · ${summary.main}${summary.detail ? ` · ${summary.detail}` : ""}`}
+      aria-label={`กิน ${foodCals} kcal · เผา ${activityCals} kcal · สุทธิ ${netCals} kcal · ${summary.label} ${summary.value} kcal${summary.detail ? ` · ${summary.detail}` : ""}`}
     >
-      <svg
-        className="dash-rings-svg"
-        viewBox="0 0 336 104"
-        preserveAspectRatio="xMidYMid meet"
-        aria-hidden
+      <div
+        className="dash-rings-donut"
+        style={{
+          position: "relative",
+          width: 220,
+          height: 220,
+          margin: "8px auto 0",
+          flex: "0 0 220px",
+        }}
       >
-        <ActivityRing
-          cx={cx}
-          cy={cy}
-          rx={148}
-          ry={44}
-          progress={foodProgress}
-          color="#2563eb"
-          trackColor="rgba(37, 99, 235, 0.14)"
-          strokeWidth={11}
-          icon={HiFire}
-          label="กินแล้ว"
-          value={foodCals}
-          goal={foodGoal}
-        />
-        <ActivityRing
-          cx={cx}
-          cy={cy}
-          rx={122}
-          ry={34}
-          progress={activityProgress}
-          color="#059669"
-          trackColor="rgba(5, 150, 105, 0.14)"
-          strokeWidth={11}
-          icon={MdDirectionsRun}
-          label="กิจกรรม"
-          value={activityCals}
-          goal={activityGoal}
-        />
-      </svg>
+        <svg
+          className="dash-rings-svg"
+          width="220"
+          height="220"
+          viewBox="0 0 220 220"
+          preserveAspectRatio="xMidYMid meet"
+          aria-hidden
+          style={{ width: 220, height: 220, display: "block" }}
+        >
+          <ActivityRing
+            cx={cx}
+            cy={cy}
+            r={92}
+            progress={foodProgress}
+            color="#2563eb"
+            trackColor="rgba(37, 99, 235, 0.14)"
+            strokeWidth={14}
+            icon={HiFire}
+            label="กินแล้ว"
+            value={foodCals}
+            goal={foodGoal}
+          />
+          <ActivityRing
+            cx={cx}
+            cy={cy}
+            r={72}
+            progress={activityProgress}
+            color="#059669"
+            trackColor="rgba(5, 150, 105, 0.14)"
+            strokeWidth={14}
+            icon={MdDirectionsRun}
+            label="กิจกรรม"
+            value={activityCals}
+            goal={activityGoal}
+          />
+        </svg>
+        <div className={`dash-rings-center dash-rings-center--${summary.tone}`}>
+          <span className="dash-rings-center-label">{summary.label}</span>
+          <strong className="dash-rings-center-value">{summary.value}</strong>
+          <span className="dash-rings-center-unit">kcal</span>
+        </div>
+      </div>
+
+      {summary.detail ? (
+        <p className="dash-rings-caption">{summary.detail}</p>
+      ) : null}
 
       <div className="dash-rings-legend">
         <div className="dash-rings-legend-item dash-rings-legend-item--food">
@@ -227,12 +224,6 @@ export default function DashboardRings({
             <small> / {activityGoal.toLocaleString("th-TH")} kcal</small>
           </div>
         </div>
-      </div>
-      <div className={`dash-rings-summary dash-rings-summary--${summary.tone}`}>
-        <p className="dash-rings-summary-main">{summary.main}</p>
-        {summary.detail ? (
-          <p className="dash-rings-summary-detail">{summary.detail}</p>
-        ) : null}
       </div>
 
       <DashboardMacroStrip

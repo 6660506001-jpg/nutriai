@@ -3,24 +3,15 @@ import MetricCard from "./MetricCard";
 import { STAT_TOOLTIPS } from "../../constants/statTooltips";
 
 function useHomeSummaryMetrics({
-  weight,
-  bmi,
-  bmiStatus,
-  tdee = 0,
   foodCals = 0,
   activityCals = 0,
   netCals = 0,
-  target = 0,
 }) {
-  const goal = target || tdee || 0;
-  const remaining = goal > 0 ? goal - netCals : 0;
-  const remainingDisplay = remaining > 0 ? Math.round(remaining) : 0;
-  const overBy = remaining < 0 ? Math.round(Math.abs(remaining)) : 0;
   const intakeNote =
     activityCals > 0
       ? `กิน ${foodCals.toLocaleString("th-TH")} · เผา ${activityCals.toLocaleString("th-TH")} · สุทธิ ${netCals.toLocaleString("th-TH")}`
       : null;
-  return { remainingDisplay, overBy, intakeNote };
+  return { intakeNote };
 }
 
 export function DashboardHomeStats({
@@ -31,24 +22,18 @@ export function DashboardHomeStats({
   foodCals = 0,
   activityCals = 0,
   netCals = 0,
-  target = 0,
 }) {
-  const { remainingDisplay, overBy, intakeNote } = useHomeSummaryMetrics({
-    weight,
-    bmi,
-    bmiStatus,
-    tdee,
+  const { intakeNote } = useHomeSummaryMetrics({
     foodCals,
     activityCals,
     netCals,
-    target,
   });
 
   return (
     <section className="dash-home-summary dash-home-stats-block" aria-label="ข้อมูลสรุป">
       <header className="dash-home-summary-head">
         <h2 className="dash-home-summary-title">ข้อมูลสรุป</h2>
-        <p className="dash-home-summary-desc">น้ำหนัก · BMI · TDEE · พลังงานวันนี้</p>
+        <p className="dash-home-summary-desc">น้ำหนัก · BMI · TDEE · พลังงานที่ได้รับ</p>
       </header>
 
       <div className="dash-home-summary-grid">
@@ -81,19 +66,6 @@ export function DashboardHomeStats({
           variant="primary"
           compact
         />
-        <MetricCard
-          label="พลังงานคงเหลือ"
-          value={remainingDisplay}
-          unit="kcal"
-          tooltip={STAT_TOOLTIPS.remainingCal}
-          variant={overBy > 0 ? "default" : "success"}
-          compact
-        />
-        {overBy > 0 ? (
-          <div className="dash-home-summary-over" role="status">
-            เกินเป้าสุทธิ ~{overBy.toLocaleString("th-TH")} kcal
-          </div>
-        ) : null}
       </div>
 
       {intakeNote ? <p className="dash-home-summary-net">{intakeNote}</p> : null}

@@ -420,7 +420,6 @@ export default function Dashboard({
             foodCals={foodCals}
             activityCals={activityCals}
             netCals={netCals}
-            target={weightControlTarget || user.tdee}
           />
           <DashboardHomeMenuPick
             menu={bestAiMenu}
