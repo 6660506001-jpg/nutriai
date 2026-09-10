@@ -656,61 +656,83 @@ export default function AppVisualEffects() {
         background: var(--nutri-bg-soft, #f8fafc);
       }
 
-      .dash-home-menu-pick .nutri-menu-card--home-compact {
-        margin: 0;
-      }
-
-      .nutri-menu-card--home-compact {
-        padding: 10px 10px 8px;
+      .dash-home-ai-menu-card {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px;
         border-radius: 14px;
         background: var(--nutri-bg-soft, #f8fafc);
         border: 1px solid var(--nutri-border, #e2e8f0);
       }
 
-      .nutri-menu-home-compact-top {
+      .dash-home-ai-menu-card-head {
         display: flex;
-        gap: 8px;
+        flex-direction: row;
         align-items: flex-start;
+        gap: 10px;
+        width: 100%;
       }
 
-      .nutri-menu-home-compact-icon {
-        font-size: 22px;
+      .dash-home-ai-menu-card-icon {
+        flex: 0 0 auto;
+        font-size: 24px;
         line-height: 1.2;
-        flex-shrink: 0;
       }
 
-      .nutri-menu-home-compact-main {
-        flex: 1;
+      .dash-home-ai-menu-card-copy {
+        flex: 1 1 auto;
         min-width: 0;
+        max-width: 100%;
       }
 
-      .nutri-menu-card--home-compact .nutri-menu-card-name {
+      .dash-home-ai-menu-card-title {
         margin: 0 0 6px;
-        font-size: 15px;
-        line-height: 1.3;
-        word-break: normal;
-        overflow-wrap: anywhere;
+        font-size: 16px;
+        font-weight: 900;
+        line-height: 1.35;
+        color: var(--nutri-text-dark, #0f172a);
+        word-break: keep-all;
+        overflow-wrap: break-word;
       }
 
-      .nutri-menu-card-badges--compact {
-        margin-bottom: 0;
+      .dash-home-ai-menu-card-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 6px;
       }
 
-      .nutri-menu-card-badges--compact .nutri-menu-badge {
+      .dash-home-ai-menu-tag {
         font-size: 10px;
-        padding: 3px 7px;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: #f0fdf4;
+        color: #166534;
       }
 
-      .nutri-menu-card-reason--compact {
-        margin: 8px 0 0;
+      .dash-home-ai-menu-tag--ai {
+        background: var(--nutri-health-blue-soft, #eff6ff);
+        color: var(--nutri-food-accent, #2563eb);
+      }
+
+      .dash-home-ai-menu-card-note {
+        margin: 0;
         font-size: 12px;
         font-weight: 600;
-        line-height: 1.35;
+        line-height: 1.4;
         color: var(--nutri-text-muted, #64748b);
       }
 
-      .nutri-menu-home-stats-line {
-        margin: 8px 0 10px;
+      .dash-home-ai-menu-card-stats {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 0;
+        margin: 0;
         padding: 8px 10px;
         border-radius: 10px;
         background: #fff;
@@ -718,47 +740,54 @@ export default function AppVisualEffects() {
         font-size: 12px;
         font-weight: 700;
         color: var(--nutri-text-dark, #0f172a);
-        line-height: 1.4;
-        flex-wrap: wrap;
+        line-height: 1.45;
       }
 
-      .nutri-menu-home-stats-line strong {
+      .dash-home-ai-menu-card-stats strong {
         color: var(--nutri-food-accent, #2563eb);
         font-size: 13px;
+        margin-right: 2px;
       }
 
-      .nutri-menu-home-stats-sep {
-        margin: 0 4px;
-        color: var(--nutri-text-muted, #94a3b8);
-        font-weight: 600;
-      }
-
-      .nutri-menu-home-stats-portion {
+      .dash-home-ai-menu-card-portion {
         color: var(--nutri-text-muted, #64748b);
         font-weight: 600;
       }
 
-      .nutri-menu-card-actions--home-compact {
+      .dash-home-ai-menu-card-foot {
         display: flex;
         flex-direction: row;
         align-items: center;
         gap: 8px;
-        margin: 0;
+        width: 100%;
       }
 
-      .nutri-menu-card-actions--home-compact .nutri-menu-btn--primary {
-        flex: 1;
-        min-height: 42px;
-        padding: 10px 12px;
+      .dash-home-ai-menu-btn {
+        border-radius: 12px;
         font-size: 13px;
-        background: var(--nutri-food-accent, #2563eb);
+        font-weight: 800;
+        cursor: pointer;
+        min-height: 42px;
+        padding: 10px 14px;
       }
 
-      .nutri-menu-card-actions--home-compact .nutri-menu-btn--text {
-        flex-shrink: 0;
-        min-height: 42px;
-        padding: 8px 10px;
-        font-size: 12px;
+      .dash-home-ai-menu-btn--primary {
+        flex: 1 1 auto;
+        border: none;
+        background: var(--nutri-food-accent, #2563eb);
+        color: #fff;
+      }
+
+      .dash-home-ai-menu-btn--ghost {
+        flex: 0 0 auto;
+        border: 1px solid var(--nutri-border, #e2e8f0);
+        background: #fff;
+        color: var(--nutri-text-muted, #64748b);
+      }
+
+      .dash-home-ai-menu-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
       }
 
       .nutri-menu-macro--protein strong {
@@ -934,13 +963,6 @@ export default function AppVisualEffects() {
         background: #fff;
         border: 1px solid var(--nutri-border, #e2e8f0);
         box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
-      }
-
-      /* หน้าหลัก — ไม่ใช้ grid 72px ของการ์ด AI ทั่วไป (โน๊ตบุ๊กเคยบีบชื่อเมนูเป็นตัวต่อตัว) */
-      .nutri-menu-card--home-compact {
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
       }
 
       .nutri-menu-card-visual {

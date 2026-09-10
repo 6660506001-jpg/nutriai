@@ -50,36 +50,36 @@ export default function MenuRecommendationCard({
 
   if (isHome) {
     return (
-      <article className="nutri-menu-card--home-compact">
-        <div className="nutri-menu-home-compact-top">
-          <span className="nutri-menu-home-compact-icon" aria-hidden>{homeIcon}</span>
-          <div className="nutri-menu-home-compact-main">
-            <h3 className="nutri-menu-card-name">{menu.name}</h3>
-            <div className="nutri-menu-card-badges nutri-menu-card-badges--compact">
-              <span className="nutri-menu-badge nutri-menu-badge--fit">AI #1</span>
+      <article className="dash-home-ai-menu-card">
+        <div className="dash-home-ai-menu-card-head">
+          <span className="dash-home-ai-menu-card-icon" aria-hidden>{homeIcon}</span>
+          <div className="dash-home-ai-menu-card-copy">
+            <h3 className="dash-home-ai-menu-card-title">{menu.name}</h3>
+            <div className="dash-home-ai-menu-card-tags">
+              <span className="dash-home-ai-menu-tag dash-home-ai-menu-tag--ai">AI #1</span>
               {badges.slice(0, 1).map((badge) => (
-                <span key={badge.label} className={`nutri-menu-badge nutri-menu-badge--${badge.tone}`}>
+                <span key={badge.label} className="dash-home-ai-menu-tag">
                   {badge.label}
                 </span>
               ))}
             </div>
+            <p className="dash-home-ai-menu-card-note">{homeReason}</p>
           </div>
         </div>
-        <p className="nutri-menu-card-reason nutri-menu-card-reason--compact">{homeReason}</p>
-        <p className="nutri-menu-home-stats-line">
+        <p className="dash-home-ai-menu-card-stats">
           <strong>{formatCalories(menu.calories)} kcal</strong>
-          <span className="nutri-menu-home-stats-sep">·</span>
-          <span>P {menu.protein}g</span>
-          <span className="nutri-menu-home-stats-sep">·</span>
-          <span>C {menu.carbs}g</span>
-          <span className="nutri-menu-home-stats-sep">·</span>
-          <span>F {menu.fat}g</span>
-          {homePortion ? <span className="nutri-menu-home-stats-portion">{homePortion}</span> : null}
+          <span aria-hidden> · </span>
+          P {menu.protein}g
+          <span aria-hidden> · </span>
+          C {menu.carbs}g
+          <span aria-hidden> · </span>
+          F {menu.fat}g
+          {homePortion ? <span className="dash-home-ai-menu-card-portion">{homePortion}</span> : null}
         </p>
-        <div className="nutri-menu-card-actions nutri-menu-card-actions--home-compact">
+        <div className="dash-home-ai-menu-card-foot">
           <button
             type="button"
-            className="nutri-menu-btn nutri-menu-btn--primary"
+            className="dash-home-ai-menu-btn dash-home-ai-menu-btn--primary"
             onClick={() => onSelect(menu)}
             disabled={loading}
           >
@@ -88,7 +88,7 @@ export default function MenuRecommendationCard({
           {onDislike ? (
             <button
               type="button"
-              className="nutri-menu-btn nutri-menu-btn--text"
+              className="dash-home-ai-menu-btn dash-home-ai-menu-btn--ghost"
               onClick={() => onDislike(menu)}
               disabled={loading}
             >
