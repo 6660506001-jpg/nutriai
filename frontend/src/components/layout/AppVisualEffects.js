@@ -656,12 +656,11 @@ export default function AppVisualEffects() {
         background: var(--nutri-bg-soft, #f8fafc);
       }
 
-      .dash-home-menu-pick .nutri-menu-card {
+      .dash-home-menu-pick .nutri-menu-card--home-compact {
         margin: 0;
       }
 
       .nutri-menu-card--home-compact {
-        display: block;
         padding: 10px 10px 8px;
         border-radius: 14px;
         background: var(--nutri-bg-soft, #f8fafc);
@@ -689,6 +688,8 @@ export default function AppVisualEffects() {
         margin: 0 0 6px;
         font-size: 15px;
         line-height: 1.3;
+        word-break: normal;
+        overflow-wrap: anywhere;
       }
 
       .nutri-menu-card-badges--compact {
@@ -933,6 +934,13 @@ export default function AppVisualEffects() {
         background: #fff;
         border: 1px solid var(--nutri-border, #e2e8f0);
         box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+      }
+
+      /* หน้าหลัก — ไม่ใช้ grid 72px ของการ์ด AI ทั่วไป (โน๊ตบุ๊กเคยบีบชื่อเมนูเป็นตัวต่อตัว) */
+      .nutri-menu-card--home-compact {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
       }
 
       .nutri-menu-card-visual {

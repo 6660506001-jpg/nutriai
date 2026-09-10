@@ -50,7 +50,7 @@ export default function MenuRecommendationCard({
 
   if (isHome) {
     return (
-      <article className="nutri-menu-card nutri-menu-card--home nutri-menu-card--home-compact">
+      <article className="nutri-menu-card--home-compact">
         <div className="nutri-menu-home-compact-top">
           <span className="nutri-menu-home-compact-icon" aria-hidden>{homeIcon}</span>
           <div className="nutri-menu-home-compact-main">
