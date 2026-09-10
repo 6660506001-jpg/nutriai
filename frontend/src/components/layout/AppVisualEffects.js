@@ -584,12 +584,38 @@ export default function AppVisualEffects() {
         margin: 0;
         font-size: 13px;
         font-weight: 600;
-        line-height: 1.5;
+        line-height: 1.45;
         color: #334155;
+      }
+
+      .dash-home-advice-lead {
+        margin: 0 0 8px;
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--nutri-text-dark, #0f172a);
+      }
+
+      .dash-home-advice-tips {
+        margin: 0;
+        padding-left: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .dash-home-advice-tips li {
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.4;
+        color: #475569;
       }
 
       .dash-home-summary-advice-body--muted {
         color: var(--nutri-text-muted, #64748b);
+      }
+
+      .dash-home-advice-block .dash-home-summary-advice-title {
+        margin-bottom: 8px;
       }
 
       .dash-home-menu-pick {

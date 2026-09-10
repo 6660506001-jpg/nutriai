@@ -62,6 +62,49 @@ const buildMacroSummary = ({
   return `${status} — ${advice}`;
 };
 
+/** คำแนะนำสั้นสำหรับการ์ดหน้าหลัก — อ่านง่ายบนมือถือ */
+export const buildHomeDietAdviceBrief = ({
+  proteinPct = 0,
+  carbsPct = 0,
+  fatPct = 0,
+  remainingProtein = 0,
+  remainingCarbs = 0,
+  remainingFat = 0,
+  remainingCal = 0,
+  focusTitle = "",
+  focusDetail = "",
+  headline = "",
+}) => {
+  const fmt = (n) => Math.round(Number(n) || 0);
+  const focus = focusTitle.replace(/^โฟกัส:\s*/u, "").trim();
+  const detailShort = (focusDetail || "")
+    .replace(/ยังขาดอีกประมาณ\s*/u, "ขาด ~")
+    .replace(/ประมาณ\s*/u, "~");
+
+  let lead = "";
+  if (focus && detailShort) {
+    lead = `${focus} ${detailShort}`;
+  } else if (headline) {
+    lead = headline.replace(/ประมาณ\s*/u, "~");
+  } else if (focus) {
+    lead = `โฟกัส${focus}`;
+  }
+
+  const tips = [];
+  if (fatPct > 110) tips.push("ไขมันเกินเป้า → ลดทอด น้ำมัน ของหวาน");
+  if (proteinPct < 85) tips.push(`โปรตีนยังไม่ครบ → เติม ~${fmt(remainingProtein)}g (ไก่ ปลา ไข่)`);
+  else if (carbsPct > 110) tips.push(`คาร์บสูง → มื้อหน้าลดข้าว/เส้น ~${fmt(Math.abs(remainingCarbs))}g`);
+  else if (remainingCal > 0 && remainingCal <= 420) tips.push(`แคลเหลือ ~${fmt(remainingCal)} kcal — กินพอดีมื้อหน้า`);
+  else if (proteinPct >= 85 && carbsPct <= 110 && fatPct <= 110) tips.push("มาโครใกล้เป้า — รักษาสัดส่วนเดิม");
+
+  if (tips.length === 0) tips.push("มื้อหน้า: โปรตีน + ผัก + คาร์บพอประมาณ");
+
+  return {
+    lead,
+    tips: tips.slice(0, 2),
+  };
+};
+
 const buildRecommendationTargets = ({
   tdee,
   remainingCal,

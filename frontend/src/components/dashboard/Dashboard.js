@@ -4,7 +4,7 @@ import DashCollapsible from "../ui/DashCollapsible";
 import { getWeightControlTarget } from "../../constants/statTooltips";
 import { calculateHealthData, calculateMacros } from "../../utils/healthCalculations";
 import { analyzeThreeMealsSummary } from "../../utils/mealRecommendations";
-import { getProfessionalPrediction } from "../../utils/aiPrediction";
+import { getProfessionalPrediction, buildHomeDietAdviceBrief } from "../../utils/aiPrediction";
 import { generateMenuRecommendations, VENUE_MODES } from "../../utils/menuRecommendations";
 import { buildAdaptiveActivitySuggestion } from "../../utils/adaptiveActivitySuggester";
 import { mealTotalsFromDaily } from "../../utils/logDisplay";
@@ -337,6 +337,21 @@ export default function Dashboard({
   };
 
   const weightControlTarget = getWeightControlTarget(user.tdee);
+  const homeAdviceBrief = useMemo(() => {
+    const pct = (key) => analysis.macroProgress?.find((row) => row.key === key)?.valuePct ?? 0;
+    return buildHomeDietAdviceBrief({
+      proteinPct: pct("p"),
+      carbsPct: pct("c"),
+      fatPct: pct("f"),
+      remainingProtein: analysis.recommendationTargets?.remainingProtein,
+      remainingCarbs: analysis.recommendationTargets?.remainingCarbs,
+      remainingFat: analysis.recommendationTargets?.remainingFat,
+      remainingCal: (Number(user.tdee) || 0) - netCals,
+      focusTitle: analysis.focusTitle,
+      focusDetail: analysis.focusDetail,
+      headline: analysis.headline,
+    });
+  }, [analysis, user.tdee, netCals]);
   const summaryPreview = hasRecordsLogged
     ? `กิน ${foodCals} · เผา ${activityCals} · สุทธิ ${netCals >= 0 ? netCals : `−${Math.abs(netCals)}`} kcal`
     : "";
@@ -417,11 +432,7 @@ export default function Dashboard({
             onMore={handleOpenAllAiMenus}
             onRefresh={handleRefreshHomeAiMenu}
           />
-          <DashboardHomeAdvice
-            adviceTitle={analysis.focusTitle}
-            adviceDetail={analysis.focusDetail || analysis.headline}
-            adviceSubline={analysis.macroSummary || analysis.subline}
-          />
+          <DashboardHomeAdvice brief={homeAdviceBrief} />
         </div>
       )}
 

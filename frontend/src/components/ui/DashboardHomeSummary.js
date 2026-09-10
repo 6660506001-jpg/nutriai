@@ -101,18 +101,26 @@ export function DashboardHomeStats({
   );
 }
 
-export function DashboardHomeAdvice({ adviceTitle, adviceDetail, adviceSubline }) {
-  const adviceLead = adviceTitle && adviceTitle !== "คำแนะนำการบริโภคอาหาร" ? adviceTitle : null;
-  const adviceBody = [adviceLead, adviceDetail, adviceSubline].filter(Boolean).join(" ");
+export function DashboardHomeAdvice({ brief }) {
+  const hasBrief = brief?.lead || (brief?.tips?.length > 0);
 
   return (
     <article className="dash-home-summary-advice dash-home-advice-block" aria-label="คำแนะนำการบริโภคอาหาร">
       <h3 className="dash-home-summary-advice-title">คำแนะนำการบริโภคอาหาร</h3>
-      {adviceBody ? (
-        <p className="dash-home-summary-advice-body">{adviceBody}</p>
+      {hasBrief ? (
+        <div className="dash-home-summary-advice-body">
+          {brief.lead ? <p className="dash-home-advice-lead">{brief.lead}</p> : null}
+          {brief.tips?.length > 0 ? (
+            <ul className="dash-home-advice-tips">
+              {brief.tips.map((tip) => (
+                <li key={tip}>{tip}</li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
       ) : (
         <p className="dash-home-summary-advice-body dash-home-summary-advice-body--muted">
-          บันทึกมื้ออาหารวันนี้เพื่อรับคำแนะนำที่เหมาะกับแคลและมาโครของคุณ
+          บันทึกมื้อวันนี้เพื่อรับคำแนะนำสั้นๆ ตามแคลและมาโครของคุณ
         </p>
       )}
     </article>
@@ -124,11 +132,7 @@ export default function DashboardHomeSummary(props) {
   return (
     <>
       <DashboardHomeStats {...props} />
-      <DashboardHomeAdvice
-        adviceTitle={props.adviceTitle}
-        adviceDetail={props.adviceDetail}
-        adviceSubline={props.adviceSubline}
-      />
+      <DashboardHomeAdvice brief={props.brief} />
     </>
   );
 }
