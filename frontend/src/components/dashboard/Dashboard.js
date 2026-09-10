@@ -411,7 +411,6 @@ export default function Dashboard({
             menu={bestAiMenu}
             loading={menuLoading && !bestAiMenu}
             mealLabel={activeMealTab}
-            aiHint={analysis.action}
             canRecommend={canRecommendMenus}
             onSelect={handleAddRecommendedMenu}
             onDislike={handleDislikeRecommendedMenu}

@@ -5,7 +5,6 @@ export default function DashboardHomeMenuPick({
   menu,
   loading = false,
   mealLabel,
-  aiHint,
   onSelect,
   onDislike,
   onMore,
@@ -15,12 +14,7 @@ export default function DashboardHomeMenuPick({
   return (
     <section className="dash-home-menu-pick dash-home-menu-block" aria-label="เมนูแนะนำมื้อถัดไป">
       <div className="dash-home-menu-pick-head">
-        <div>
-          <h2 className="dash-home-menu-pick-title">เมนูที่ AI เห็นว่าเหมาะที่สุด</h2>
-          <p className="dash-home-menu-pick-desc">
-            {aiHint || "คัดจากชุดเมนูเดียวกับแท็บ AI — เรียงตามคะแนนเหมาะกับคุณวันนี้"}
-          </p>
-        </div>
+        <h2 className="dash-home-menu-pick-title">เมนูที่ AI เห็นว่าเหมาะที่สุด</h2>
         <div className="dash-home-menu-pick-actions">
           {onRefresh ? (
             <button type="button" className="dash-home-menu-pick-link" onClick={onRefresh} disabled={loading}>

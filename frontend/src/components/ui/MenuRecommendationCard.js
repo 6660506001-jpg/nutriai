@@ -44,63 +44,86 @@ export default function MenuRecommendationCard({
   const isHome = variant === "home";
   const showPortion = isHome || expanded;
 
+  const homeIcon = menu.category === "lean-protein" ? "🥗" : menu.category === "soup" ? "🍲" : "🍽️";
+  const homeReason = menu.matchNote || getMenuPlainReason(menu);
+  const homePortion = menu.portionLabel ? ` · ${menu.portionLabel}` : "";
+
+  if (isHome) {
+    return (
+      <article className="nutri-menu-card nutri-menu-card--home nutri-menu-card--home-compact">
+        <div className="nutri-menu-home-compact-top">
+          <span className="nutri-menu-home-compact-icon" aria-hidden>{homeIcon}</span>
+          <div className="nutri-menu-home-compact-main">
+            <h3 className="nutri-menu-card-name">{menu.name}</h3>
+            <div className="nutri-menu-card-badges nutri-menu-card-badges--compact">
+              <span className="nutri-menu-badge nutri-menu-badge--fit">AI #1</span>
+              {badges.slice(0, 1).map((badge) => (
+                <span key={badge.label} className={`nutri-menu-badge nutri-menu-badge--${badge.tone}`}>
+                  {badge.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <p className="nutri-menu-card-reason nutri-menu-card-reason--compact">{homeReason}</p>
+        <p className="nutri-menu-home-stats-line">
+          <strong>{formatCalories(menu.calories)} kcal</strong>
+          <span className="nutri-menu-home-stats-sep">·</span>
+          <span>P {menu.protein}g</span>
+          <span className="nutri-menu-home-stats-sep">·</span>
+          <span>C {menu.carbs}g</span>
+          <span className="nutri-menu-home-stats-sep">·</span>
+          <span>F {menu.fat}g</span>
+          {homePortion ? <span className="nutri-menu-home-stats-portion">{homePortion}</span> : null}
+        </p>
+        <div className="nutri-menu-card-actions nutri-menu-card-actions--home-compact">
+          <button
+            type="button"
+            className="nutri-menu-btn nutri-menu-btn--primary"
+            onClick={() => onSelect(menu)}
+            disabled={loading}
+          >
+            {mealLabel ? `บันทึก${mealLabel}` : "บันทึกเมนูนี้"}
+          </button>
+          {onDislike ? (
+            <button
+              type="button"
+              className="nutri-menu-btn nutri-menu-btn--text"
+              onClick={() => onDislike(menu)}
+              disabled={loading}
+            >
+              ไม่ชอบ
+            </button>
+          ) : null}
+        </div>
+      </article>
+    );
+  }
+
   return (
-    <article className={`nutri-menu-card${isHome ? " nutri-menu-card--home" : ""}`}>
-      {!isHome ? (
-        <div className="nutri-menu-card-visual" aria-hidden>
-          <span className="nutri-menu-card-visual-icon">
-            {menu.category === "lean-protein" ? "🥗" : menu.category === "soup" ? "🍲" : "🍽️"}
-          </span>
-          <span className="nutri-menu-card-index">#{index + 1}</span>
-        </div>
-      ) : (
-        <div className="nutri-menu-card-home-icon" aria-hidden>
-          {menu.category === "lean-protein" ? "🥗" : menu.category === "soup" ? "🍲" : "🍽️"}
-        </div>
-      )}
+    <article className="nutri-menu-card">
+      <div className="nutri-menu-card-visual" aria-hidden>
+        <span className="nutri-menu-card-visual-icon">{homeIcon}</span>
+        <span className="nutri-menu-card-index">#{index + 1}</span>
+      </div>
 
       <div className="nutri-menu-card-body">
         <div className="nutri-menu-card-top">
           <h3 className="nutri-menu-card-name">{menu.name}</h3>
           <div className="nutri-menu-card-badges">
-            {isHome ? (
-              <span className="nutri-menu-badge nutri-menu-badge--fit">อันดับ 1 จาก AI</span>
-            ) : null}
             {badges.map((badge) => (
               <span key={badge.label} className={`nutri-menu-badge nutri-menu-badge--${badge.tone}`}>
                 {badge.label}
               </span>
             ))}
           </div>
-          {isHome ? (
-            <p className="nutri-menu-card-reason">
-              {menu.matchNote
-                ? `AI: ${menu.matchNote} — ${getMenuPlainReason(menu)}`
-                : getMenuPlainReason(menu)}
-            </p>
-          ) : null}
         </div>
 
-        {isHome ? (
-          <div className="nutri-menu-home-cal-block">
-            <p className="nutri-menu-home-cal-label">แคลอรี่โดยประมาณ</p>
-            <p className="nutri-menu-home-cal-value">
-              <strong>{formatCalories(menu.calories)}</strong>
-              <span> กิโลแคลอรี่</span>
-            </p>
-            {menu.portionLabel ? (
-              <p className="nutri-menu-home-portion">ขนาด: {menu.portionLabel}</p>
-            ) : null}
+        <div className="nutri-menu-card-macros">
+          <div className="nutri-menu-macro nutri-menu-macro--cal">
+            <strong>{formatCalories(menu.calories)}</strong>
+            <span>แคลอรี่</span>
           </div>
-        ) : null}
-
-        <div className={`nutri-menu-card-macros${isHome ? " nutri-menu-card-macros--home" : ""}`}>
-          {!isHome ? (
-            <div className="nutri-menu-macro nutri-menu-macro--cal">
-              <strong>{formatCalories(menu.calories)}</strong>
-              <span>แคลอรี่</span>
-            </div>
-          ) : null}
           <div className="nutri-menu-macro nutri-menu-macro--protein">
             <strong>{menu.protein}g</strong>
             <span>โปรตีน</span>
@@ -115,27 +138,25 @@ export default function MenuRecommendationCard({
           </div>
         </div>
 
-        {!isHome && showPortion && menu.portionLabel ? (
+        {showPortion && menu.portionLabel ? (
           <p className="nutri-menu-card-detail">ขนาด: {menu.portionLabel}</p>
         ) : null}
 
-        <div className={`nutri-menu-card-actions${isHome ? " nutri-menu-card-actions--home" : ""}`}>
-          {!isHome ? (
-            <button
-              type="button"
-              className="nutri-menu-btn nutri-menu-btn--ghost"
-              onClick={() => setExpanded((open) => !open)}
-            >
-              {expanded ? "ย่อรายละเอียด" : "ดูขนาดจาน"}
-            </button>
-          ) : null}
+        <div className="nutri-menu-card-actions">
+          <button
+            type="button"
+            className="nutri-menu-btn nutri-menu-btn--ghost"
+            onClick={() => setExpanded((open) => !open)}
+          >
+            {expanded ? "ย่อรายละเอียด" : "ดูขนาดจาน"}
+          </button>
           <button
             type="button"
             className="nutri-menu-btn nutri-menu-btn--primary"
             onClick={() => onSelect(menu)}
             disabled={loading}
           >
-            {isHome ? "บันทึกเมนูนี้" : "เลือกเมนู"}
+            เลือกเมนู
           </button>
           {onDislike ? (
             <button
@@ -144,15 +165,11 @@ export default function MenuRecommendationCard({
               onClick={() => onDislike(menu)}
               disabled={loading}
             >
-              {isHome ? "ไม่ชอบเมนูนี้" : "ไม่ชอบ"}
+              ไม่ชอบ
             </button>
           ) : null}
         </div>
-        {mealLabel ? (
-          <p className="nutri-menu-card-meal-hint">
-            {isHome ? `จะบันทึกใน${mealLabel}` : `เพิ่มใน${mealLabel}`}
-          </p>
-        ) : null}
+        {mealLabel ? <p className="nutri-menu-card-meal-hint">เพิ่มใน{mealLabel}</p> : null}
       </div>
     </article>
   );

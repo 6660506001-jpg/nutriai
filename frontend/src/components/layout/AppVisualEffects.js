@@ -594,7 +594,7 @@ export default function AppVisualEffects() {
 
       .dash-home-menu-pick {
         margin-top: 12px;
-        padding: 14px 14px 16px;
+        padding: 12px 12px 14px;
         border-radius: var(--nutri-radius-lg, 18px);
         background: #fff;
         border: 1px solid var(--nutri-border, #e2e8f0);
@@ -603,24 +603,20 @@ export default function AppVisualEffects() {
 
       .dash-home-menu-pick-head {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 12px;
+        gap: 8px;
+        margin-bottom: 10px;
       }
 
       .dash-home-menu-pick-title {
         margin: 0;
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 900;
         letter-spacing: -0.02em;
-      }
-
-      .dash-home-menu-pick-desc {
-        margin: 4px 0 0;
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--nutri-text-muted, #64748b);
+        line-height: 1.25;
+        flex: 1;
+        min-width: 0;
       }
 
       .dash-home-menu-pick-actions {
@@ -634,12 +630,13 @@ export default function AppVisualEffects() {
         border: none;
         background: var(--nutri-health-blue-soft, #eff6ff);
         color: var(--nutri-food-accent, #2563eb);
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 800;
-        padding: 8px 10px;
+        padding: 6px 8px;
         border-radius: 999px;
         cursor: pointer;
-        min-height: 36px;
+        min-height: 32px;
+        white-space: nowrap;
       }
 
       .dash-home-menu-pick-link:disabled {
@@ -663,85 +660,104 @@ export default function AppVisualEffects() {
         margin: 0;
       }
 
-      .nutri-menu-card--home {
-        grid-template-columns: 1fr;
-        padding: 16px;
-        border: none;
-        box-shadow: none;
-        background: var(--nutri-bg-soft, #f8fafc);
-      }
-
-      .nutri-menu-card-home-icon {
-        font-size: 28px;
-        line-height: 1;
-        margin-bottom: 4px;
-      }
-
-      .nutri-menu-card-reason {
-        margin: 0 0 12px;
-        font-size: 13px;
-        font-weight: 600;
-        line-height: 1.45;
-        color: var(--nutri-text-muted, #64748b);
-      }
-
-      .nutri-menu-home-cal-block {
-        margin-bottom: 12px;
-        padding: 12px 14px;
+      .nutri-menu-card--home-compact {
+        display: block;
+        padding: 10px 10px 8px;
         border-radius: 14px;
-        background: #fff;
+        background: var(--nutri-bg-soft, #f8fafc);
         border: 1px solid var(--nutri-border, #e2e8f0);
       }
 
-      .nutri-menu-home-cal-label {
-        margin: 0 0 4px;
+      .nutri-menu-home-compact-top {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+      }
+
+      .nutri-menu-home-compact-icon {
+        font-size: 22px;
+        line-height: 1.2;
+        flex-shrink: 0;
+      }
+
+      .nutri-menu-home-compact-main {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .nutri-menu-card--home-compact .nutri-menu-card-name {
+        margin: 0 0 6px;
+        font-size: 15px;
+        line-height: 1.3;
+      }
+
+      .nutri-menu-card-badges--compact {
+        margin-bottom: 0;
+      }
+
+      .nutri-menu-card-badges--compact .nutri-menu-badge {
+        font-size: 10px;
+        padding: 3px 7px;
+      }
+
+      .nutri-menu-card-reason--compact {
+        margin: 8px 0 0;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.35;
+        color: var(--nutri-text-muted, #64748b);
+      }
+
+      .nutri-menu-home-stats-line {
+        margin: 8px 0 10px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: #fff;
+        border: 1px solid var(--nutri-border, #e2e8f0);
         font-size: 12px;
         font-weight: 700;
-        color: var(--nutri-text-muted, #64748b);
-      }
-
-      .nutri-menu-home-cal-value {
-        margin: 0;
-        font-size: 14px;
-        font-weight: 700;
         color: var(--nutri-text-dark, #0f172a);
+        line-height: 1.4;
+        flex-wrap: wrap;
       }
 
-      .nutri-menu-home-cal-value strong {
-        font-size: 26px;
-        font-weight: 900;
+      .nutri-menu-home-stats-line strong {
         color: var(--nutri-food-accent, #2563eb);
-        letter-spacing: -0.02em;
-      }
-
-      .nutri-menu-home-portion {
-        margin: 8px 0 0;
         font-size: 13px;
+      }
+
+      .nutri-menu-home-stats-sep {
+        margin: 0 4px;
+        color: var(--nutri-text-muted, #94a3b8);
         font-weight: 600;
-        color: var(--nutri-text-dark, #0f172a);
       }
 
-      .nutri-menu-card-macros--home {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 10px;
-        margin-bottom: 14px;
+      .nutri-menu-home-stats-portion {
+        color: var(--nutri-text-muted, #64748b);
+        font-weight: 600;
       }
 
-      .nutri-menu-card-macros--home .nutri-menu-macro {
+      .nutri-menu-card-actions--home-compact {
+        display: flex;
+        flex-direction: row;
         align-items: center;
-        text-align: center;
-        padding: 10px 6px;
-        border-radius: 12px;
-        background: #fff;
-        border: 1px solid var(--nutri-border, #e2e8f0);
+        gap: 8px;
+        margin: 0;
       }
 
-      .nutri-menu-card-macros--home .nutri-menu-macro strong {
-        font-size: 16px;
+      .nutri-menu-card-actions--home-compact .nutri-menu-btn--primary {
+        flex: 1;
+        min-height: 42px;
+        padding: 10px 12px;
+        font-size: 13px;
+        background: var(--nutri-food-accent, #2563eb);
       }
 
-      .nutri-menu-card-macros--home .nutri-menu-macro span {
-        font-size: 11px;
+      .nutri-menu-card-actions--home-compact .nutri-menu-btn--text {
+        flex-shrink: 0;
+        min-height: 42px;
+        padding: 8px 10px;
+        font-size: 12px;
       }
 
       .nutri-menu-macro--protein strong {
@@ -754,28 +770,6 @@ export default function AppVisualEffects() {
 
       .nutri-menu-macro--fat strong {
         color: #7c3aed;
-      }
-
-      .nutri-menu-card-actions--home {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .nutri-menu-card-actions--home .nutri-menu-btn--primary {
-        flex: none;
-        width: 100%;
-        background: var(--nutri-food-accent, #2563eb);
-      }
-
-      .nutri-menu-card-actions--home .nutri-menu-btn--text {
-        width: 100%;
-        text-align: center;
-        font-size: 12px;
-      }
-
-      .dash-home-menu-pick .nutri-menu-card-meal-hint {
-        text-align: center;
-        font-size: 12px;
       }
 
       @media (min-width: 769px) {
