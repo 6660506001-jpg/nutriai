@@ -27,6 +27,7 @@ import { DashboardDaySummary } from "../ui/DailyLogDisplay";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import DashboardQuickFab from "../ui/DashboardQuickFab";
 import DashboardHomeSummary from "../ui/DashboardHomeSummary";
+import DashboardHomeMenuPick from "../ui/DashboardHomeMenuPick";
 
 export default function Dashboard({
   user,
@@ -90,6 +91,47 @@ export default function Dashboard({
     totalEaten
   });
 
+  const recommendationTargetsRef = React.useRef(analysis.recommendationTargets);
+  recommendationTargetsRef.current = analysis.recommendationTargets;
+
+  const canRecommendMenus = Boolean(analysis.recommendationTargets?.canRecommend);
+  const foodPreferencesKey = useMemo(
+    () => JSON.stringify(user?.foodPreferences ?? null),
+    [user?.foodPreferences],
+  );
+
+  const menuInputsKey = useMemo(() => {
+    const t = analysis.recommendationTargets;
+    if (!t?.canRecommend) return "off";
+    return [
+      foodCals,
+      activityCals,
+      user.tdee,
+      totalEaten.p,
+      totalEaten.c,
+      totalEaten.f,
+      totalEaten.cal,
+      menuVenueMode,
+      foodPreferencesKey,
+      t.calMin,
+      t.calMax,
+      t.focusKey,
+      t.remainingCal,
+      t.lightMode ? 1 : 0,
+    ].join("|");
+  }, [
+    analysis.recommendationTargets,
+    foodCals,
+    activityCals,
+    user.tdee,
+    totalEaten.p,
+    totalEaten.c,
+    totalEaten.f,
+    totalEaten.cal,
+    menuVenueMode,
+    foodPreferencesKey,
+  ]);
+
   const activitySuggestion = useMemo(() => {
     const pct = (part, whole) => (whole > 0 ? (part / whole) * 100 : 0);
     return buildAdaptiveActivitySuggestion({
@@ -103,10 +145,77 @@ export default function Dashboard({
     });
   }, [macros, totalEaten, user.weight, user.tdee, netCals]);
 
+  const homeMenuFetchRef = React.useRef(0);
+
+  const fetchMenuRecommendations = React.useCallback(async (
+    venueMode = menuVenueMode,
+    prefs,
+    options = {},
+  ) => {
+    const targets = recommendationTargetsRef.current;
+    if (!targets?.canRecommend) return [];
+    const shuffle = options.shuffle === true;
+    const requestId = options.requestId ?? 0;
+    if (!options.keepPrevious) {
+      setMenuRecommendations([]);
+    }
+    setMenuLoading(true);
+    try {
+      const menus = await generateMenuRecommendations(
+        {
+          ...targets,
+          foodPreferences: prefs ?? user?.foodPreferences,
+          shuffleMenus: shuffle,
+          excludeMenuNames: options.excludeMenuNames || [],
+          bestOnly: options.bestOnly === true,
+        },
+        venueMode,
+      );
+      if (options.requestId != null && requestId !== homeMenuFetchRef.current) {
+        return menus;
+      }
+      if (options.bestOnly) {
+        setMenuRecommendations((prev) => {
+          if (menus.length === 0) return [];
+          const rest = prev.filter((item) => item.name !== menus[0].name).slice(0, 2);
+          return [menus[0], ...rest];
+        });
+      } else {
+        setMenuRecommendations(menus);
+      }
+      return menus;
+    } catch (err) {
+      console.error("Menu recommendation error:", err);
+      if (!options.keepPrevious) {
+        setMenuRecommendations([]);
+      }
+      return [];
+    } finally {
+      if (options.requestId == null || requestId === homeMenuFetchRef.current) {
+        setMenuLoading(false);
+      }
+    }
+  }, [menuVenueMode, user?.foodPreferences]);
+
+  const bestAiMenu = menuRecommendations[0] ?? null;
+
   useEffect(() => {
     setShowMenuRecommendations(false);
-    setMenuRecommendations([]);
-  }, [foodCals, activityCals, user.tdee, totalEaten.cal]);
+  }, [menuInputsKey]);
+
+  useEffect(() => {
+    if (viewMode !== "home" || !canRecommendMenus) return undefined;
+    const requestId = homeMenuFetchRef.current + 1;
+    homeMenuFetchRef.current = requestId;
+    const prefs = user?.foodPreferences;
+    fetchMenuRecommendations(menuVenueMode, prefs, {
+      shuffle: false,
+      bestOnly: true,
+      keepPrevious: false,
+      requestId,
+    });
+    return undefined;
+  }, [viewMode, menuInputsKey, canRecommendMenus, fetchMenuRecommendations, menuVenueMode, user?.foodPreferences]);
 
   const mealsAnalysis = analyzeThreeMealsSummary(dailyMeals, {
     tdee: user.tdee,
@@ -128,42 +237,35 @@ export default function Dashboard({
     return () => window.clearTimeout(timer);
   }, [viewMode]);
 
-  const fetchMenuRecommendations = async (
-    venueMode = menuVenueMode,
-    prefs = user?.foodPreferences,
-    options = {},
-  ) => {
-    if (!analysis.recommendationTargets?.canRecommend) return;
-    setMenuLoading(true);
-    setMenuRecommendations([]);
-    try {
-      const menus = await generateMenuRecommendations(
-        {
-          ...analysis.recommendationTargets,
-          foodPreferences: prefs,
-          shuffleMenus: options.shuffle !== false,
-          excludeMenuNames: options.excludeMenuNames || [],
-        },
-        venueMode,
-      );
-      setMenuRecommendations(menus);
-    } catch (err) {
-      console.error("Menu recommendation error:", err);
-      setMenuRecommendations([]);
-    } finally {
-      setMenuLoading(false);
-    }
-  };
-
   const handleGenerateMenuRecommendations = async () => {
     setShowMenuRecommendations(true);
     await fetchMenuRecommendations(menuVenueMode, user?.foodPreferences, { shuffle: false });
   };
 
+  const handleOpenAllAiMenus = () => {
+    setShowMenuRecommendations(true);
+    onNavigateToMeals();
+    if (menuRecommendations.length <= 1) {
+      fetchMenuRecommendations(menuVenueMode, user?.foodPreferences, { shuffle: false });
+    }
+  };
+
+  const handleRefreshHomeAiMenu = () => {
+    fetchMenuRecommendations(menuVenueMode, user?.foodPreferences, {
+      shuffle: false,
+      bestOnly: true,
+      keepPrevious: true,
+      excludeMenuNames: bestAiMenu ? [bestAiMenu.name] : [],
+    });
+  };
+
   const refreshMenusWithPreferences = async (nextPreferences, options = {}) => {
     setUser((prev) => ({ ...prev, foodPreferences: nextPreferences }));
+    const homePickOnly = viewMode === "home" && !showMenuRecommendations;
     await fetchMenuRecommendations(menuVenueMode, nextPreferences, {
-      shuffle: true,
+      shuffle: false,
+      bestOnly: homePickOnly,
+      keepPrevious: homePickOnly,
       ...options,
     });
   };
@@ -191,7 +293,15 @@ export default function Dashboard({
   const handleMenuVenueModeChange = async (mode) => {
     setMenuVenueMode(mode);
     if (showMenuRecommendations) {
-      await fetchMenuRecommendations(mode);
+      await fetchMenuRecommendations(mode, user?.foodPreferences, { shuffle: false });
+      return;
+    }
+    if (viewMode === "home") {
+      await fetchMenuRecommendations(mode, user?.foodPreferences, {
+        shuffle: false,
+        bestOnly: true,
+        keepPrevious: false,
+      });
     }
   };
 
@@ -282,6 +392,20 @@ export default function Dashboard({
         <DashboardQuickFab
           onLogFood={onNavigateToFood}
           onLogActivity={() => onNavigateToActivity()}
+        />
+      )}
+
+      {viewMode === "home" && (
+        <DashboardHomeMenuPick
+          menu={bestAiMenu}
+          loading={menuLoading && !bestAiMenu}
+          mealLabel={activeMealTab}
+          aiHint={analysis.action}
+          canRecommend={canRecommendMenus}
+          onSelect={handleAddRecommendedMenu}
+          onDislike={handleDislikeRecommendedMenu}
+          onMore={handleOpenAllAiMenus}
+          onRefresh={handleRefreshHomeAiMenu}
         />
       )}
 

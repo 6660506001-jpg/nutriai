@@ -592,6 +592,192 @@ export default function AppVisualEffects() {
         color: var(--nutri-text-muted, #64748b);
       }
 
+      .dash-home-menu-pick {
+        margin-top: 12px;
+        padding: 14px 14px 16px;
+        border-radius: var(--nutri-radius-lg, 18px);
+        background: #fff;
+        border: 1px solid var(--nutri-border, #e2e8f0);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+      }
+
+      .dash-home-menu-pick-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .dash-home-menu-pick-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+      }
+
+      .dash-home-menu-pick-desc {
+        margin: 4px 0 0;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--nutri-text-muted, #64748b);
+      }
+
+      .dash-home-menu-pick-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: flex-end;
+      }
+
+      .dash-home-menu-pick-link {
+        border: none;
+        background: var(--nutri-health-blue-soft, #eff6ff);
+        color: var(--nutri-food-accent, #2563eb);
+        font-size: 12px;
+        font-weight: 800;
+        padding: 8px 10px;
+        border-radius: 999px;
+        cursor: pointer;
+        min-height: 36px;
+      }
+
+      .dash-home-menu-pick-link:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .dash-home-menu-pick-loading,
+      .dash-home-menu-pick-empty {
+        margin: 0;
+        padding: 12px 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--nutri-text-muted, #64748b);
+        text-align: center;
+        border-radius: 12px;
+        background: var(--nutri-bg-soft, #f8fafc);
+      }
+
+      .dash-home-menu-pick .nutri-menu-card {
+        margin: 0;
+      }
+
+      .nutri-menu-card--home {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        border: none;
+        box-shadow: none;
+        background: var(--nutri-bg-soft, #f8fafc);
+      }
+
+      .nutri-menu-card-home-icon {
+        font-size: 28px;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+
+      .nutri-menu-card-reason {
+        margin: 0 0 12px;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.45;
+        color: var(--nutri-text-muted, #64748b);
+      }
+
+      .nutri-menu-home-cal-block {
+        margin-bottom: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #fff;
+        border: 1px solid var(--nutri-border, #e2e8f0);
+      }
+
+      .nutri-menu-home-cal-label {
+        margin: 0 0 4px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--nutri-text-muted, #64748b);
+      }
+
+      .nutri-menu-home-cal-value {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--nutri-text-dark, #0f172a);
+      }
+
+      .nutri-menu-home-cal-value strong {
+        font-size: 26px;
+        font-weight: 900;
+        color: var(--nutri-food-accent, #2563eb);
+        letter-spacing: -0.02em;
+      }
+
+      .nutri-menu-home-portion {
+        margin: 8px 0 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--nutri-text-dark, #0f172a);
+      }
+
+      .nutri-menu-card-macros--home {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .nutri-menu-card-macros--home .nutri-menu-macro {
+        align-items: center;
+        text-align: center;
+        padding: 10px 6px;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid var(--nutri-border, #e2e8f0);
+      }
+
+      .nutri-menu-card-macros--home .nutri-menu-macro strong {
+        font-size: 16px;
+      }
+
+      .nutri-menu-card-macros--home .nutri-menu-macro span {
+        font-size: 11px;
+      }
+
+      .nutri-menu-macro--protein strong {
+        color: #dc2626;
+      }
+
+      .nutri-menu-macro--carbs strong {
+        color: #ea580c;
+      }
+
+      .nutri-menu-macro--fat strong {
+        color: #7c3aed;
+      }
+
+      .nutri-menu-card-actions--home {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .nutri-menu-card-actions--home .nutri-menu-btn--primary {
+        flex: none;
+        width: 100%;
+        background: var(--nutri-food-accent, #2563eb);
+      }
+
+      .nutri-menu-card-actions--home .nutri-menu-btn--text {
+        width: 100%;
+        text-align: center;
+        font-size: 12px;
+      }
+
+      .dash-home-menu-pick .nutri-menu-card-meal-hint {
+        text-align: center;
+        font-size: 12px;
+      }
+
       @media (min-width: 769px) {
         .dash-home-summary-grid {
           grid-template-columns: repeat(3, minmax(0, 1fr));

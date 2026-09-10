@@ -142,7 +142,7 @@ const pickDiverseTop3 = (scored, targets) => {
   let filtered = filterMenusByPreferences(scored, preferences);
   filtered = filterExcludedMenuNames(filtered, excludeNames);
 
-  let ranked = [...filtered];
+  let ranked = [...filtered].sort((a, b) => b.score - a.score);
   if (shuffle) {
     ranked = ranked
       .map((item) => ({
@@ -175,6 +175,23 @@ const pickDiverseTop3 = (scored, targets) => {
     ...menu,
     matchNote: buildMatchNote(menu, score),
   }));
+};
+
+/** เมนูเดียวที่คะแนนสูงสุดหลังกรอง preference — ใช้บนหน้าหลักให้ตรงกับ AI อันดับ 1 */
+export const pickBestScoredMenu = (scored, targets) => {
+  const preferences = targets?.foodPreferences;
+  const excludeNames = targets?.excludeMenuNames || [];
+  let filtered = filterMenusByPreferences(scored, preferences);
+  filtered = filterExcludedMenuNames(filtered, excludeNames);
+  filtered.sort((a, b) => b.score - a.score);
+  const best = filtered[0];
+  if (!best) return null;
+  const { score, category, ...menu } = best;
+  return {
+    ...menu,
+    matchNote: buildMatchNote(menu, score),
+    aiScore: score,
+  };
 };
 
 const buildMatchNote = (menu, score) => {
@@ -216,14 +233,7 @@ const pickOutOfHomeTop3 = (catalog, targets) => {
   return pickDiverseTop3(excludePorkMenus(scored), targets);
 };
 
-export const generateMenuRecommendations = async (targets, venueMode = "home") => {
-  if (!targets?.canRecommend) return [];
-
-  if (venueMode === "seven" || venueMode === "tamsung") {
-    const catalog = excludePorkMenus(getOutOfHomeCatalog(venueMode));
-    return pickOutOfHomeTop3(catalog, targets);
-  }
-
+const scoreHomeMenuPool = async (targets) => {
   const catalog = flattenCatalog(await loadThaiFoods());
   const curated = excludePorkMenus(CURATED_LEAN_MENUS.map((m) => ({ ...m, source: "curated" })));
 
@@ -236,7 +246,7 @@ export const generateMenuRecommendations = async (targets, venueMode = "home") =
   const calMin = targets.calMin;
   const calMax = targets.calMax;
 
-  const scored = pool
+  return pool
     .map((menu) => {
       const scaled = fitToCalorieWindow(menu, calMin, calMax);
       if (!scaled) return null;
@@ -244,6 +254,40 @@ export const generateMenuRecommendations = async (targets, venueMode = "home") =
     })
     .filter(Boolean)
     .sort((a, b) => b.score - a.score);
+};
 
-  return pickDiverseTop3(excludePorkMenus(scored), targets);
+export const generateMenuRecommendations = async (targets, venueMode = "home") => {
+  if (!targets?.canRecommend) return [];
+
+  if (venueMode === "seven" || venueMode === "tamsung") {
+    const catalog = excludePorkMenus(getOutOfHomeCatalog(venueMode));
+    if (targets.bestOnly) {
+      const calMin = targets.calMin;
+      const calMax = targets.calMax;
+      const scored = catalog
+        .map((menu) => ({
+          ...menu,
+          id: `${menu.venue}-${menu.name}`,
+          portionLabel: menu.orderTip || "เซ็ตแนะนำ",
+          source: menu.venue,
+          score: scoreMenu(menu, targets),
+        }))
+        .sort((a, b) => {
+          const aInWindow = a.calories >= calMin - 30 && a.calories <= calMax + 30;
+          const bInWindow = b.calories >= calMin - 30 && b.calories <= calMax + 30;
+          if (aInWindow !== bInWindow) return bInWindow - aInWindow;
+          return b.score - a.score;
+        });
+      const best = pickBestScoredMenu(scored, targets);
+      return best ? [best] : [];
+    }
+    return pickOutOfHomeTop3(catalog, targets);
+  }
+
+  const scored = excludePorkMenus(await scoreHomeMenuPool(targets));
+  if (targets.bestOnly) {
+    const best = pickBestScoredMenu(scored, targets);
+    return best ? [best] : [];
+  }
+  return pickDiverseTop3(scored, targets);
 };
