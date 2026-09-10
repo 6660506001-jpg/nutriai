@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+import json
 import mysql.connector
 from mysql.connector import Error
 import os
@@ -72,6 +73,42 @@ def get_db_connection():
     except Error as e:
         print(f"❌ Database Error: {e}")
         return None
+
+def ensure_sync_table(conn):
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS user_sync_data (
+              username VARCHAR(64) NOT NULL PRIMARY KEY,
+              payload JSON NOT NULL,
+              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+            """
+        )
+        conn.commit()
+    finally:
+        cursor.close()
+
+
+def verify_user_credentials(username, password):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="DB Connection Failed")
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            "SELECT username FROM users WHERE username = %s AND password_hash = %s",
+            (username, password),
+        )
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=401, detail="Invalid Credentials")
+        return row["username"]
+    finally:
+        cursor.close()
+        conn.close()
+
 
 # --- Health check ---
 @app.get("/health")
@@ -156,6 +193,74 @@ async def register(data: dict):
     finally:
         cursor.close()
         conn.close()
+
+# --- User log sync (meals / activities / history) ---
+@app.post("/api/user-data/load")
+async def load_user_data(data: dict):
+    username = str(data.get("username") or "").strip()
+    password = data.get("password")
+    if not username or not password:
+        raise HTTPException(status_code=400, detail="username and password required")
+
+    verify_user_credentials(username, password)
+
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="DB Connection Failed")
+    ensure_sync_table(conn)
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            "SELECT payload, updated_at FROM user_sync_data WHERE username = %s",
+            (username,),
+        )
+        row = cursor.fetchone()
+        if not row:
+            return {"payload": None, "updated_at": None}
+        payload = row["payload"]
+        if isinstance(payload, str):
+            payload = json.loads(payload)
+        updated = row["updated_at"]
+        updated_iso = updated.isoformat() if updated else None
+        return {"payload": payload, "updated_at": updated_iso}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.post("/api/user-data/save")
+async def save_user_data(data: dict):
+    username = str(data.get("username") or "").strip()
+    password = data.get("password")
+    payload = data.get("payload")
+    if not username or not password:
+        raise HTTPException(status_code=400, detail="username and password required")
+    if payload is None:
+        raise HTTPException(status_code=400, detail="payload required")
+
+    verify_user_credentials(username, password)
+
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="DB Connection Failed")
+    ensure_sync_table(conn)
+    cursor = conn.cursor()
+    try:
+        payload_json = json.dumps(payload, ensure_ascii=False)
+        cursor.execute(
+            """
+            INSERT INTO user_sync_data (username, payload)
+            VALUES (%s, %s)
+            ON DUPLICATE KEY UPDATE payload = VALUES(payload), updated_at = CURRENT_TIMESTAMP
+            """,
+            (username, payload_json),
+        )
+        conn.commit()
+        return {"status": "ok"}
+    finally:
+        cursor.close()
+        conn.close()
+
 
 # --- 3. Login System ---
 @app.post("/login")

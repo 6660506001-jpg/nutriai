@@ -14,6 +14,20 @@ function scopedKey(kind, username) {
   return `${STORAGE_KEYS[kind]}__${encodeURIComponent(username)}`;
 }
 
+function syncUpdatedKey(username) {
+  return `nutri_sync_updated_at__${encodeURIComponent(username)}`;
+}
+
+export function getLocalSyncUpdatedAt(username) {
+  const raw = localStorage.getItem(syncUpdatedKey(username));
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function touchLocalSyncUpdatedAt(username) {
+  localStorage.setItem(syncUpdatedKey(username), String(Date.now()));
+}
+
 function readJson(key, fallback) {
   const raw = localStorage.getItem(key);
   if (raw == null) return fallback;
@@ -84,6 +98,7 @@ export function loadUserSession(username) {
     historyData: readHistory(username, []),
     activities: readScopedOrLegacy("activities", username, []),
     lastDate: readScopedOrLegacy("lastDate", username, null),
+    syncUpdatedAt: getLocalSyncUpdatedAt(username),
   };
 }
 
@@ -108,6 +123,7 @@ export function saveUserSession(username, { user, dailyMeals, historyData, activ
   if (lastDate != null) {
     localStorage.setItem(scopedKey("lastDate", username), lastDate);
   }
+  touchLocalSyncUpdatedAt(username);
 }
 
 /** ล้างคีย์เก่าที่ไม่แยกบัญชี — ป้องกันข้อมูลชนกันระหว่าง user */

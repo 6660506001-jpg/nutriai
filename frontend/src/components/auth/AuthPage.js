@@ -117,7 +117,7 @@ export default function AuthPage({
     try {
       if (isLogin) {
         const user = await loginUser(username, password);
-        onLogin(user);
+        await onLogin(user, password);
         return;
       }
 
@@ -131,11 +131,11 @@ export default function AuthPage({
       });
 
       const user = await loginUser(username, password);
-      onLogin({
+      await onLogin({
         ...user,
         foodPreferences: normalizeFoodPreferences(foodPreferences),
         foodPrefsConfiguredOnSignup: hasFoodAvoidanceConfigured(foodPreferences),
-      });
+      }, password);
     } catch (error) {
       if (error instanceof TypeError) {
         setLoginError("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ — เปิด backend แล้วลองใหม่");

@@ -512,6 +512,92 @@ export default function AppVisualEffects() {
         background: var(--nutri-activity-accent, #059669);
       }
 
+      .dash-home-summary {
+        padding: 14px 14px 16px;
+        border-radius: var(--nutri-radius-lg, 18px);
+        background: #fff;
+        border: 1px solid var(--nutri-border, #e2e8f0);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+      }
+
+      .dash-home-summary-head {
+        margin-bottom: 12px;
+      }
+
+      .dash-home-summary-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        color: var(--nutri-text-dark, #0f172a);
+      }
+
+      .dash-home-summary-desc {
+        margin: 4px 0 0;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--nutri-text-muted, #64748b);
+      }
+
+      .dash-home-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .dash-home-summary-over {
+        grid-column: 1 / -1;
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        text-align: center;
+        color: #b91c1c;
+        background: rgba(254, 242, 242, 0.9);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+      }
+
+      .dash-home-summary-net {
+        margin: 10px 0 0;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--nutri-text-muted, #64748b);
+        text-align: center;
+      }
+
+      .dash-home-summary-advice {
+        margin-top: 14px;
+        padding: 12px 12px 14px;
+        border-radius: 14px;
+        background: var(--nutri-health-blue-soft, #eff6ff);
+        border: 1px solid color-mix(in srgb, var(--nutri-food-accent, #2563eb) 18%, var(--nutri-border));
+      }
+
+      .dash-home-summary-advice-title {
+        margin: 0 0 6px;
+        font-size: 13px;
+        font-weight: 900;
+        color: var(--nutri-text-dark, #0f172a);
+      }
+
+      .dash-home-summary-advice-body {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.5;
+        color: #334155;
+      }
+
+      .dash-home-summary-advice-body--muted {
+        color: var(--nutri-text-muted, #64748b);
+      }
+
+      @media (min-width: 769px) {
+        .dash-home-summary-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
       @media (max-width: 900px) {
         .app-main--mobile .dash-status-hero--compact {
           display: none !important;
@@ -519,6 +605,15 @@ export default function AppVisualEffects() {
 
         .app-main--mobile.app-main-tab-dashboard .dashboard-home-simple {
           padding-bottom: calc(84px + env(safe-area-inset-bottom));
+        }
+
+        .app-main.app-main--mobile {
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .app-main--mobile .dash-home-summary {
+          margin-top: 4px;
         }
       }
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { HiSparkles } from "react-icons/hi";
 import DashCollapsible from "../ui/DashCollapsible";
-import { STAT_TOOLTIPS, getWeightControlTarget } from "../../constants/statTooltips";
+import { getWeightControlTarget } from "../../constants/statTooltips";
 import { calculateHealthData, calculateMacros } from "../../utils/healthCalculations";
 import { analyzeThreeMealsSummary } from "../../utils/mealRecommendations";
 import { getProfessionalPrediction } from "../../utils/aiPrediction";
@@ -10,7 +10,6 @@ import { buildAdaptiveActivitySuggestion } from "../../utils/adaptiveActivitySug
 import { mealTotalsFromDaily } from "../../utils/logDisplay";
 import { summarizeDailyRewards } from "../../utils/mealRewards";
 import { styles } from "../../styles/appStyles";
-import MetricCard from "../ui/MetricCard";
 import DashboardStatusHero from "../ui/DashboardStatusHero";
 import HomeActionGrid from "../ui/HomeActionGrid";
 import MenuRecommendationCard from "../ui/MenuRecommendationCard";
@@ -27,6 +26,7 @@ import {
 import { DashboardDaySummary } from "../ui/DailyLogDisplay";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import DashboardQuickFab from "../ui/DashboardQuickFab";
+import DashboardHomeSummary from "../ui/DashboardHomeSummary";
 
 export default function Dashboard({
   user,
@@ -50,7 +50,7 @@ export default function Dashboard({
   const [showMenuRecommendations, setShowMenuRecommendations] = useState(false);
   const [menuVenueMode, setMenuVenueMode] = useState("home");
   const [showAdvancedTools, setShowAdvancedTools] = useState(false);
-  const { bmi } = calculateHealthData(user);
+  const { bmi, status: bmiStatus } = calculateHealthData(user);
 
   const handleConfirmFood = (foodEntry) => {
     if (!canSaveFoodEntry(foodEntry)) {
@@ -285,6 +285,22 @@ export default function Dashboard({
         />
       )}
 
+      {viewMode === "home" && (
+        <DashboardHomeSummary
+          weight={user.weight}
+          bmi={bmi}
+          bmiStatus={bmiStatus}
+          tdee={user.tdee}
+          foodCals={foodCals}
+          activityCals={activityCals}
+          netCals={netCals}
+          target={weightControlTarget || user.tdee}
+          adviceTitle={analysis.focusTitle}
+          adviceDetail={analysis.focusDetail || analysis.headline}
+          adviceSubline={analysis.macroSummary || analysis.subline}
+        />
+      )}
+
       {viewMode === "home" && !isMobile && (
         <HomeActionGrid
           foodCals={foodCals}
@@ -296,22 +312,12 @@ export default function Dashboard({
         />
       )}
 
-      {viewMode === "home" && !isMobile && (
-        <div className="dash-body-section">
-          <p className="dash-section-label">ข้อมูลร่างกาย</p>
-          <div className="dash-secondary-metrics">
-            <MetricCard label="น้ำหนัก" value={user.weight} unit="kg" tooltip={STAT_TOOLTIPS.weight} compact />
-            <MetricCard label="BMI" value={bmi} tooltip={STAT_TOOLTIPS.bmi} compact />
-          </div>
-        </div>
-      )}
-
       {viewMode === "home" && hasRecordsLogged && (
         <DashCollapsible
           className="dash-collapse-summary"
           title="สรุปวันนี้"
           preview={summaryPreview}
-          defaultOpen={false}
+          defaultOpen={!isMobile}
         >
           <DashboardDaySummary
             foodCals={foodCals}

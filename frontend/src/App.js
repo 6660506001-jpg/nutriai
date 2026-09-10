@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState, useEffect, useMemo } from "react";
+import React, { Suspense, lazy, useState, useEffect, useMemo, useRef } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { HiOutlineUserCircle } from "react-icons/hi";
 import { MdOutlineSpaceDashboard, MdHistory, MdRestaurant, MdMenuBook, MdDirectionsRun, MdWavingHand, MdHelpOutline } from "react-icons/md";
@@ -19,6 +19,9 @@ import DailyCompleteToast from "./components/ui/DailyCompleteToast";
 import { useDailyMealCompleteCelebration } from "./hooks/useDailyMealCompleteCelebration";
 import { PAGE_META } from "./constants/pageMeta";
 import { EMPTY_MEALS, loadUserSession, saveUserSession, clearLegacySessionKeys } from "./utils/userStorage";
+import { loadUserDataFromCloud, saveUserDataToCloud } from "./utils/syncApi";
+import { clearSyncPassword, getSyncPassword, setSyncPassword } from "./utils/syncCredentials";
+import { packCloudPayload, resolveSessionOnLogin } from "./utils/sessionCloudMerge";
 import { stripSimulatedHistory } from "./utils/dailyArchive";
 import { hasSeenUserGuide, markUserGuideSeen } from "./utils/userGuideStorage";
 import {
@@ -84,6 +87,7 @@ export default function App() {
   const [showUserGuide, setShowUserGuide] = useState(false);
   const [showFoodPrefsModal, setShowFoodPrefsModal] = useState(false);
   const isMobile = useIsMobile();
+  const cloudSyncTimerRef = useRef(null);
 
   useEffect(() => {
     if (!isLoggedIn || !user?.username) return;
@@ -96,6 +100,30 @@ export default function App() {
   useEffect(() => {
     if (!isLoggedIn || !user?.username) return;
     saveUserSession(user.username, { user, dailyMeals, historyData, activities });
+  }, [isLoggedIn, user, dailyMeals, activities, historyData]);
+
+  useEffect(() => {
+    if (!isLoggedIn || !user?.username) return undefined;
+    const password = getSyncPassword(user.username);
+    if (!password) return undefined;
+
+    if (cloudSyncTimerRef.current) {
+      clearTimeout(cloudSyncTimerRef.current);
+    }
+    cloudSyncTimerRef.current = setTimeout(() => {
+      const { lastDate } = loadUserSession(user.username);
+      saveUserDataToCloud(
+        user.username,
+        password,
+        packCloudPayload({ dailyMeals, activities, historyData, lastDate, user }),
+      ).catch(() => {});
+    }, 1500);
+
+    return () => {
+      if (cloudSyncTimerRef.current) {
+        clearTimeout(cloudSyncTimerRef.current);
+      }
+    };
   }, [isLoggedIn, user, dailyMeals, activities, historyData]);
 
   useEffect(() => {
@@ -122,31 +150,78 @@ export default function App() {
     setShowUserGuide(false);
   };
 
-  const handleLogin = (userData) => {
-    const username = userData.username?.trim();
-    if (!username) return;
-
-    const session = loadUserSession(username);
-    const sessionPrefs = normalizeFoodPreferences(session.user?.foodPreferences);
+  const mergeUserProfile = (username, userData, sessionUser) => {
+    const sessionPrefs = normalizeFoodPreferences(sessionUser?.foodPreferences);
     const incomingPrefs = normalizeFoodPreferences(userData.foodPreferences);
     const foodPreferences = hasFoodAvoidanceConfigured(incomingPrefs)
       ? incomingPrefs
       : (hasFoodAvoidanceConfigured(sessionPrefs) ? sessionPrefs : incomingPrefs);
 
     const mergedUser = {
-      ...(session.user || {}),
+      ...(sessionUser || {}),
       ...userData,
       username,
       foodPreferences,
     };
     delete mergedUser.foodPrefsConfiguredOnSignup;
+    return mergedUser;
+  };
+
+  const handleLogin = async (userData, password = "") => {
+    const username = userData.username?.trim();
+    if (!username) return;
+
+    if (password) {
+      setSyncPassword(username, password);
+    }
+
+    const localSession = loadUserSession(username);
+    let pickSession = {
+      dailyMeals: localSession.dailyMeals,
+      activities: localSession.activities,
+      historyData: localSession.historyData,
+      lastDate: localSession.lastDate,
+      user: mergeUserProfile(username, userData, localSession.user),
+    };
+
+    if (password) {
+      try {
+        const cloud = await loadUserDataFromCloud(username, password);
+        const { session: resolved, uploadLocal } = resolveSessionOnLogin(
+          localSession,
+          cloud,
+          userData,
+        );
+        if (resolved) {
+          pickSession = {
+            dailyMeals: resolved.dailyMeals,
+            activities: resolved.activities,
+            historyData: resolved.historyData,
+            lastDate: resolved.lastDate,
+            user: mergeUserProfile(username, userData, resolved.user || localSession.user),
+          };
+        }
+        if (uploadLocal) {
+          await saveUserDataToCloud(
+            username,
+            password,
+            packCloudPayload({
+              ...localSession,
+              user: pickSession.user,
+            }),
+          );
+        }
+      } catch {
+        /* ใช้ข้อมูลในเครื่องถ้า cloud ไม่พร้อม */
+      }
+    }
 
     const archived = applyDailyArchive({
-      lastDate: session.lastDate,
-      user: mergedUser,
-      dailyMeals: session.dailyMeals,
-      historyData: stripSimulatedHistory(session.historyData),
-      activities: session.activities,
+      lastDate: pickSession.lastDate,
+      user: pickSession.user,
+      dailyMeals: pickSession.dailyMeals,
+      historyData: stripSimulatedHistory(pickSession.historyData),
+      activities: pickSession.activities,
     });
 
     setUser(archived.user);
@@ -157,8 +232,21 @@ export default function App() {
       ...archived,
       historyData: stripSimulatedHistory(archived.historyData),
     });
+    if (password) {
+      saveUserDataToCloud(
+        username,
+        password,
+        packCloudPayload({
+          dailyMeals: archived.dailyMeals,
+          activities: archived.activities,
+          historyData: archived.historyData,
+          lastDate: archived.lastDate,
+          user: archived.user,
+        }),
+      ).catch(() => {});
+    }
     clearLegacySessionKeys();
-    if (userData.foodPrefsConfiguredOnSignup || hasFoodAvoidanceConfigured(mergedUser.foodPreferences)) {
+    if (userData.foodPrefsConfiguredOnSignup || hasFoodAvoidanceConfigured(archived.user.foodPreferences)) {
       markFoodPrefsSetupDone(username);
     }
     setIsLoggedIn(true);
@@ -181,7 +269,16 @@ export default function App() {
   const handleLogout = () => {
     if (window.confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
       if (user?.username) {
+        const password = getSyncPassword(user.username);
         saveUserSession(user.username, { user, dailyMeals, historyData, activities });
+        if (password) {
+          saveUserDataToCloud(
+            user.username,
+            password,
+            packCloudPayload({ dailyMeals, activities, historyData, user }),
+          ).catch(() => {});
+        }
+        clearSyncPassword(user.username);
       }
       setIsLoggedIn(false);
       setCurrentTab("dashboard");
