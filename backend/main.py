@@ -91,6 +91,44 @@ def ensure_sync_table(conn):
         cursor.close()
 
 
+def parse_sync_payload(raw):
+    if raw is None:
+        return None
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, str):
+        try:
+            return json.loads(raw)
+        except Exception:
+            return None
+    return None
+
+
+def payload_has_daily_logs(payload):
+    if not isinstance(payload, dict):
+        return False
+    meals = payload.get("dailyMeals") or {}
+    if isinstance(meals, dict):
+        for items in meals.values():
+            if items:
+                return True
+    return bool(payload.get("activities"))
+
+
+def merge_sync_payload(existing, incoming):
+    if not incoming:
+        return existing or incoming
+    if not existing:
+        return incoming
+    same_day = existing.get("lastDate") and incoming.get("lastDate") and existing.get("lastDate") == incoming.get("lastDate")
+    if same_day and payload_has_daily_logs(existing) and not payload_has_daily_logs(incoming):
+        merged = dict(incoming)
+        merged["dailyMeals"] = existing.get("dailyMeals", incoming.get("dailyMeals"))
+        merged["activities"] = existing.get("activities", incoming.get("activities"))
+        return merged
+    return incoming
+
+
 def verify_user_credentials(username, password):
     conn = get_db_connection()
     if not conn:
@@ -246,7 +284,15 @@ async def save_user_data(data: dict):
     ensure_sync_table(conn)
     cursor = conn.cursor()
     try:
-        payload_json = json.dumps(payload, ensure_ascii=False)
+        cursor.execute(
+            "SELECT payload FROM user_sync_data WHERE username = %s",
+            (username,),
+        )
+        row = cursor.fetchone()
+        existing = parse_sync_payload(row[0] if row else None)
+        incoming = payload if isinstance(payload, dict) else parse_sync_payload(payload)
+        merged = merge_sync_payload(existing, incoming)
+        payload_json = json.dumps(merged, ensure_ascii=False)
         cursor.execute(
             """
             INSERT INTO user_sync_data (username, payload)

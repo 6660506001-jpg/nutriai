@@ -29,7 +29,7 @@ import {
 import { loadUserDataFromCloud, saveUserDataToCloud } from "./utils/syncApi";
 import SyncUnlockModal from "./components/ui/SyncUnlockModal";
 import { clearSyncPassword, getSyncPassword, setSyncPassword } from "./utils/syncCredentials";
-import { packCloudPayload, resolveSessionOnLogin, sessionHasLogData } from "./utils/sessionCloudMerge";
+import { packCloudPayload, resolveSessionOnLogin, sessionHasDailyLogs, sessionHasLogData } from "./utils/sessionCloudMerge";
 import { stripSimulatedHistory } from "./utils/dailyArchive";
 import { hasSeenUserGuide, markUserGuideSeen } from "./utils/userGuideStorage";
 import {
@@ -189,20 +189,28 @@ export default function App() {
     pullCloudSession(user.username, password, user, { dailyMeals, activities, historyData })
       .then(({ session: resolved, uploadLocal }) => {
         if (cancelled || !resolved) return;
-        const localHas = sessionHasLogData({ dailyMeals, activities, historyData });
-        if (sessionHasLogData(resolved) && (!localHas || !uploadLocal)) {
+        const localHasDaily = sessionHasDailyLogs({ dailyMeals, activities });
+        const resolvedHasDaily = sessionHasDailyLogs(resolved);
+        if (resolvedHasDaily && (!localHasDaily || !uploadLocal)) {
           applyResolvedCloudSession(resolved, user);
-        } else if (uploadLocal && localHas) {
+        } else if (uploadLocal && sessionHasDailyLogs({ dailyMeals, activities })) {
           const { lastDate } = loadUserSession(user.username);
           return saveUserDataToCloud(
             user.username,
             password,
             packCloudPayload({ dailyMeals, activities, historyData, lastDate, user }),
           );
+        } else if (!localHasDaily && !resolvedHasDaily) {
+          setSyncUnlockHint("ยังไม่มีมื้อบนคลาวด์ — กรอกรหัสผ่านบนคอมเพื่อส่งมื้อมา แล้วกดซิงค์บนมือถืออีกครั้ง");
         }
         return undefined;
       })
-      .catch(() => {})
+      .catch((error) => {
+        if (!cancelled && !sessionHasDailyLogs({ dailyMeals, activities })) {
+          setSyncUnlockHint(error?.message || "ดึงมื้อจากคลาวด์ไม่สำเร็จ");
+          setSyncUnlockOpen(true);
+        }
+      })
       .finally(() => {
         cloudPullingRef.current = false;
         if (!cancelled) setCloudReady(true);
@@ -240,9 +248,11 @@ export default function App() {
 
     document.addEventListener("visibilitychange", refresh);
     window.addEventListener("focus", refresh);
+    const intervalId = window.setInterval(refresh, 12000);
     return () => {
       document.removeEventListener("visibilitychange", refresh);
       window.removeEventListener("focus", refresh);
+      window.clearInterval(intervalId);
     };
   }, [isLoggedIn, user, dailyMeals, activities, historyData, cloudReady]);
 
@@ -330,12 +340,12 @@ export default function App() {
         user,
         { dailyMeals, activities, historyData },
       );
-      const localHas = sessionHasLogData({ dailyMeals, activities, historyData });
-      const resolvedHas = resolved && sessionHasLogData(resolved);
-      if (resolvedHas && (!localHas || !uploadLocal)) {
+      const localHasDaily = sessionHasDailyLogs({ dailyMeals, activities });
+      const resolvedHasDaily = resolved && sessionHasDailyLogs(resolved);
+      if (resolvedHasDaily && (!localHasDaily || !uploadLocal)) {
         applyResolvedCloudSession(resolved, user);
         setSyncUnlockOpen(false);
-      } else if (localHas) {
+      } else if (localHasDaily) {
         const { lastDate } = loadUserSession(user.username);
         await saveUserDataToCloud(
           user.username,
@@ -426,7 +436,7 @@ export default function App() {
       ...archived,
       historyData: stripSimulatedHistory(archived.historyData),
     });
-    if (password) {
+    if (password && sessionHasDailyLogs(archived)) {
       saveUserDataToCloud(
         username,
         password,
@@ -591,6 +601,15 @@ export default function App() {
     || activities.length > 0;
   const isFirstTimeUser = !hasAnyLogHistory;
   const showDashboardRings = isMobile && currentTab === "dashboard";
+  const hasDailyLogs = sessionHasDailyLogs({ dailyMeals, activities });
+  const syncPasswordReady = Boolean(user?.username && getSyncPassword(user.username));
+  const showSyncBanner = Boolean(
+    isLoggedIn && user?.username && currentTab === "dashboard" && (!hasDailyLogs || !syncPasswordReady)
+  );
+  const openSyncUnlock = () => {
+    setSyncUnlockError("");
+    setSyncUnlockOpen(true);
+  };
 
   return (
     <Router>
@@ -656,6 +675,15 @@ export default function App() {
                         getUserInitials(user.username)
                       )}
                     </span>
+                    {showSyncBanner ? (
+                      <button
+                        type="button"
+                        className="app-header-sync-btn"
+                        onClick={openSyncUnlock}
+                      >
+                        ซิงค์
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       className="app-header-help-btn app-header-help-btn--icon"
@@ -729,6 +757,18 @@ export default function App() {
               </>
             )}
           </header>
+          {showSyncBanner ? (
+            <div className="sync-needed-banner">
+              <p>
+                {hasDailyLogs
+                  ? "มื้อนี้อยู่แค่เครื่องนี้ — กรอกรหัสผ่านเพื่อส่งไปมือถือ"
+                  : "เครื่องนี้ยังไม่มีมื้อวันนี้ — ดึงจากคลาวด์หรือส่งจากคอมก่อน"}
+              </p>
+              <button type="button" className="sync-needed-banner-btn" onClick={openSyncUnlock}>
+                ซิงค์มื้ออาหาร
+              </button>
+            </div>
+          ) : null}
           {!isMobile ? <AppPageHint text={pageMeta.hint} /> : null}
           <div className="app-scroll" style={styles.scrollContent}>
             <Suspense fallback={<TabLoading />}>

@@ -1,11 +1,15 @@
 import { EMPTY_MEALS } from "./userStorage";
 
-export function sessionHasLogData({ dailyMeals, activities, historyData }) {
+export function sessionHasDailyLogs({ dailyMeals, activities }) {
   const meals = dailyMeals || EMPTY_MEALS;
   const hasMeals = Object.values(meals).some((items) => items?.length > 0);
   const hasActs = (activities || []).length > 0;
+  return hasMeals || hasActs;
+}
+
+export function sessionHasLogData({ dailyMeals, activities, historyData }) {
   const hasHistory = (historyData || []).length > 0;
-  return hasMeals || hasActs || hasHistory;
+  return sessionHasDailyLogs({ dailyMeals, activities }) || hasHistory;
 }
 
 export function packCloudPayload({ dailyMeals, activities, historyData, lastDate, user }) {

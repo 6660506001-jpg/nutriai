@@ -265,6 +265,40 @@ export default function AppVisualEffects() {
         }
       }
 
+      .sync-needed-banner {
+        margin: 0 14px 8px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+      }
+      .sync-needed-banner p {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e3a8a;
+        line-height: 1.4;
+      }
+      .sync-needed-banner-btn,
+      .app-header-sync-btn {
+        border: none;
+        border-radius: 10px;
+        background: #2563eb;
+        color: #fff;
+        font: inherit;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .sync-needed-banner-btn {
+        width: 100%;
+        height: 42px;
+      }
+      .app-header-sync-btn {
+        height: 36px;
+        padding: 0 12px;
+        font-size: 13px;
+      }
+
       .app-header--dash-rings {
         display: block !important;
         text-align: left !important;
