@@ -10,6 +10,7 @@ import {
 import {
   MEAL_ORDER,
   getMealShort,
+  getMealTooltip,
   mealTotalsFromDaily,
   stampLogMeta,
   sumCalories,
@@ -29,6 +30,7 @@ import LogPageSummary from "../ui/LogPageSummary";
 import LogSavedBar from "../ui/LogSavedBar";
 import PostSaveMenuSuggestions from "../ui/PostSaveMenuSuggestions";
 import FoodFilterSheet, { applyFoodFilters } from "../ui/FoodFilterSheet";
+import PressTip from "../ui/PressTip";
 import {
   ActiveMealAdvicePanel,
   EmptyLogHint,
@@ -585,18 +587,24 @@ export default function FoodLogPage({
           {MEAL_ORDER.map((tab) => {
             const reward = getMealReward(tab);
             return (
-              <button
+              <PressTip
                 key={tab}
-                type="button"
-                onClick={() => setActiveMealTab(tab)}
-                className={`log-meal-tab${activeMealTab === tab ? " is-active" : ""}`}
+                className="log-meal-tab-tip"
+                label={tab}
+                tooltip={getMealTooltip(tab)}
               >
-                {getMealShort(tab)}
-                {mealTotals[tab] > 0 && (
-                  <span className="log-meal-tab-cal">{mealTotals[tab]}</span>
-                )}
-                <MealTabStars stars={reward?.stars} />
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveMealTab(tab)}
+                  className={`log-meal-tab${activeMealTab === tab ? " is-active" : ""}`}
+                >
+                  {getMealShort(tab)}
+                  {mealTotals[tab] > 0 && (
+                    <span className="log-meal-tab-cal">{mealTotals[tab]}</span>
+                  )}
+                  <MealTabStars stars={reward?.stars} />
+                </button>
+              </PressTip>
             );
           })}
         </div>

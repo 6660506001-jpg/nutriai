@@ -44,6 +44,16 @@ export const getMealAutoHint = (mealType, date = new Date()) => {
   return `${prefix} · ${meta.rangeLabel}`;
 };
 
+export const getMealTooltip = (mealType) => {
+  const meta = MEAL_WINDOWS[mealType];
+  if (!meta) return null;
+  return {
+    title: mealType,
+    subtitle: meta.rangeLabel,
+    body: meta.uxNote,
+  };
+};
+
 export const formatTodayLabel = (date = new Date()) =>
   date.toLocaleDateString("th-TH", {
     weekday: "long",

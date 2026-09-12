@@ -6098,12 +6098,14 @@ export default function AppVisualEffects() {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 8px;
       }
-      .log-meal-window-hint {
-        margin: 8px 2px 0;
-        font-size: 12px;
-        font-weight: 600;
-        line-height: 1.45;
-        color: var(--nutri-text-muted, #64748b);
+      .press-tip-wrap,
+      .log-meal-tab-tip {
+        display: block;
+        min-width: 0;
+        width: 100%;
+      }
+      .log-meal-tab-tip .log-meal-tab {
+        width: 100%;
       }
       .log-meal-tab {
         padding: 10px 6px;

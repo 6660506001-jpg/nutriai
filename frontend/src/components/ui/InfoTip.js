@@ -19,7 +19,7 @@ function getMainContentMinLeft() {
   return Math.max(VIEWPORT_MARGIN, Math.round(rect.right + 8));
 }
 
-function computeTooltipPosition(buttonRect, tooltipHeight) {
+export function computeTooltipPosition(buttonRect, tooltipHeight) {
   const width = Math.min(TOOLTIP_MAX_WIDTH, window.innerWidth - VIEWPORT_MARGIN * 2);
   const minLeft = getMainContentMinLeft();
   const maxLeft = window.innerWidth - width - VIEWPORT_MARGIN;
