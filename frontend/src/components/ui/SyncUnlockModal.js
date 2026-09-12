@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 export default function SyncUnlockModal({
   username,
-  hasLocalLogs,
+  hasDailyLogs,
   busy,
   error,
   hint,
@@ -21,11 +21,20 @@ export default function SyncUnlockModal({
         }}
       >
         <h2 id="sync-unlock-title">ซิงค์มื้ออาหาร</h2>
-        <p>
-          {hasLocalLogs
-            ? "เครื่องนี้มีมื้ออาหารแล้ว กรอกรหัสผ่านเพื่อส่งไปมือถือ / เครื่องอื่น"
-            : "เครื่องนี้ยังไม่มีมื้อ กรอกรหัสผ่านเพื่อดึงข้อมูลจากคอม"}
-        </p>
+        {hasDailyLogs ? (
+          <p>
+            เครื่องนี้มีมื้อวันนี้แล้ว กรอกรหัสผ่านเพื่อส่งขึ้นคลาวด์ ให้มือถือดึงไปใช้ได้
+          </p>
+        ) : (
+          <>
+            <p>
+              เครื่องนี้ยังไม่มีมื้อวันนี้ กรอกรหัสผ่านเพื่อดึงจากคลาวด์
+            </p>
+            <p className="sync-unlock-modal-steps">
+              ถ้าขึ้นว่ายังไม่มีมื้อบนคลาวด์ ให้ไปที่คอมก่อน: เปิดเว็บเดียวกัน เข้าบัญชีนี้ แล้วกดซิงค์เพื่อส่งมื้อขึ้น จากนั้นกลับมากดซิงค์บนมือถืออีกครั้ง
+            </p>
+          </>
+        )}
         <p className="sync-unlock-modal-user">บัญชี: <strong>{username}</strong></p>
         <input
           type="password"
@@ -38,11 +47,13 @@ export default function SyncUnlockModal({
         {error ? <p className="sync-unlock-modal-error">{error}</p> : null}
         {hint ? <p className="sync-unlock-modal-hint">{hint}</p> : null}
         <button type="submit" className="sync-unlock-modal-btn" disabled={busy}>
-          {busy ? "กำลังซิงค์..." : "ซิงค์ตอนนี้"}
+          {busy ? "กำลังซิงค์..." : hasDailyLogs ? "ส่งมื้อขึ้นคลาวด์" : "ดึงมื้อจากคลาวด์"}
         </button>
-        <button type="button" className="sync-unlock-modal-skip" onClick={onSkip} disabled={busy}>
-          ข้ามไปก่อน
-        </button>
+        {hasDailyLogs ? null : (
+          <button type="button" className="sync-unlock-modal-skip" onClick={onSkip} disabled={busy}>
+            ข้ามไปก่อน
+          </button>
+        )}
       </form>
     </div>
   );

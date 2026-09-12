@@ -221,6 +221,10 @@ export default function AppVisualEffects() {
       .sync-unlock-modal-user {
         color: #0f172a !important;
       }
+      .sync-unlock-modal-steps {
+        color: #9a3412 !important;
+        font-weight: 700 !important;
+      }
       .sync-unlock-modal-input {
         width: 100%;
         height: 46px;

@@ -284,6 +284,13 @@ export default function App() {
 
   useEffect(() => {
     if (!isLoggedIn || !user?.username) return;
+    if (!sessionHasDailyLogs({ dailyMeals, activities })) return;
+    if (getSyncPassword(user.username)) return;
+    setSyncUnlockOpen(true);
+  }, [isLoggedIn, user?.username, dailyMeals, activities]);
+
+  useEffect(() => {
+    if (!isLoggedIn || !user?.username) return;
     if (showFoodPrefsModal) return;
     if (isMobile) return;
     if (!hasSeenUserGuide(user.username)) {
@@ -355,7 +362,7 @@ export default function App() {
         );
         setSyncUnlockOpen(false);
       } else {
-        setSyncUnlockHint("ยังไม่มีมื้อบนคลาวด์ — เปิดคอม กรอกรหัสผ่านแล้วกดซิงค์เพื่อส่งมื้อมา แล้วกลับมากดซิงค์บนมือถืออีกครั้ง");
+        setSyncUnlockHint("คลาวด์ยังว่างอยู่ — เปิดเว็บเดียวกันบนคอม เข้าบัญชีนี้ แล้วกด「ส่งมื้อขึ้นคลาวด์」ก่อน แล้วกลับมากดดึงมื้ออีกครั้ง");
       }
       setCloudReady(true);
     } catch (error) {
@@ -625,7 +632,7 @@ export default function App() {
       {isLoggedIn && user?.username && syncUnlockOpen ? (
         <SyncUnlockModal
           username={user.username}
-          hasLocalLogs={sessionHasLogData({ dailyMeals, activities, historyData })}
+          hasDailyLogs={hasDailyLogs}
           busy={syncUnlockBusy}
           error={syncUnlockError}
           hint={syncUnlockHint}
