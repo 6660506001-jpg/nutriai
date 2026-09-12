@@ -156,7 +156,6 @@ export default function LoginVisualEffects() {
         margin: 0;
         font-size: 12px;
         font-weight: 800;
-        letter-spacing: 0.04em;
         color: var(--nutri-primary, #1E293B);
       }
       .login-mobile-brand-row {
@@ -402,6 +401,30 @@ export default function LoginVisualEffects() {
         }
         .login-page-mobile {
           padding-top: max(12px, env(safe-area-inset-top));
+        }
+      }
+      @media (max-width: 480px) {
+        .login-form-panel-responsive {
+          padding: 20px 16px 24px !important;
+          border-radius: 18px !important;
+        }
+        .login-form-header-mobile h2 {
+          font-size: 22px !important;
+        }
+        .login-input-pro,
+        .login-form-touch select {
+          font-size: 16px !important;
+          min-height: 48px;
+        }
+        .login-submit-btn {
+          min-height: 48px;
+          font-size: 16px !important;
+        }
+        .login-tab-btn {
+          min-height: 44px;
+        }
+        .share-access-mobile-only {
+          margin-top: 14px;
         }
       }
       .theme-fab-panel {

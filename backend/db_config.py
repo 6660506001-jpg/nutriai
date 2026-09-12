@@ -53,4 +53,10 @@ def get_cors_origins():
     raw = _env("FRONTEND_URL", "CORS_ORIGINS")
     if not raw:
         return ["*"]
-    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+    origins = [origin.strip() for origin in raw.split(",") if origin.strip()]
+    # ให้ dev บน localhost เรียก API cloud ได้ — ใช้บัญชีเดียวกับมือถือ/Vercel
+    for local_origin in ("http://localhost:3000", "http://127.0.0.1:3000"):
+        if local_origin not in origins:
+            origins.append(local_origin)
+    return origins

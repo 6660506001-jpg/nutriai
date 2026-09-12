@@ -57,18 +57,26 @@ export default function AuthPage({
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${getApiBaseUrl()}/health`, { method: "GET", cache: "no-store" })
+    const apiBase = getApiBaseUrl();
+    const isCloudApi = /^https:\/\//i.test(apiBase) && !/localhost|127\.0\.0\.1/.test(apiBase);
+    fetch(`${apiBase}/health`, { method: "GET", cache: "no-store" })
       .then((res) => {
         if (!cancelled && !res.ok) {
-          setLoginError("เชื่อมต่อ backend ไม่ได้ — ตรวจว่าเปิด uvicorn --host 0.0.0.0 --port 8000");
+          setLoginError(
+            isCloudApi
+              ? "เซิร์ฟเวอร์ตอบไม่สำเร็จ — ลองเข้าสู่ระบบอีกครั้ง หรือเปิดเว็บ https://nutriai-dusky.vercel.app"
+              : "เชื่อมต่อ backend ไม่ได้ — เปิดโฟลเดอร์ backend แล้วรัน uvicorn --host 0.0.0.0 --port 8000"
+          );
         }
       })
       .catch(() => {
         if (!cancelled) {
           setLoginError(
-            canSharePublicAppLink()
-              ? "เชื่อมต่อ backend ไม่ได้ — ตรวจ REACT_APP_API_BASE_URL บน Vercel"
-              : "เชื่อมต่อ backend ไม่ได้ — มือถือต้องอยู่ Wi‑Fi เดียวกับคอม"
+            isCloudApi
+              ? "หน้านี้เรียก API ไม่ผ่าน — เปิด https://nutriai-dusky.vercel.app จะเข้าได้เลย"
+              : canSharePublicAppLink()
+                ? "เชื่อมต่อ backend ไม่ได้ — ตรวจ REACT_APP_API_BASE_URL บน Vercel"
+                : "เชื่อมต่อ backend ไม่ได้ — ถ้าเปิด localhost ให้ใช้ https://nutriai-dusky.vercel.app แทน"
           );
         }
       });

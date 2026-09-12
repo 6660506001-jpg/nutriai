@@ -13,7 +13,7 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: "Noto Sans Thai", "Leelawadee UI", "Segoe UI", Tahoma, sans-serif;
   background-color: #eef2f7;
   color: var(--nutri-text-dark, #1E293B);
 }

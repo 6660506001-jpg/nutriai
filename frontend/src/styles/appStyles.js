@@ -5,7 +5,7 @@ export const styles = {
     display: 'flex',
     minHeight: '100vh',
     background: 'transparent',
-    fontFamily:'"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    fontFamily: '"Noto Sans Thai", "Leelawadee UI", "Segoe UI", Tahoma, sans-serif'
   },
   sidebar: {
     width: '260px',
@@ -453,7 +453,7 @@ export const styles = {
     justifyContent: 'center',
     position: 'relative',
     padding: '28px',
-    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: '"Noto Sans Thai", "Leelawadee UI", "Segoe UI", Tahoma, sans-serif',
     boxSizing: 'border-box',
     overflowY: 'auto',
   },
@@ -512,7 +512,7 @@ export const styles = {
     marginBottom: '18px',
     color: '#ffffff',
   },
-  loginBrandTitle: { margin: 0, fontSize: '38px', fontWeight: '900', letterSpacing: '-0.8px' },
+  loginBrandTitle: { margin: 0, fontSize: '38px', fontWeight: '900' },
   loginBrandSubtitle: { margin: '10px 0 24px 0', fontSize: '15px', lineHeight: '1.6', color: 'rgba(255,255,255,0.9)', fontWeight: '500' },
   loginFeatureList: { display: 'flex', flexDirection: 'column', gap: '12px' },
   loginFeatureItem: { display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '600', color: 'rgba(255,255,255,0.95)' },

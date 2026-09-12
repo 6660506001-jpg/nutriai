@@ -44,6 +44,11 @@ export default function AppVisualEffects() {
         --nutri-font-body: 14px;
         --nutri-font-small: 12px;
         --nutri-font-display: clamp(24px, 4vw, 32px);
+        --nutri-font: "Noto Sans Thai", "Leelawadee UI", "Segoe UI", Tahoma, sans-serif;
+      }
+
+      html, body, #root, button, input, select, textarea {
+        font-family: var(--nutri-font);
       }
 
       .app-scroll {
