@@ -5,7 +5,7 @@ export const styles = {
     display: 'flex',
     minHeight: '100vh',
     background: 'transparent',
-    fontFamily: '"Noto Sans Thai", "Leelawadee UI", "Segoe UI", Tahoma, sans-serif'
+    fontFamily: '"Sarabun", sans-serif'
   },
   sidebar: {
     width: '260px',
@@ -453,7 +453,7 @@ export const styles = {
     justifyContent: 'center',
     position: 'relative',
     padding: '28px',
-    fontFamily: '"Noto Sans Thai", "Leelawadee UI", "Segoe UI", Tahoma, sans-serif',
+    fontFamily: '"Sarabun", sans-serif',
     boxSizing: 'border-box',
     overflowY: 'auto',
   },

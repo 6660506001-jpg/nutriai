@@ -2,6 +2,7 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  font-family: "Sarabun", sans-serif;
 }
 
 html,
@@ -15,14 +16,13 @@ body,
 body {
   margin: 0;
   background: var(--nutri-bg);
-  font-family: "Noto Sans Thai", "Leelawadee UI", "Segoe UI", Tahoma, sans-serif;
+  font-family: "Sarabun", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: "Sarabun", sans-serif;
 }
 
 img {

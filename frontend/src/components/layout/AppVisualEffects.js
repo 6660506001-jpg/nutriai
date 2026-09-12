@@ -44,10 +44,11 @@ export default function AppVisualEffects() {
         --nutri-font-body: 14px;
         --nutri-font-small: 12px;
         --nutri-font-display: clamp(24px, 4vw, 32px);
-        --nutri-font: "Noto Sans Thai", "Leelawadee UI", "Segoe UI", Tahoma, sans-serif;
+        --nutri-font: "Sarabun", sans-serif;
       }
 
-      html, body, #root, button, input, select, textarea {
+      html, body, #root, button, input, select, textarea,
+      h1, h2, h3, h4, h5, h6, p, span, a, label, li, td, th {
         font-family: var(--nutri-font);
       }
 
