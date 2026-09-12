@@ -9,7 +9,6 @@ import {
 } from "../../utils/logSearchHelpers";
 import {
   MEAL_ORDER,
-  getMealAutoHint,
   getMealShort,
   stampLogMeta,
   sumCalories,
@@ -260,7 +259,6 @@ export default function ActivityLogPage({
             );
           })}
         </div>
-        <p className="log-meal-window-hint">{getMealAutoHint(activeMealTab)}</p>
       </div>
 
       <div className="log-page-block log-page-block-records" ref={recordsRef}>

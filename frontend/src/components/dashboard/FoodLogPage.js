@@ -9,7 +9,6 @@ import {
 } from "../../utils/logSearchHelpers";
 import {
   MEAL_ORDER,
-  getMealAutoHint,
   getMealShort,
   mealTotalsFromDaily,
   stampLogMeta,
@@ -601,7 +600,6 @@ export default function FoodLogPage({
             );
           })}
         </div>
-        <p className="log-meal-window-hint">{getMealAutoHint(activeMealTab)}</p>
       </div>
 
       {foodCals > 0 && (
