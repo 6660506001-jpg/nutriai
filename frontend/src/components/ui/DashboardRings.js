@@ -30,12 +30,12 @@ export default function DashboardRings({
       role="img"
       aria-label={
         over
-          ? `เกินเป้า ${Math.round(overflow)} kcal จากเป้าหมาย ${Math.round(goal)}`
-          : `กินได้อีก ${Math.round(remaining)} kcal จากเป้าหมาย ${Math.round(goal)}`
+          ? `พลังงานคงเหลือเกินเป้า ${Math.round(overflow)} kcal จากเป้าหมาย ${Math.round(goal)}`
+          : `พลังงานคงเหลือ ${Math.round(remaining)} kcal จากเป้าหมาย ${Math.round(goal)}`
       }
     >
       <div className={`dash-energy-hero${over ? " is-over" : ""}`}>
-        <span className="dash-energy-hero-label">{over ? "เกินเป้า" : "กินได้อีก"}</span>
+        <span className="dash-energy-hero-label">{over ? "เกินเป้า" : "พลังงานคงเหลือ"}</span>
         <strong className="dash-energy-hero-value">
           {Math.abs(Math.round(remaining)).toLocaleString("th-TH")}
         </strong>
@@ -48,14 +48,14 @@ export default function DashboardRings({
         aria-valuemin={0}
         aria-valuemax={Math.round(goal)}
         aria-valuenow={Math.round(eaten)}
-        aria-label={`กินไปแล้ว ${Math.round(eaten)} จาก ${Math.round(goal)} kcal`}
+        aria-label={`พลังงานที่ได้รับ ${Math.round(eaten)} จากเป้าหมาย ${Math.round(goal)} kcal`}
       >
         <span className="dash-energy-bar-track">
           <span className="dash-energy-bar-used" style={{ width: `${usedPct}%` }} />
           {overPct > 0 ? <span className="dash-energy-bar-over" style={{ width: `${overPct}%` }} /> : null}
         </span>
         <span className="dash-energy-bar-meta">
-          {`กินไปแล้ว ${Math.round(eaten).toLocaleString("th-TH")} / ${Math.round(goal).toLocaleString("th-TH")} kcal`}
+          {`พลังงานที่ได้รับ ${Math.round(eaten).toLocaleString("th-TH")} / ${Math.round(goal).toLocaleString("th-TH")} kcal`}
         </span>
       </div>
 
@@ -65,7 +65,11 @@ export default function DashboardRings({
           <strong className="dash-energy-mini-value">{Math.round(goal).toLocaleString("th-TH")}</strong>
         </div>
         <div className="dash-energy-mini-item">
-          <span className="dash-energy-mini-label">เผาผลาญเพิ่ม</span>
+          <span className="dash-energy-mini-label">พลังงานที่ได้รับ</span>
+          <strong className="dash-energy-mini-value">{Math.round(eaten).toLocaleString("th-TH")}</strong>
+        </div>
+        <div className="dash-energy-mini-item">
+          <span className="dash-energy-mini-label">การเผาผลาญ</span>
           <strong className="dash-energy-mini-value">{Math.round(burned).toLocaleString("th-TH")}</strong>
         </div>
       </div>

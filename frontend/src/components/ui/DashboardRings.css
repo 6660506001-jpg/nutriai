@@ -95,7 +95,7 @@
 
 .dash-energy-mini {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin: 0 0 12px;
 }
@@ -112,9 +112,10 @@
 }
 
 .dash-energy-mini-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: #64748b;
+  line-height: 1.25;
 }
 
 .dash-energy-mini-value {
@@ -209,7 +210,7 @@
   .dash-status-hero-energy .dash-energy-bar,
   .dash-status-hero-energy .dash-energy-mini,
   .dash-status-hero-energy .dash-macro-rows {
-    max-width: 560px;
+    max-width: 640px;
     margin-left: auto;
     margin-right: auto;
   }
