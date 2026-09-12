@@ -117,9 +117,11 @@ export default function App() {
     const name = bootSession?.user?.username;
     return Boolean(name && !getSyncPassword(name));
   });
+  const [cloudPushVerified, setCloudPushVerified] = useState(false);
   const isMobile = useIsMobile();
   const cloudSyncTimerRef = useRef(null);
   const cloudPullingRef = useRef(false);
+  const autoPushTriedRef = useRef(false);
 
   useEffect(() => {
     if (!isLoggedIn || !user?.username) return;
@@ -283,11 +285,15 @@ export default function App() {
   }, [isLoggedIn, user, dailyMeals, activities, historyData]);
 
   useEffect(() => {
-    if (!isLoggedIn || !user?.username) return;
+    if (!isLoggedIn || !user?.username || isMobile) return;
     if (!sessionHasDailyLogs({ dailyMeals, activities })) return;
-    if (getSyncPassword(user.username)) return;
+    if (cloudPushVerified || syncUnlockBusy) return;
     setSyncUnlockOpen(true);
-  }, [isLoggedIn, user?.username, dailyMeals, activities]);
+    const password = getSyncPassword(user.username);
+    if (!password || autoPushTriedRef.current) return;
+    autoPushTriedRef.current = true;
+    handleUnlockSync(password);
+  }, [isLoggedIn, user?.username, isMobile, dailyMeals, activities, cloudPushVerified, syncUnlockBusy]);
 
   useEffect(() => {
     if (!isLoggedIn || !user?.username) return;
@@ -352,6 +358,7 @@ export default function App() {
       const resolvedHasDaily = resolved && sessionHasDailyLogs(resolved);
       if (resolvedHasDaily && (!localHasDaily || !uploadLocal)) {
         applyResolvedCloudSession(resolved, user);
+        setCloudPushVerified(true);
         setSyncUnlockOpen(false);
       } else if (localHasDaily) {
         const { lastDate } = loadUserSession(user.username);
@@ -364,6 +371,7 @@ export default function App() {
           return;
         }
         const itemCount = countDailyItems(stored);
+        setCloudPushVerified(true);
         setSyncUnlockHint(`ส่งสำเร็จ ${itemCount} รายการ — กลับไปมือถือแล้วกดดึงมื้อจากคลาวด์`);
         setCloudReady(true);
         return;
@@ -616,9 +624,10 @@ export default function App() {
   const isFirstTimeUser = !hasAnyLogHistory;
   const showDashboardRings = isMobile && currentTab === "dashboard";
   const hasDailyLogs = sessionHasDailyLogs({ dailyMeals, activities });
-  const syncPasswordReady = Boolean(user?.username && getSyncPassword(user.username));
   const showSyncBanner = Boolean(
-    isLoggedIn && user?.username && currentTab === "dashboard" && (!hasDailyLogs || !syncPasswordReady)
+    isLoggedIn && user?.username && currentTab === "dashboard" && (
+      !hasDailyLogs || (!isMobile && hasDailyLogs && !cloudPushVerified)
+    )
   );
   const openSyncUnlock = () => {
     setSyncUnlockError("");
@@ -742,6 +751,15 @@ export default function App() {
                       </span>
                     </>
                   )}
+                  {hasDailyLogs && !cloudPushVerified ? (
+                    <button
+                      type="button"
+                      className="app-header-sync-btn"
+                      onClick={openSyncUnlock}
+                    >
+                      ส่งขึ้นคลาวด์
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className="app-header-help-btn"
@@ -775,7 +793,7 @@ export default function App() {
             <div className="sync-needed-banner">
               <p>
                 {hasDailyLogs
-                  ? "หน้านี้มียอดวันนี้ — กดซิงค์เพื่อส่งขึ้นคลาวด์ให้มือถือ"
+                  ? "หน้านี้มียอดวันนี้แล้ว — กดส่งขึ้นคลาวด์จนขึ้นว่าส่งสำเร็จ แล้วค่อยไปดึงบนมือถือ"
                   : "มือถือยังไม่มีมื้อ — ต้องส่งจากหน้าคอมที่มียอดวันนี้แล้ว ไม่ใช่แท็บที่ยังเป็น 0"}
               </p>
               <button type="button" className="sync-needed-banner-btn" onClick={openSyncUnlock}>
