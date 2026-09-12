@@ -252,229 +252,19 @@ export default function AppVisualEffects() {
         object-fit: cover;
       }
 
-      .dash-rings-wrap {
+      .dash-rings-wrap,
+      .dash-energy-wrap {
         width: 100%;
         min-width: 0;
       }
 
-      .dash-rings-donut {
-        position: relative;
-        width: min(220px, 68vw);
-        margin: 4px auto 0;
-        aspect-ratio: 1;
-      }
-
-      .dash-rings-svg {
-        width: 100%;
-        height: auto;
-        display: block;
-        overflow: visible;
-      }
-
-      .dash-rings-center {
-        position: absolute;
-        inset: 18%;
+      .dash-macro-strip,
+      .dash-macro-rows {
         display: flex;
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        pointer-events: none;
-      }
-
-      .dash-rings-center-label {
-        font-size: 11px;
-        font-weight: 800;
-        line-height: 1.2;
-        color: var(--nutri-text-muted, #64748b);
-      }
-
-      .dash-rings-center-value {
-        margin: 2px 0 0;
-        font-size: clamp(26px, 8vw, 34px);
-        font-weight: 900;
-        letter-spacing: -0.04em;
-        line-height: 1;
-        color: var(--nutri-text-dark, #0f172a);
-      }
-
-      .dash-rings-center-unit {
-        margin-top: 2px;
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--nutri-text-muted, #64748b);
-      }
-
-      .dash-rings-center--ok .dash-rings-center-value,
-      .dash-rings-center--neutral .dash-rings-center-value {
-        color: var(--nutri-food-accent, #2563eb);
-      }
-
-      .dash-rings-center--over .dash-rings-center-label,
-      .dash-rings-center--over .dash-rings-center-value {
-        color: #dc2626;
-      }
-
-      .dash-rings-caption {
-        margin: 6px 0 0;
-        text-align: center;
-        font-size: 11px;
-        font-weight: 600;
-        line-height: 1.4;
-        color: var(--nutri-text-muted, #64748b);
-      }
-
-      .dash-ring-progress {
-        transition: stroke-dashoffset 0.45s ease;
-      }
-
-      .dash-ring-tip-icon {
-        width: 18px;
-        height: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .dash-rings-legend {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
         gap: 8px;
-        margin-top: 8px;
-      }
-
-      .dash-rings-legend-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 7px;
-        min-width: 0;
-      }
-
-      .dash-rings-legend-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        margin-top: 5px;
-        flex-shrink: 0;
-      }
-
-      .dash-rings-legend-item--food .dash-rings-legend-dot {
-        background: var(--nutri-food-accent, #2563eb);
-      }
-
-      .dash-rings-legend-item--activity .dash-rings-legend-dot {
-        background: var(--nutri-activity-accent, #059669);
-      }
-
-      .dash-rings-legend-label {
-        display: block;
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--nutri-text-muted, #64748b);
-        line-height: 1.2;
-      }
-
-      .dash-rings-legend-item strong {
-        font-size: 15px;
-        font-weight: 900;
-        color: var(--nutri-text-dark, #0f172a);
-        letter-spacing: -0.02em;
-      }
-
-      .dash-rings-legend-item small {
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--nutri-text-muted, #64748b);
-      }
-
-      .dash-rings-value--over {
-        color: #dc2626;
-      }
-
-      .dash-macro-strip {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 6px;
-        margin-top: 8px;
-        opacity: 0.62;
-      }
-
-      .dash-macro-strip--active {
+        margin-top: 2px;
         opacity: 1;
-      }
-
-      .dash-macro-strip-item {
-        min-width: 0;
-        padding: 6px 7px;
-        border-radius: 10px;
-        background: rgba(248, 250, 252, 0.92);
-        border: 1px solid var(--nutri-border, #e2e8f0);
-      }
-
-      .dash-macro-strip-head {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 4px;
-        margin-bottom: 4px;
-      }
-
-      .dash-macro-strip-label {
-        font-size: 9px;
-        font-weight: 800;
-        color: var(--nutri-text-muted, #64748b);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .dash-macro-strip-value {
-        font-size: 10px;
-        font-weight: 900;
-        color: var(--nutri-text-dark, #0f172a);
-        white-space: nowrap;
-      }
-
-      .dash-macro-strip-value small {
-        font-size: 9px;
-        font-weight: 700;
-        color: var(--nutri-text-muted, #64748b);
-      }
-
-      .dash-macro-strip-track {
-        height: 4px;
-        border-radius: 999px;
-        background: rgba(148, 163, 184, 0.22);
-        overflow: hidden;
-      }
-
-      .dash-macro-strip-fill {
-        display: block;
-        height: 100%;
-        border-radius: inherit;
-        transition: width 0.35s ease;
-      }
-
-      .dash-macro-strip-item--protein .dash-macro-strip-fill {
-        background: #e11d48;
-      }
-
-      .dash-macro-strip-item--carbs .dash-macro-strip-fill {
-        background: #f59e0b;
-      }
-
-      .dash-macro-strip-item--fat .dash-macro-strip-fill {
-        background: #8b5cf6;
-      }
-
-      .dash-macro-strip-short {
-        display: block;
-        margin-top: 3px;
-        font-size: 8px;
-        font-weight: 900;
-        letter-spacing: 0.04em;
-        color: var(--nutri-text-muted, #94a3b8);
-        text-transform: uppercase;
       }
 
       .dash-quick-fab {
@@ -7594,13 +7384,6 @@ export default function AppVisualEffects() {
       .app-header.app-header--dash-rings {
         display: block !important;
         text-align: left !important;
-      }
-      .app-header--dash-rings .dash-rings-donut,
-      .app-header--dash-rings .dash-rings-svg {
-        width: 220px !important;
-        height: 220px !important;
-        max-width: 100%;
-        aspect-ratio: 1 / 1 !important;
       }
     `}</style>
   );

@@ -1,120 +1,24 @@
+.dash-energy-wrap,
 .dash-rings-wrap {
   width: 100%;
   min-width: 0;
 }
 
-.dash-rings-donut {
-  position: relative;
-  width: 220px;
-  height: 220px;
-  max-width: 100%;
-  margin: 8px auto 0;
-  flex: 0 0 auto;
-  aspect-ratio: 1 / 1;
-}
-
-.dash-rings-svg {
-  display: block !important;
-  width: 220px !important;
-  height: 220px !important;
-  max-width: 100%;
-  max-height: 220px;
-  margin: 0 auto;
-  overflow: visible;
-  aspect-ratio: 1 / 1 !important;
-}
-
-.dash-rings-center {
-  position: absolute;
-  inset: 20%;
+.dash-energy-eq {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  pointer-events: none;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 4px;
+  margin: 2px 0 8px;
 }
 
-.dash-rings-center-label {
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 1.2;
-  color: var(--nutri-text-muted, #64748b);
-}
-
-.dash-rings-center-value {
-  margin: 2px 0 0;
-  font-size: 32px;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  color: var(--nutri-food-accent, #2563eb);
-}
-
-.dash-rings-center-unit {
-  margin-top: 2px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--nutri-text-muted, #64748b);
-}
-
-.dash-rings-center--over .dash-rings-center-label,
-.dash-rings-center--over .dash-rings-center-value {
-  color: #dc2626;
-}
-
-.dash-rings-caption {
-  margin: 6px 0 0;
-  text-align: center;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--nutri-text-muted, #64748b);
-}
-
-.dash-ring-progress {
-  transition: stroke-dashoffset 0.45s ease;
-}
-
-.dash-ring-tip-icon {
-  width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dash-rings-legend {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.dash-rings-legend-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
+.dash-energy-term {
+  flex: 1;
   min-width: 0;
+  text-align: center;
 }
 
-.dash-rings-legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-top: 5px;
-  flex-shrink: 0;
-}
-
-.dash-rings-legend-item--food .dash-rings-legend-dot {
-  background: var(--nutri-food-accent, #2563eb);
-}
-
-.dash-rings-legend-item--activity .dash-rings-legend-dot {
-  background: var(--nutri-activity-accent, #059669);
-}
-
-.dash-rings-legend-label {
+.dash-energy-term-label {
   display: block;
   font-size: 10px;
   font-weight: 700;
@@ -122,21 +26,157 @@
   line-height: 1.2;
 }
 
-.dash-rings-legend-item strong {
+.dash-energy-term-value {
+  display: block;
+  margin-top: 2px;
   font-size: 15px;
   font-weight: 900;
-  color: var(--nutri-text-dark, #0f172a);
   letter-spacing: -0.02em;
+  color: var(--nutri-text-dark, #0f172a);
+  line-height: 1.1;
 }
 
-.dash-rings-legend-item small {
-  font-size: 11px;
-  font-weight: 600;
+.dash-energy-op {
+  flex: 0 0 auto;
+  padding-bottom: 1px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #94a3b8;
+  line-height: 1;
+}
+
+.dash-energy-remain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 2px 0 10px;
+}
+
+.dash-energy-remain-label {
+  font-size: 12px;
+  font-weight: 800;
   color: var(--nutri-text-muted, #64748b);
 }
 
-.dash-rings-value--over {
-  color: #dc2626;
+.dash-energy-remain-value {
+  margin: 2px 0 0;
+  font-size: clamp(36px, 11vw, 48px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: #2563eb;
+}
+
+.dash-energy-remain-unit {
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--nutri-text-muted, #64748b);
+}
+
+.dash-energy-remain--over .dash-energy-remain-label,
+.dash-energy-remain--over .dash-energy-remain-value {
+  color: #ea580c;
+}
+
+.dash-energy-bar {
+  margin: 0 0 12px;
+}
+
+.dash-energy-bar-track {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.22);
+  overflow: hidden;
+}
+
+.dash-energy-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #2563eb;
+  transition: width 0.4s ease, background 0.25s ease;
+}
+
+.dash-energy-bar.is-over .dash-energy-bar-fill {
+  background: #ea580c;
+}
+
+.dash-energy-bar-meta {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--nutri-text-muted, #64748b);
+  text-align: center;
+}
+
+.dash-energy-bar.is-over .dash-energy-bar-meta {
+  color: #c2410c;
+}
+
+.dash-macro-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dash-macro-row {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-macro-row-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--nutri-text-dark, #0f172a);
+}
+
+.dash-macro-row-track {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.dash-macro-row-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.35s ease;
+}
+
+.dash-macro-row--protein .dash-macro-row-fill {
+  background: #e11d48;
+}
+
+.dash-macro-row--carbs .dash-macro-row-fill {
+  background: #f59e0b;
+}
+
+.dash-macro-row--fat .dash-macro-row-fill {
+  background: #8b5cf6;
+}
+
+.dash-macro-row-value {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--nutri-text-dark, #0f172a);
+  white-space: nowrap;
+}
+
+.dash-macro-row-value small {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--nutri-text-muted, #64748b);
+}
+
+.dash-macro-row.is-over .dash-macro-row-value {
+  color: #c2410c;
 }
 
 .app-header.app-header--dash-rings {
@@ -144,6 +184,7 @@
   text-align: left !important;
 }
 
+.app-header--dash-rings .dash-energy-wrap,
 .app-header--dash-rings .dash-rings-wrap {
   display: block;
   width: 100%;
