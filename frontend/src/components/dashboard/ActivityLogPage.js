@@ -10,7 +10,6 @@ import {
 import {
   MEAL_ORDER,
   getMealShort,
-  getMealTooltip,
   stampLogMeta,
   sumCalories,
 } from "../../utils/logDisplay";
@@ -19,7 +18,6 @@ import ActivityLogModal from "../ui/ActivityLogModal";
 import DashCollapsible from "../ui/DashCollapsible";
 import LogPageSummary from "../ui/LogPageSummary";
 import LogSavedBar from "../ui/LogSavedBar";
-import PressTip from "../ui/PressTip";
 import QuickStartSteps from "../ui/QuickStartSteps";
 import { ACTIVITY_LOG_QUICK_STEPS } from "../../constants/quickStartSteps";
 import {
@@ -249,21 +247,15 @@ export default function ActivityLogPage({
           {MEAL_ORDER.map((tab) => {
             const tabCals = sumCalories(activities.filter((a) => a.mealPeriod === tab));
             return (
-              <PressTip
+              <button
                 key={tab}
-                className="log-meal-tab-tip"
-                label={tab}
-                tooltip={getMealTooltip(tab)}
+                type="button"
+                onClick={() => setActiveMealTab(tab)}
+                className={`log-meal-tab log-meal-tab-activity${activeMealTab === tab ? " is-active" : ""}`}
               >
-                <button
-                  type="button"
-                  onClick={() => setActiveMealTab(tab)}
-                  className={`log-meal-tab log-meal-tab-activity${activeMealTab === tab ? " is-active" : ""}`}
-                >
-                  {getMealShort(tab)}
-                  {tabCals > 0 && <span className="log-meal-tab-cal">−{tabCals}</span>}
-                </button>
-              </PressTip>
+                {getMealShort(tab)}
+                {tabCals > 0 && <span className="log-meal-tab-cal">−{tabCals}</span>}
+              </button>
             );
           })}
         </div>
