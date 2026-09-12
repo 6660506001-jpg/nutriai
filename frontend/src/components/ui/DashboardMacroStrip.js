@@ -32,10 +32,10 @@ export default function DashboardMacroStrip({
   return (
     <div
       className={`dash-macro-rows${className ? ` ${className}` : ""}`}
-      aria-label="มาโครนิวเทรนต์วันนี้"
+      aria-label="สารอาหารหลักวันนี้"
     >
       <MacroRow label="โปรตีน" value={protein} target={targetProtein} tone="protein" />
-      <MacroRow label="คาร์บ" value={carbs} target={targetCarbs} tone="carbs" />
+      <MacroRow label="คาร์โบไฮเดรต" value={carbs} target={targetCarbs} tone="carbs" />
       <MacroRow label="ไขมัน" value={fat} target={targetFat} tone="fat" />
     </div>
   );

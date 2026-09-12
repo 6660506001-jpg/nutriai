@@ -30,16 +30,16 @@ export default function DashboardRings({
       role="img"
       aria-label={
         over
-          ? `พลังงานคงเหลือเกินเป้า ${Math.round(overflow)} kcal จากเป้าหมาย ${Math.round(goal)}`
-          : `พลังงานคงเหลือ ${Math.round(remaining)} kcal จากเป้าหมาย ${Math.round(goal)}`
+          ? `เกินเป้าหมายพลังงาน ${Math.round(overflow)} กิโลแคลอรี จากเป้าหมาย ${Math.round(goal)}`
+          : `พลังงานคงเหลือ ${Math.round(remaining)} กิโลแคลอรี จากเป้าหมายพลังงาน ${Math.round(goal)}`
       }
     >
       <div className={`dash-energy-hero${over ? " is-over" : ""}`}>
-        <span className="dash-energy-hero-label">{over ? "เกินเป้า" : "พลังงานคงเหลือ"}</span>
+        <span className="dash-energy-hero-label">{over ? "เกินเป้าหมาย" : "พลังงานคงเหลือ"}</span>
         <strong className="dash-energy-hero-value">
           {Math.abs(Math.round(remaining)).toLocaleString("th-TH")}
         </strong>
-        <span className="dash-energy-hero-unit">kcal</span>
+        <span className="dash-energy-hero-unit">กิโลแคลอรี</span>
       </div>
 
       <div
@@ -48,20 +48,20 @@ export default function DashboardRings({
         aria-valuemin={0}
         aria-valuemax={Math.round(goal)}
         aria-valuenow={Math.round(eaten)}
-        aria-label={`พลังงานที่ได้รับ ${Math.round(eaten)} จากเป้าหมาย ${Math.round(goal)} kcal`}
+        aria-label={`พลังงานที่ได้รับ ${Math.round(eaten)} จากเป้าหมายพลังงาน ${Math.round(goal)} กิโลแคลอรี`}
       >
         <span className="dash-energy-bar-track">
           <span className="dash-energy-bar-used" style={{ width: `${usedPct}%` }} />
           {overPct > 0 ? <span className="dash-energy-bar-over" style={{ width: `${overPct}%` }} /> : null}
         </span>
         <span className="dash-energy-bar-meta">
-          {`พลังงานที่ได้รับ ${Math.round(eaten).toLocaleString("th-TH")} / ${Math.round(goal).toLocaleString("th-TH")} kcal`}
+          {`พลังงานที่ได้รับ ${Math.round(eaten).toLocaleString("th-TH")} / ${Math.round(goal).toLocaleString("th-TH")} กิโลแคลอรี`}
         </span>
       </div>
 
       <div className="dash-energy-mini">
         <div className="dash-energy-mini-item">
-          <span className="dash-energy-mini-label">เป้าหมาย</span>
+          <span className="dash-energy-mini-label">เป้าหมายพลังงาน</span>
           <strong className="dash-energy-mini-value">{Math.round(goal).toLocaleString("th-TH")}</strong>
         </div>
         <div className="dash-energy-mini-item">
@@ -69,7 +69,7 @@ export default function DashboardRings({
           <strong className="dash-energy-mini-value">{Math.round(eaten).toLocaleString("th-TH")}</strong>
         </div>
         <div className="dash-energy-mini-item">
-          <span className="dash-energy-mini-label">การเผาผลาญ</span>
+          <span className="dash-energy-mini-label">พลังงานที่เผาผลาญ</span>
           <strong className="dash-energy-mini-value">{Math.round(burned).toLocaleString("th-TH")}</strong>
         </div>
       </div>

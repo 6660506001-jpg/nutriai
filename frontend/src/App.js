@@ -694,9 +694,9 @@ export default function App() {
                   <span className="app-header-chip app-header-chip--date">{todayLabel}</span>
                   {!isFirstTimeUser && (
                     <>
-                      <span className="app-header-chip">TDEE {updatedUser.tdee || 0} kcal</span>
+                      <span className="app-header-chip">เป้าหมาย {updatedUser.tdee || 0} กิโลแคลอรี</span>
                       <span className="app-header-chip app-header-chip--accent">
-                        กินสุทธิ {headerNetCals} kcal
+                        พลังงานสุทธิ {headerNetCals} กิโลแคลอรี
                       </span>
                     </>
                   )}

@@ -20,9 +20,9 @@ export const FEATURE_TOOLTIPS = {
     ],
   },
   tdee: {
-    title: "TDEE",
-    subtitle: "Total Daily Energy Expenditure",
-    body: "พลังงานที่ร่างกายใช้โดยประมาณต่อวัน รวมกิจกรรมและการเผาผลาญพื้นฐาน",
+    title: "เป้าหมายพลังงาน",
+    subtitle: "TDEE · Total Daily Energy Expenditure",
+    body: "เป้าหมายพลังงานต่อวัน คำนวณจากพลังงานที่ร่างกายใช้โดยประมาณ รวมการเผาผลาญพื้นฐานและกิจกรรม",
   },
   bmr: {
     title: "BMR",
@@ -31,8 +31,8 @@ export const FEATURE_TOOLTIPS = {
   },
   remainingCal: {
     title: "พลังงานคงเหลือ",
-    subtitle: "Remaining calories",
-    body: "แคลที่ยังกินได้วันนี้ คำนวณจากเป้าหมายลบด้วยยอดสุทธิ (กิน − เผา)",
+    subtitle: "Remaining energy",
+    body: "พลังงานที่ยังรับประทานได้วันนี้ คำนวณจากเป้าหมายพลังงาน ลบพลังงานที่ได้รับ แล้วบวกพลังงานที่เผาผลาญ",
   },
   weight: {
     title: "น้ำหนักปัจจุบัน",
