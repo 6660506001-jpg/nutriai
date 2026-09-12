@@ -9,6 +9,7 @@ import {
 } from "../../utils/logSearchHelpers";
 import {
   MEAL_ORDER,
+  getMealAutoHint,
   getMealShort,
   stampLogMeta,
   sumCalories,
@@ -253,12 +254,13 @@ export default function ActivityLogPage({
                 onClick={() => setActiveMealTab(tab)}
                 className={`log-meal-tab log-meal-tab-activity${activeMealTab === tab ? " is-active" : ""}`}
               >
-                {tab.replace("มื้อ", "")}
+                {getMealShort(tab)}
                 {tabCals > 0 && <span className="log-meal-tab-cal">−{tabCals}</span>}
               </button>
             );
           })}
         </div>
+        <p className="log-meal-window-hint">{getMealAutoHint(activeMealTab)}</p>
       </div>
 
       <div className="log-page-block log-page-block-records" ref={recordsRef}>

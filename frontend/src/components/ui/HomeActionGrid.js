@@ -23,7 +23,7 @@ export default function HomeActionGrid({
             <small>
               {foodCals > 0
                 ? `วันนี้ ${foodCals} kcal${mealPoints > 0 ? ` · ${mealPoints} แต้ม` : ""}`
-                : "เลือกมื้อ → ค้นหา → บันทึก"}
+                : "ระบบเลือกมื้อตามเวลา → ค้นหา → บันทึก"}
             </small>
           </span>
         </button>

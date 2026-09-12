@@ -385,14 +385,27 @@ export default function App() {
   const handleNavigateToFood = (mealTab) => {
     if (typeof mealTab === "string" && MEAL_ORDER.includes(mealTab)) {
       setActiveMealTab(mealTab);
+    } else {
+      setActiveMealTab(getMealPeriodByTime());
     }
     setCurrentTab("food");
+  };
+
+  const handleSetTab = (tab) => {
+    if (tab === "food" && currentTab !== "food") {
+      setActiveMealTab(getMealPeriodByTime());
+    }
+    if (tab === "activity" && currentTab !== "activity") {
+      setActiveMealTab(getMealPeriodByTime());
+    }
+    setCurrentTab(tab);
   };
 
   const handleNavigateToDashboard = () => setCurrentTab("dashboard");
 
   const handleNavigateToActivity = (preset) => {
     if (preset) setActivityLaunchPreset(preset);
+    setActiveMealTab(getMealPeriodByTime());
     setCurrentTab("activity");
   };
 
@@ -438,7 +451,7 @@ export default function App() {
       <div style={styles.container}>
         <Sidebar
           activeTab={currentTab}
-          setActiveTab={setCurrentTab}
+          setActiveTab={handleSetTab}
           onLogout={handleLogout}
           onOpenGuide={() => setShowUserGuide(true)}
         />

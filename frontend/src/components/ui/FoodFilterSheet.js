@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { HiX } from "react-icons/hi";
-import { MEAL_ORDER } from "../../utils/logDisplay";
+import { MEAL_ORDER, getMealShort } from "../../utils/logDisplay";
 
 const GI_OPTIONS = [
   { id: "all", label: "ทั้งหมด" },
@@ -68,7 +68,7 @@ export default function FoodFilterSheet({
                   className={`nutri-filter-chip${filters.meal === meal ? " is-active" : ""}`}
                   onClick={() => setFilter("meal", meal)}
                 >
-                  {meal.replace("มื้อ", "")}
+                  {getMealShort(meal)}
                 </button>
               ))}
             </div>

@@ -7,7 +7,7 @@ import { analyzeThreeMealsSummary } from "../../utils/mealRecommendations";
 import { getProfessionalPrediction, buildHomeDietAdviceBrief } from "../../utils/aiPrediction";
 import { generateMenuRecommendations, VENUE_MODES } from "../../utils/menuRecommendations";
 import { buildAdaptiveActivitySuggestion } from "../../utils/adaptiveActivitySuggester";
-import { mealTotalsFromDaily } from "../../utils/logDisplay";
+import { getMealShort, mealTotalsFromDaily } from "../../utils/logDisplay";
 import { summarizeDailyRewards } from "../../utils/mealRewards";
 import { styles } from "../../styles/appStyles";
 import DashboardStatusHero from "../ui/DashboardStatusHero";
@@ -555,7 +555,7 @@ export default function Dashboard({
                 key={`${menu.id || menu.name}-${index}`}
                 menu={menu}
                 index={index}
-                mealLabel={activeMealTab.replace("มื้อ", "")}
+                mealLabel={getMealShort(activeMealTab)}
                 onSelect={handleAddRecommendedMenu}
                 onDislike={handleDislikeRecommendedMenu}
                 loading={menuLoading}

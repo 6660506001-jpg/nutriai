@@ -4,20 +4,45 @@ export { getTodayKey };
 
 export const MEAL_ORDER = ["มื้อเช้า", "มื้อกลางวัน", "มื้อเย็น"];
 
-/** เลือกมื้อตามเวลา — ลดขั้นตอนตอนบันทึกบนมือถือ */
+export const MEAL_WINDOWS = {
+  "มื้อเช้า": {
+    short: "เช้า",
+    rangeLabel: "04:00–10:59 น.",
+    uxNote: "เผื่อคนที่ตื่นเช้ามาก หรือกินเช้าสาย",
+  },
+  "มื้อกลางวัน": {
+    short: "กลางวัน",
+    rangeLabel: "11:00–15:59 น.",
+    uxNote: "ครอบคลุมช่วงเที่ยงและบ่าย",
+  },
+  "มื้อเย็น": {
+    short: "เย็น/ว่าง",
+    rangeLabel: "16:00–03:59 น.",
+    uxNote: "รวมมื้อค่ำและมื้อดึก",
+  },
+};
+
+/** เลือกมื้อตามเวลา — เช้า 04:00–10:59 / กลางวัน 11:00–15:59 / เย็น–ว่าง 16:00–03:59 */
 export const getMealPeriodByTime = (date = new Date()) => {
   const hour = date.getHours();
-  if (hour < 11) return "มื้อเช้า";
-  if (hour < 15) return "มื้อกลางวัน";
+  if (hour >= 4 && hour < 11) return "มื้อเช้า";
+  if (hour >= 11 && hour < 16) return "มื้อกลางวัน";
   return "มื้อเย็น";
 };
 
 export const getMealShort = (mealType) =>
-  ({
-    "มื้อเช้า": "เช้า",
-    "มื้อกลางวัน": "กลางวัน",
-    "มื้อเย็น": "เย็น",
-  }[mealType] || String(mealType || "").replace("มื้อ", "") || "—");
+  MEAL_WINDOWS[mealType]?.short
+  || String(mealType || "").replace("มื้อ", "")
+  || "—";
+
+export const getMealAutoHint = (mealType, date = new Date()) => {
+  const meta = MEAL_WINDOWS[mealType];
+  if (!meta) return "";
+  const prefix = getMealPeriodByTime(date) === mealType
+    ? "ระบบเลือกให้อัตโนมัติ"
+    : getMealShort(mealType);
+  return `${prefix} · ${meta.rangeLabel} · ${meta.uxNote}`;
+};
 
 export const formatTodayLabel = (date = new Date()) =>
   date.toLocaleDateString("th-TH", {

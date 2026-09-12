@@ -9,6 +9,8 @@ import {
 } from "../../utils/logSearchHelpers";
 import {
   MEAL_ORDER,
+  getMealAutoHint,
+  getMealShort,
   mealTotalsFromDaily,
   stampLogMeta,
   sumCalories,
@@ -109,7 +111,7 @@ export default function FoodLogPage({
     ? "ยังไม่มีรายการ"
     : showAllDayRecords
       ? `ทั้งวัน ${foodCals} kcal`
-      : `${activeMealTab.replace("มื้อ", "")} ${mealTotals[activeMealTab] || 0} kcal`;
+      : `${getMealShort(activeMealTab)} ${mealTotals[activeMealTab] || 0} kcal`;
 
   React.useEffect(() => {
     if (mealSuggestions?.loading || !mealSuggestions?.menus?.length) return;
@@ -157,7 +159,7 @@ export default function FoodLogPage({
     >
       <div className="log-search-hero">
         <label htmlFor="food-search-input" className="log-search-hero-label">
-          ค้นหาอาหาร · {activeMealTab.replace("มื้อ", "")}
+          ค้นหาอาหาร · {getMealShort(activeMealTab)}
         </label>
         <div className="log-search-hero-row">
           <div className="log-search-hero-input-wrap">
@@ -590,7 +592,7 @@ export default function FoodLogPage({
                 onClick={() => setActiveMealTab(tab)}
                 className={`log-meal-tab${activeMealTab === tab ? " is-active" : ""}`}
               >
-                {tab.replace("มื้อ", "")}
+                {getMealShort(tab)}
                 {mealTotals[tab] > 0 && (
                   <span className="log-meal-tab-cal">{mealTotals[tab]}</span>
                 )}
@@ -599,6 +601,7 @@ export default function FoodLogPage({
             );
           })}
         </div>
+        <p className="log-meal-window-hint">{getMealAutoHint(activeMealTab)}</p>
       </div>
 
       {foodCals > 0 && (
