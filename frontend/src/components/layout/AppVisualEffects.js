@@ -5909,9 +5909,24 @@ export default function AppVisualEffects() {
         flex-wrap: wrap;
       }
       .log-page-summary-date {
+        min-width: 0;
+        flex: 1;
         font-size: 13px;
         font-weight: 800;
         color: var(--nutri-text-dark, #0f172a);
+        overflow-wrap: anywhere;
+      }
+      .press-tip-bubble {
+        padding: 10px 12px !important;
+      }
+      .press-tip-bubble .stat-card-tooltip-title {
+        font-size: 14px;
+      }
+      .press-tip-bubble .stat-card-tooltip-subtitle {
+        margin-top: 2px;
+      }
+      .press-tip-bubble .stat-card-tooltip-body {
+        margin-top: 4px;
       }
       .log-page-summary-meal {
         font-size: 12px;

@@ -19,18 +19,24 @@ function getMainContentMinLeft() {
   return Math.max(VIEWPORT_MARGIN, Math.round(rect.right + 8));
 }
 
-export function computeTooltipPosition(buttonRect, tooltipHeight) {
-  const width = Math.min(TOOLTIP_MAX_WIDTH, window.innerWidth - VIEWPORT_MARGIN * 2);
+export function computeTooltipPosition(buttonRect, tooltipHeight, options = {}) {
+  const maxWidth = Number(options.maxWidth) || TOOLTIP_MAX_WIDTH;
+  const width = Math.min(maxWidth, window.innerWidth - VIEWPORT_MARGIN * 2);
   const minLeft = getMainContentMinLeft();
   const maxLeft = window.innerWidth - width - VIEWPORT_MARGIN;
 
-  let left = buttonRect.left + buttonRect.width / 2 - width / 2;
+  let left = options.align === "start"
+    ? buttonRect.left
+    : buttonRect.left + buttonRect.width / 2 - width / 2;
   left = Math.max(minLeft, Math.min(left, maxLeft));
 
   const spaceAbove = buttonRect.top - VIEWPORT_MARGIN;
   const spaceBelow = window.innerHeight - buttonRect.bottom - VIEWPORT_MARGIN;
-  const showBelow =
-    spaceAbove < tooltipHeight + TOOLTIP_GAP && spaceBelow > spaceAbove;
+  const canShowBelow = spaceBelow >= tooltipHeight + TOOLTIP_GAP;
+  const canShowAbove = spaceAbove >= tooltipHeight + TOOLTIP_GAP;
+  const showBelow = options.prefer === "below"
+    ? canShowBelow || !canShowAbove
+    : spaceAbove < tooltipHeight + TOOLTIP_GAP && spaceBelow > spaceAbove;
 
   if (showBelow) {
     return {

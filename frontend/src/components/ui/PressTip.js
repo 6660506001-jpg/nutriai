@@ -6,6 +6,8 @@ export default function PressTip({
   tooltip,
   label = "ข้อมูลเพิ่มเติม",
   className = "",
+  prefer = "below",
+  maxWidth = 220,
   children,
 }) {
   const tipId = `press-tip-${String(label).replace(/\s+/g, "-")}`;
@@ -44,8 +46,12 @@ export default function PressTip({
     const positionTooltip = () => {
       const anchor = anchorRef.current;
       if (!anchor) return;
-      const tooltipHeight = tooltipRef.current?.offsetHeight || 140;
-      const position = computeTooltipPosition(anchor.getBoundingClientRect(), tooltipHeight);
+      const tooltipHeight = tooltipRef.current?.offsetHeight || 88;
+      const position = computeTooltipPosition(
+        anchor.getBoundingClientRect(),
+        tooltipHeight,
+        { prefer, maxWidth, align: "start" },
+      );
       setTipStyle({
         width: position.width,
         left: position.left,
@@ -63,7 +69,7 @@ export default function PressTip({
       window.removeEventListener("resize", positionTooltip);
       window.removeEventListener("scroll", positionTooltip, true);
     };
-  }, [tipOpen, tooltip]);
+  }, [tipOpen, tooltip, prefer, maxWidth]);
 
   useEffect(() => {
     if (!tipOpen) setTipStyle(null);
@@ -125,7 +131,7 @@ export default function PressTip({
             <div
               id={tipId}
               ref={tooltipRef}
-              className={`stat-card-tooltip stat-card-tooltip--fixed${tipStyle ? " is-visible" : ""}`}
+              className={`stat-card-tooltip stat-card-tooltip--fixed press-tip-bubble${tipStyle ? " is-visible" : ""}`}
               role="tooltip"
               style={tipStyle || undefined}
               onPointerEnter={openTip}
