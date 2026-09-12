@@ -28,12 +28,14 @@ export function DashboardHomeStats({
     activityCals,
     netCals,
   });
+  const remaining = (Number(tdee) || 0) - netCals;
+  const over = remaining < 0;
 
   return (
     <section className="dash-home-summary dash-home-stats-block" aria-label="ข้อมูลสรุป">
       <header className="dash-home-summary-head">
         <h2 className="dash-home-summary-title">ข้อมูลสรุป</h2>
-        <p className="dash-home-summary-desc">น้ำหนัก · BMI · TDEE · พลังงานที่ได้รับ</p>
+        <p className="dash-home-summary-desc">น้ำหนัก · BMI · TDEE · คงเหลือ</p>
       </header>
 
       <div className="dash-home-summary-grid">
@@ -59,11 +61,11 @@ export function DashboardHomeStats({
           compact
         />
         <MetricCard
-          label="พลังงานที่ได้รับ"
-          value={foodCals}
+          label={over ? "เกินเป้า" : "คงเหลือ"}
+          value={Math.abs(Math.round(remaining)).toLocaleString("th-TH")}
           unit="kcal"
-          tooltip="แคลอรีจากอาหารที่บันทึกวันนี้"
-          variant="primary"
+          tooltip={STAT_TOOLTIPS.remainingCal}
+          variant={over ? "warn" : "success"}
           compact
         />
       </div>

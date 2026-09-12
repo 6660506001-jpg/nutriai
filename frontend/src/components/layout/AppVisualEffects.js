@@ -802,6 +802,11 @@ export default function AppVisualEffects() {
         background: var(--nutri-health-green-soft, #ecfdf5);
       }
 
+      .nutri-metric-card--warn {
+        border-color: color-mix(in srgb, #ea580c 28%, var(--nutri-border));
+        background: #fff7ed;
+      }
+
       .nutri-metric-card-head {
         display: flex;
         align-items: center;
