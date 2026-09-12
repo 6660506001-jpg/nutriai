@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { HiSparkles } from "react-icons/hi";
 import DashCollapsible from "../ui/DashCollapsible";
-import { getWeightControlTarget } from "../../constants/statTooltips";
 import { calculateHealthData, calculateMacros } from "../../utils/healthCalculations";
 import { analyzeThreeMealsSummary } from "../../utils/mealRecommendations";
 import { getProfessionalPrediction, buildHomeDietAdviceBrief } from "../../utils/aiPrediction";
@@ -333,7 +332,6 @@ export default function Dashboard({
     });
   };
 
-  const weightControlTarget = getWeightControlTarget(user.tdee);
   const homeAdviceBrief = useMemo(() => {
     const pct = (key) => analysis.macroProgress?.find((row) => row.key === key)?.valuePct ?? 0;
     return buildHomeDietAdviceBrief({
@@ -389,10 +387,14 @@ export default function Dashboard({
         <DashboardStatusHero
           username={user.username}
           tdee={user.tdee}
-          target={weightControlTarget || user.tdee}
           foodCals={foodCals}
           activityCals={activityCals}
-          netCals={netCals}
+          protein={totalEaten.p}
+          carbs={totalEaten.c}
+          fat={totalEaten.f}
+          targetProtein={macros.protein}
+          targetCarbs={macros.carbs}
+          targetFat={macros.fat}
           onLogFood={onNavigateToFood}
           onLogActivity={() => onNavigateToActivity()}
           showActions

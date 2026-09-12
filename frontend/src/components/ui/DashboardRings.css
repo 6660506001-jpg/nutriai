@@ -189,3 +189,27 @@
   display: block;
   width: 100%;
 }
+
+@media (min-width: 901px) {
+  .dash-status-hero-energy {
+    margin-top: 4px;
+    padding-top: 14px;
+    border-top: 1px solid var(--nutri-border, #e2e8f0);
+  }
+
+  .dash-status-hero-energy .dash-energy-eq,
+  .dash-status-hero-energy .dash-energy-bar,
+  .dash-status-hero-energy .dash-macro-rows {
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .dash-status-hero-energy .dash-energy-term-value {
+    font-size: 18px;
+  }
+
+  .dash-status-hero-energy .dash-energy-remain-value {
+    font-size: 52px;
+  }
+}

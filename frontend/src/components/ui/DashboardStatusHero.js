@@ -1,16 +1,18 @@
 import React from "react";
 import { formatTodayLabel } from "../../utils/logDisplay";
-import CalorieProgress from "./CalorieProgress";
-import MetricCard from "./MetricCard";
-import { STAT_TOOLTIPS } from "../../constants/statTooltips";
+import DashboardRings from "./DashboardRings";
 
 export default function DashboardStatusHero({
   username,
   tdee = 0,
-  target = 0,
   foodCals = 0,
   activityCals = 0,
-  netCals = 0,
+  protein = 0,
+  carbs = 0,
+  fat = 0,
+  targetProtein = 0,
+  targetCarbs = 0,
+  targetFat = 0,
   onLogFood,
   onLogActivity,
   showActions = true,
@@ -24,12 +26,16 @@ export default function DashboardStatusHero({
     return "สวัสดีตอนเย็น";
   })();
 
-  const remaining = Math.max(0, (target || tdee) - netCals);
-  const statusText = netCals === 0
-    ? "ยังไม่ได้บันทึกอาหารวันนี้ — เริ่มจากแท็บ「อาหาร」"
-    : remaining > 0
-      ? `วันนี้ยังกินได้อีกประมาณ ${remaining.toLocaleString("th-TH")} kcal`
-      : "ถึงเป้าแล้ว — มื้อถัดไปควรเบาลง";
+  const remaining = (Number(tdee) || 0) - (foodCals - activityCals);
+  const over = remaining < 0;
+  const hasLogs = foodCals > 0 || activityCals > 0;
+  const statusText = !hasLogs
+    ? "ยังไม่ได้บันทึกอาหารวันนี้ — เริ่มจากแท็บอาหาร"
+    : over
+      ? `เกินเป้าแล้ว ${Math.abs(Math.round(remaining)).toLocaleString("th-TH")} kcal`
+      : remaining === 0
+        ? "ถึงเป้าแล้ว — มื้อถัดไปควรเบาลง"
+        : `วันนี้ยังกินได้อีกประมาณ ${Math.round(remaining).toLocaleString("th-TH")} kcal`;
 
   return (
     <section className={`dash-status-hero${isCompact ? " dash-status-hero--compact" : ""}`} aria-label="สรุปสถานะวันนี้">
@@ -75,30 +81,18 @@ export default function DashboardStatusHero({
             ) : null}
           </header>
 
-          {target > 0 && (
-            <CalorieProgress
-              consumed={netCals}
-              target={target}
-              label="ความคืบหน้า"
-            />
-          )}
-
-          <div className="dash-status-metrics">
-            <MetricCard label="เป้าหมาย/วัน" value={tdee || "—"} unit="kcal" tooltip={STAT_TOOLTIPS.tdee} compact />
-            <MetricCard label="กินแล้ว" value={foodCals} unit="kcal" variant="primary" compact />
-            <MetricCard
-              label="เหลือ"
-              value={remaining}
-              unit="kcal"
-              tooltip={STAT_TOOLTIPS.remainingCal}
-              variant="success"
-              compact
-            />
-          </div>
-
-          {activityCals > 0 && (
-            <p className="dash-status-hero-burn">เผาแล้ว {activityCals} kcal · สุทธิ {netCals} kcal</p>
-          )}
+          <DashboardRings
+            foodCals={foodCals}
+            activityCals={activityCals}
+            tdee={tdee}
+            protein={protein}
+            carbs={carbs}
+            fat={fat}
+            targetProtein={targetProtein}
+            targetCarbs={targetCarbs}
+            targetFat={targetFat}
+            className="dash-status-hero-energy"
+          />
         </>
       )}
     </section>
