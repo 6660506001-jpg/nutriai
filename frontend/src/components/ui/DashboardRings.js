@@ -2,15 +2,6 @@ import React from "react";
 import DashboardMacroStrip from "./DashboardMacroStrip";
 import "./DashboardRings.css";
 
-function EqTerm({ label, value, emphasize = false, over = false }) {
-  return (
-    <div className={`dash-energy-term${emphasize ? " dash-energy-term--result" : ""}${over ? " dash-energy-term--over" : ""}`}>
-      <span className="dash-energy-term-label">{label}</span>
-      <strong className="dash-energy-term-value">{Math.round(value).toLocaleString("th-TH")}</strong>
-    </div>
-  );
-}
-
 export default function DashboardRings({
   foodCals = 0,
   activityCals = 0,
@@ -24,52 +15,59 @@ export default function DashboardRings({
   className = "",
 }) {
   const goal = Math.max(Number(tdee) || 0, 1);
-  const used = Math.max(0, foodCals - activityCals);
-  const remaining = goal - (foodCals - activityCals);
+  const eaten = Math.max(0, Number(foodCals) || 0);
+  const burned = Math.max(0, Number(activityCals) || 0);
+  const remaining = goal - (eaten - burned);
   const over = remaining < 0;
   const overflow = over ? Math.abs(remaining) : 0;
-  const scale = over ? used : goal;
-  const usedPct = scale > 0 ? (Math.min(used, goal) / scale) * 100 : 0;
-  const overPct = scale > 0 ? (overflow / scale) * 100 : 0;
+  const scale = eaten > goal ? eaten : goal;
+  const usedPct = scale > 0 ? (Math.min(eaten, goal) / scale) * 100 : 0;
+  const overPct = scale > 0 && eaten > goal ? ((eaten - goal) / scale) * 100 : 0;
 
   return (
     <div
       className={`dash-energy-wrap ${className}`.trim()}
       role="img"
-      aria-label={`เป้าหมาย ${Math.round(goal)} ลบกินแล้ว ${foodCals} บวกกิจกรรม ${activityCals} เท่ากับ${over ? "เกินเป้า" : "คงเหลือ"} ${Math.abs(Math.round(remaining))} kcal`}
+      aria-label={
+        over
+          ? `เกินเป้า ${Math.round(overflow)} kcal จากเป้าหมาย ${Math.round(goal)}`
+          : `กินได้อีก ${Math.round(remaining)} kcal จากเป้าหมาย ${Math.round(goal)}`
+      }
     >
-      <div className="dash-energy-eq" aria-hidden>
-        <EqTerm label="เป้าหมาย" value={goal} />
-        <span className="dash-energy-op">−</span>
-        <EqTerm label="กินแล้ว" value={foodCals} />
-        <span className="dash-energy-op">+</span>
-        <EqTerm label="กิจกรรม" value={activityCals} />
-        <span className={`dash-energy-op dash-energy-op--eq${over ? " is-over" : ""}`}>=</span>
-        <EqTerm
-          label={over ? "เกินเป้า" : "คงเหลือ"}
-          value={Math.abs(remaining)}
-          emphasize
-          over={over}
-        />
+      <div className={`dash-energy-hero${over ? " is-over" : ""}`}>
+        <span className="dash-energy-hero-label">{over ? "เกินเป้า" : "กินได้อีก"}</span>
+        <strong className="dash-energy-hero-value">
+          {Math.abs(Math.round(remaining)).toLocaleString("th-TH")}
+        </strong>
+        <span className="dash-energy-hero-unit">kcal</span>
       </div>
 
       <div
-        className={`dash-energy-bar${over ? " is-over" : ""}`}
+        className={`dash-energy-bar${eaten > goal ? " is-over" : ""}`}
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={Math.round(goal)}
-        aria-valuenow={Math.round(used)}
-        aria-label={over ? "กินเกินเป้าหมายแล้ว" : `ใช้ไป ${Math.round(used)} จาก ${Math.round(goal)} kcal`}
+        aria-valuenow={Math.round(eaten)}
+        aria-label={`กินไปแล้ว ${Math.round(eaten)} จาก ${Math.round(goal)} kcal`}
       >
         <span className="dash-energy-bar-track">
           <span className="dash-energy-bar-used" style={{ width: `${usedPct}%` }} />
-          {over ? <span className="dash-energy-bar-over" style={{ width: `${overPct}%` }} /> : null}
+          {overPct > 0 ? <span className="dash-energy-bar-over" style={{ width: `${overPct}%` }} /> : null}
         </span>
         <span className="dash-energy-bar-meta">
-          {over
-            ? `ใช้ไป ${Math.round(used).toLocaleString("th-TH")} / ${Math.round(goal).toLocaleString("th-TH")} · เกิน ${Math.round(overflow).toLocaleString("th-TH")} kcal`
-            : `ใช้ไป ${Math.round(used).toLocaleString("th-TH")} / ${Math.round(goal).toLocaleString("th-TH")} kcal`}
+          {`กินไปแล้ว ${Math.round(eaten).toLocaleString("th-TH")} / ${Math.round(goal).toLocaleString("th-TH")} kcal`}
         </span>
+      </div>
+
+      <div className="dash-energy-mini">
+        <div className="dash-energy-mini-item">
+          <span className="dash-energy-mini-label">เป้าหมาย</span>
+          <strong className="dash-energy-mini-value">{Math.round(goal).toLocaleString("th-TH")}</strong>
+        </div>
+        <div className="dash-energy-mini-item">
+          <span className="dash-energy-mini-label">เผาผลาญเพิ่ม</span>
+          <strong className="dash-energy-mini-value">{Math.round(burned).toLocaleString("th-TH")}</strong>
+        </div>
       </div>
 
       <DashboardMacroStrip

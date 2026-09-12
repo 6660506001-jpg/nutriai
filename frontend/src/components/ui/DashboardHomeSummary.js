@@ -35,7 +35,7 @@ export function DashboardHomeStats({
     <section className="dash-home-summary dash-home-stats-block" aria-label="ข้อมูลสรุป">
       <header className="dash-home-summary-head">
         <h2 className="dash-home-summary-title">ข้อมูลสรุป</h2>
-        <p className="dash-home-summary-desc">น้ำหนัก · BMI · TDEE · คงเหลือ</p>
+        <p className="dash-home-summary-desc">น้ำหนัก · BMI · TDEE · กินได้อีก</p>
       </header>
 
       <div className="dash-home-summary-grid">
@@ -61,7 +61,7 @@ export function DashboardHomeStats({
           compact
         />
         <MetricCard
-          label={over ? "เกินเป้า" : "คงเหลือ"}
+          label={over ? "เกินเป้า" : "กินได้อีก"}
           value={Math.abs(Math.round(remaining)).toLocaleString("th-TH")}
           unit="kcal"
           tooltip={STAT_TOOLTIPS.remainingCal}

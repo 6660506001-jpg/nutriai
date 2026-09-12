@@ -26,16 +26,10 @@ export default function DashboardStatusHero({
     return "สวัสดีตอนเย็น";
   })();
 
-  const remaining = (Number(tdee) || 0) - (foodCals - activityCals);
-  const over = remaining < 0;
   const hasLogs = foodCals > 0 || activityCals > 0;
   const statusText = !hasLogs
     ? "ยังไม่ได้บันทึกอาหารวันนี้ — เริ่มจากแท็บอาหาร"
-    : over
-      ? `เกินเป้าแล้ว ${Math.abs(Math.round(remaining)).toLocaleString("th-TH")} kcal`
-      : remaining === 0
-        ? "ถึงเป้าแล้ว — มื้อถัดไปควรเบาลง"
-        : `วันนี้ยังกินได้อีกประมาณ ${Math.round(remaining).toLocaleString("th-TH")} kcal`;
+    : null;
 
   return (
     <section className={`dash-status-hero${isCompact ? " dash-status-hero--compact" : ""}`} aria-label="สรุปสถานะวันนี้">
@@ -63,7 +57,7 @@ export default function DashboardStatusHero({
                 {greeting}
                 {username ? `, ${username}` : ""}
               </h2>
-              <p className="dash-status-hero-status">{statusText}</p>
+              {statusText ? <p className="dash-status-hero-status">{statusText}</p> : null}
             </div>
             {(showActions && (onLogFood || onLogActivity)) ? (
               <div className="dash-status-hero-actions">
