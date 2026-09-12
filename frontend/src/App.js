@@ -235,8 +235,9 @@ export default function App() {
       pullCloudSession(user.username, password, user, { dailyMeals, activities, historyData })
         .then(({ session: resolved, uploadLocal }) => {
           if (!resolved) return;
-          const localHas = sessionHasLogData({ dailyMeals, activities, historyData });
-          if (sessionHasLogData(resolved) && (!localHas || !uploadLocal)) {
+          const localHasDaily = sessionHasDailyLogs({ dailyMeals, activities });
+          const resolvedHasDaily = sessionHasDailyLogs(resolved);
+          if (resolvedHasDaily && (!localHasDaily || !uploadLocal)) {
             applyResolvedCloudSession(resolved, user);
           }
         })
