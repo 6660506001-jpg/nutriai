@@ -10,6 +10,34 @@ const STORAGE_KEYS = {
   lastDate: "nutri_last_date",
 };
 
+const LAST_USERNAME_KEY = "nutri_last_username";
+
+export function getLastUsername() {
+  try {
+    return String(localStorage.getItem(LAST_USERNAME_KEY) || "").trim();
+  } catch {
+    return "";
+  }
+}
+
+export function setLastUsername(username) {
+  const clean = String(username || "").trim();
+  if (!clean) return;
+  try {
+    localStorage.setItem(LAST_USERNAME_KEY, clean);
+  } catch {
+    /* ignore quota */
+  }
+}
+
+export function clearLastUsername() {
+  try {
+    localStorage.removeItem(LAST_USERNAME_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 function scopedKey(kind, username) {
   return `${STORAGE_KEYS[kind]}__${encodeURIComponent(username)}`;
 }
@@ -81,6 +109,23 @@ function readScopedOrLegacy(kind, username, fallback) {
   return kind === "lastDate" ? legacy : readJson(legacyKey, fallback);
 }
 
+export function findStoredUsername() {
+  const last = getLastUsername();
+  if (last) return last;
+  try {
+    const prefix = `${STORAGE_KEYS.user}__`;
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith(prefix)) continue;
+      const user = readJson(key, null);
+      if (user?.username) return String(user.username).trim();
+    }
+  } catch {
+    /* ignore */
+  }
+  return "";
+}
+
 export function loadUserSession(username) {
   if (!username) {
     return {
@@ -123,6 +168,7 @@ export function saveUserSession(username, { user, dailyMeals, historyData, activ
   if (lastDate != null) {
     localStorage.setItem(scopedKey("lastDate", username), lastDate);
   }
+  setLastUsername(username);
   touchLocalSyncUpdatedAt(username);
 }
 

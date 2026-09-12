@@ -18,7 +18,14 @@ import FoodPreferencesModal from "./components/ui/FoodPreferencesModal";
 import DailyCompleteToast from "./components/ui/DailyCompleteToast";
 import { useDailyMealCompleteCelebration } from "./hooks/useDailyMealCompleteCelebration";
 import { PAGE_META } from "./constants/pageMeta";
-import { EMPTY_MEALS, loadUserSession, saveUserSession, clearLegacySessionKeys } from "./utils/userStorage";
+import {
+  EMPTY_MEALS,
+  loadUserSession,
+  saveUserSession,
+  clearLegacySessionKeys,
+  findStoredUsername,
+  clearLastUsername,
+} from "./utils/userStorage";
 import { loadUserDataFromCloud, saveUserDataToCloud } from "./utils/syncApi";
 import { clearSyncPassword, getSyncPassword, setSyncPassword } from "./utils/syncCredentials";
 import { packCloudPayload, resolveSessionOnLogin, sessionHasLogData } from "./utils/sessionCloudMerge";
@@ -58,8 +65,23 @@ function TabLoading() {
   return <div style={{ padding: 24, color: "#64748b" }}>กำลังโหลด...</div>;
 }
 
+function bootstrapLastSession() {
+  const username = findStoredUsername();
+  if (!username) return null;
+  const localSession = loadUserSession(username);
+  if (!localSession.user?.username) return null;
+  return applyDailyArchive({
+    lastDate: localSession.lastDate,
+    user: localSession.user,
+    dailyMeals: localSession.dailyMeals,
+    historyData: stripSimulatedHistory(localSession.historyData),
+    activities: localSession.activities,
+  });
+}
+
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [bootSession] = useState(bootstrapLastSession);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(bootSession?.user));
   const [currentTab, setCurrentTab] = useState("dashboard");
   const [themeId, setThemeId] = useState(getStoredThemeId);
   const [appearanceMode, setAppearanceMode] = useState(getStoredAppearance);
@@ -78,10 +100,10 @@ export default function App() {
     return unsubscribeSystemAppearance;
   }, [themeId, appearanceMode, followDevice, customPrimary]);
 
-  const [user, setUser] = useState(null);
-  const [dailyMeals, setDailyMeals] = useState(() => ({ ...EMPTY_MEALS }));
-  const [historyData, setHistoryData] = useState([]);
-  const [activities, setActivities] = useState([]);
+  const [user, setUser] = useState(() => bootSession?.user || null);
+  const [dailyMeals, setDailyMeals] = useState(() => bootSession?.dailyMeals || ({ ...EMPTY_MEALS }));
+  const [historyData, setHistoryData] = useState(() => bootSession?.historyData || []);
+  const [activities, setActivities] = useState(() => bootSession?.activities || []);
   const [activeMealTab, setActiveMealTab] = useState(getMealPeriodByTime);
   const [activityLaunchPreset, setActivityLaunchPreset] = useState(null);
   const [showUserGuide, setShowUserGuide] = useState(false);
@@ -256,9 +278,7 @@ export default function App() {
       markFoodPrefsSetupDone(username);
     }
     setIsLoggedIn(true);
-    const hasNoLogsToday = !Object.values(archived.dailyMeals).some((meal) => meal.length > 0);
-    const openFoodFirst = isMobile || hasNoLogsToday;
-    setCurrentTab(openFoodFirst ? "food" : "dashboard");
+    setCurrentTab("dashboard");
   };
 
   const handleSaveFoodPreferences = (nextPreferences) => {
@@ -285,6 +305,7 @@ export default function App() {
           ).catch(() => {});
         }
         clearSyncPassword(user.username);
+        clearLastUsername();
       }
       setIsLoggedIn(false);
       setCurrentTab("dashboard");
