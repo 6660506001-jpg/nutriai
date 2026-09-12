@@ -190,6 +190,52 @@ export default function AppVisualEffects() {
         min-height: 48px;
       }
 
+      .sync-unlock-bar {
+        margin: 0 14px 10px;
+        padding: 10px 12px;
+        border: 1px solid #fde68a;
+        border-radius: 14px;
+        background: #fffbeb;
+      }
+      .sync-unlock-bar-copy {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #92400e;
+        line-height: 1.4;
+      }
+      .sync-unlock-bar-row {
+        display: flex;
+        gap: 8px;
+      }
+      .sync-unlock-bar-input {
+        flex: 1;
+        min-width: 0;
+        height: 40px;
+        padding: 0 12px;
+        border: 1px solid #f4d38a;
+        border-radius: 10px;
+        background: #fff;
+        font: inherit;
+      }
+      .sync-unlock-bar-btn {
+        flex: 0 0 auto;
+        height: 40px;
+        padding: 0 14px;
+        border: none;
+        border-radius: 10px;
+        background: #d97706;
+        color: #fff;
+        font: inherit;
+        font-weight: 800;
+      }
+      .sync-unlock-bar-error {
+        margin: 8px 0 0;
+        font-size: 12px;
+        font-weight: 700;
+        color: #b45309;
+      }
+
       .app-header--dash-rings {
         display: block !important;
         text-align: left !important;
