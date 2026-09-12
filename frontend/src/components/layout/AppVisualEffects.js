@@ -190,50 +190,79 @@ export default function AppVisualEffects() {
         min-height: 48px;
       }
 
-      .sync-unlock-bar {
-        margin: 0 14px 10px;
-        padding: 10px 12px;
-        border: 1px solid #fde68a;
-        border-radius: 14px;
-        background: #fffbeb;
-      }
-      .sync-unlock-bar-copy {
-        margin: 0 0 8px;
-        font-size: 13px;
-        font-weight: 700;
-        color: #92400e;
-        line-height: 1.4;
-      }
-      .sync-unlock-bar-row {
+      .sync-unlock-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 1400;
         display: flex;
-        gap: 8px;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 16px 16px calc(18px + env(safe-area-inset-bottom));
+        background: rgba(15, 23, 42, 0.45);
       }
-      .sync-unlock-bar-input {
-        flex: 1;
-        min-width: 0;
-        height: 40px;
-        padding: 0 12px;
-        border: 1px solid #f4d38a;
-        border-radius: 10px;
+      .sync-unlock-modal-card {
+        width: min(420px, 100%);
+        padding: 18px 16px 14px;
+        border-radius: 20px;
         background: #fff;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.2);
+      }
+      .sync-unlock-modal-card h2 {
+        margin: 0 0 8px;
+        font-size: 20px;
+        font-weight: 900;
+      }
+      .sync-unlock-modal-card p {
+        margin: 0 0 10px;
+        font-size: 14px;
+        line-height: 1.45;
+        color: #475569;
+      }
+      .sync-unlock-modal-user {
+        color: #0f172a !important;
+      }
+      .sync-unlock-modal-input {
+        width: 100%;
+        height: 46px;
+        margin: 4px 0 10px;
+        padding: 0 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
         font: inherit;
       }
-      .sync-unlock-bar-btn {
-        flex: 0 0 auto;
-        height: 40px;
-        padding: 0 14px;
+      .sync-unlock-modal-error {
+        color: #b45309 !important;
+        font-weight: 700;
+      }
+      .sync-unlock-modal-hint {
+        color: #9a3412 !important;
+        font-weight: 700;
+      }
+      .sync-unlock-modal-btn {
+        width: 100%;
+        height: 46px;
         border: none;
-        border-radius: 10px;
-        background: #d97706;
+        border-radius: 12px;
+        background: #2563eb;
         color: #fff;
         font: inherit;
         font-weight: 800;
       }
-      .sync-unlock-bar-error {
-        margin: 8px 0 0;
-        font-size: 12px;
+      .sync-unlock-modal-skip {
+        display: block;
+        width: 100%;
+        margin-top: 8px;
+        padding: 10px 0;
+        border: none;
+        background: none;
+        color: #64748b;
+        font: inherit;
         font-weight: 700;
-        color: #b45309;
+      }
+      @media (min-width: 901px) {
+        .sync-unlock-modal {
+          align-items: center;
+        }
       }
 
       .app-header--dash-rings {

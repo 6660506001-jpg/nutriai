@@ -27,6 +27,7 @@ import {
   clearLastUsername,
 } from "./utils/userStorage";
 import { loadUserDataFromCloud, saveUserDataToCloud } from "./utils/syncApi";
+import SyncUnlockModal from "./components/ui/SyncUnlockModal";
 import { clearSyncPassword, getSyncPassword, setSyncPassword } from "./utils/syncCredentials";
 import { packCloudPayload, resolveSessionOnLogin, sessionHasLogData } from "./utils/sessionCloudMerge";
 import { stripSimulatedHistory } from "./utils/dailyArchive";
@@ -39,7 +40,7 @@ import {
   hasFoodAvoidanceConfigured,
   normalizeFoodPreferences,
 } from "./utils/foodPreferences";
-import { formatTodayLabel, getMealPeriodByTime, MEAL_ORDER } from "./utils/logDisplay";
+import { formatTodayLabel, getMealPeriodByTime, getTodayKey, MEAL_ORDER } from "./utils/logDisplay";
 import { useIsMobile } from "./hooks/useIsMobile";
 import DashboardRings from "./components/ui/DashboardRings";
 
@@ -111,6 +112,11 @@ export default function App() {
   const [cloudReady, setCloudReady] = useState(false);
   const [syncUnlockError, setSyncUnlockError] = useState("");
   const [syncUnlockBusy, setSyncUnlockBusy] = useState(false);
+  const [syncUnlockHint, setSyncUnlockHint] = useState("");
+  const [syncUnlockOpen, setSyncUnlockOpen] = useState(() => {
+    const name = bootSession?.user?.username;
+    return Boolean(name && !getSyncPassword(name));
+  });
   const isMobile = useIsMobile();
   const cloudSyncTimerRef = useRef(null);
   const cloudPullingRef = useRef(false);
@@ -125,7 +131,13 @@ export default function App() {
 
   useEffect(() => {
     if (!isLoggedIn || !user?.username) return;
-    saveUserSession(user.username, { user, dailyMeals, historyData, activities });
+    saveUserSession(user.username, {
+      user,
+      dailyMeals,
+      historyData,
+      activities,
+      lastDate: getTodayKey(),
+    });
   }, [isLoggedIn, user, dailyMeals, activities, historyData]);
 
   const applyResolvedCloudSession = (resolved, fallbackUser) => {
@@ -235,10 +247,10 @@ export default function App() {
   }, [isLoggedIn, user, dailyMeals, activities, historyData, cloudReady]);
 
   useEffect(() => {
-    if (!isLoggedIn || !user?.username || !cloudReady) return undefined;
+    if (!isLoggedIn || !user?.username) return undefined;
     const password = getSyncPassword(user.username);
     if (!password) return undefined;
-    if (cloudPullingRef.current) return undefined;
+    if (!sessionHasLogData({ dailyMeals, activities, historyData })) return undefined;
 
     if (cloudSyncTimerRef.current) {
       clearTimeout(cloudSyncTimerRef.current);
@@ -250,14 +262,14 @@ export default function App() {
         password,
         packCloudPayload({ dailyMeals, activities, historyData, lastDate, user }),
       ).catch(() => {});
-    }, 1500);
+    }, 800);
 
     return () => {
       if (cloudSyncTimerRef.current) {
         clearTimeout(cloudSyncTimerRef.current);
       }
     };
-  }, [isLoggedIn, user, dailyMeals, activities, historyData, cloudReady]);
+  }, [isLoggedIn, user, dailyMeals, activities, historyData]);
 
   useEffect(() => {
     if (!isLoggedIn || !user?.username) return;
@@ -300,33 +312,39 @@ export default function App() {
     return mergedUser;
   };
 
-  const handleUnlockSync = async (event) => {
-    event.preventDefault();
+  const handleUnlockSync = async (password) => {
     if (!user?.username) return;
-    const password = String(event.currentTarget.elements.namedItem("sync-password")?.value || "").trim();
-    if (!password) {
-      setSyncUnlockError("กรอกรหัสผ่านเพื่อดึงมื้อจากเครื่องอื่น");
+    const clean = String(password || "").trim();
+    if (!clean) {
+      setSyncUnlockError("กรอกรหัสผ่านของบัญชีนี้");
       return;
     }
     setSyncUnlockBusy(true);
     setSyncUnlockError("");
+    setSyncUnlockHint("");
     try {
-      setSyncPassword(user.username, password);
+      setSyncPassword(user.username, clean);
       const { session: resolved, uploadLocal } = await pullCloudSession(
         user.username,
-        password,
+        clean,
         user,
         { dailyMeals, activities, historyData },
       );
-      if (resolved && sessionHasLogData(resolved)) {
+      const localHas = sessionHasLogData({ dailyMeals, activities, historyData });
+      const resolvedHas = resolved && sessionHasLogData(resolved);
+      if (resolvedHas && (!localHas || !uploadLocal)) {
         applyResolvedCloudSession(resolved, user);
-      } else if (uploadLocal && sessionHasLogData({ dailyMeals, activities, historyData })) {
+        setSyncUnlockOpen(false);
+      } else if (localHas) {
         const { lastDate } = loadUserSession(user.username);
         await saveUserDataToCloud(
           user.username,
-          password,
+          clean,
           packCloudPayload({ dailyMeals, activities, historyData, lastDate, user }),
         );
+        setSyncUnlockOpen(false);
+      } else {
+        setSyncUnlockHint("ยังไม่มีมื้อบนคลาวด์ — เปิดคอม กรอกรหัสผ่านแล้วกดซิงค์เพื่อส่งมื้อมา แล้วกลับมากดซิงค์บนมือถืออีกครั้ง");
       }
       setCloudReady(true);
     } catch (error) {
@@ -427,7 +445,10 @@ export default function App() {
     }
     setIsLoggedIn(true);
     setCurrentTab("dashboard");
-    if (password) setCloudReady(true);
+    if (password) {
+      setCloudReady(true);
+      setSyncUnlockOpen(false);
+    }
   };
 
   const handleSaveFoodPreferences = (nextPreferences) => {
@@ -581,6 +602,17 @@ export default function App() {
         onSave={handleSaveFoodPreferences}
         onSkip={handleSkipFoodPreferences}
       />
+      {isLoggedIn && user?.username && syncUnlockOpen ? (
+        <SyncUnlockModal
+          username={user.username}
+          hasLocalLogs={sessionHasLogData({ dailyMeals, activities, historyData })}
+          busy={syncUnlockBusy}
+          error={syncUnlockError}
+          hint={syncUnlockHint}
+          onSubmit={handleUnlockSync}
+          onSkip={() => setSyncUnlockOpen(false)}
+        />
+      ) : null}
       <UserGuideModal
         open={showUserGuide}
         onClose={handleCloseUserGuide}
@@ -608,24 +640,6 @@ export default function App() {
           className={`app-main nutri-page-bg app-main-tab-${currentTab}${isMobile ? " app-main--mobile" : ""}`}
           style={styles.mainArea}
         >
-          {isLoggedIn && user?.username && !getSyncPassword(user.username) ? (
-            <form className="sync-unlock-bar" onSubmit={handleUnlockSync}>
-              <p className="sync-unlock-bar-copy">มื้อบนมือถือยังไม่ตรงกับคอม — กรอกรหัสผ่านเพื่อดึงข้อมูล</p>
-              <div className="sync-unlock-bar-row">
-                <input
-                  name="sync-password"
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="รหัสผ่าน"
-                  className="sync-unlock-bar-input"
-                />
-                <button type="submit" className="sync-unlock-bar-btn" disabled={syncUnlockBusy}>
-                  {syncUnlockBusy ? "กำลังซิงค์..." : "ซิงค์"}
-                </button>
-              </div>
-              {syncUnlockError ? <p className="sync-unlock-bar-error">{syncUnlockError}</p> : null}
-            </form>
-          ) : null}
           <header
             className={`app-header${showDashboardRings ? " app-header--dash-rings" : " app-header-context"}`}
             style={showDashboardRings ? undefined : styles.header}
