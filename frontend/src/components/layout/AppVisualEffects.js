@@ -242,6 +242,9 @@ export default function AppVisualEffects() {
         color: #9a3412 !important;
         font-weight: 700;
       }
+      .sync-unlock-modal-hint.is-success {
+        color: #047857 !important;
+      }
       .sync-unlock-modal-btn {
         width: 100%;
         height: 46px;

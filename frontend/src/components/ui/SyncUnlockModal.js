@@ -10,6 +10,7 @@ export default function SyncUnlockModal({
   onSkip,
 }) {
   const [password, setPassword] = useState("");
+  const hintIsSuccess = String(hint || "").startsWith("ส่งสำเร็จ");
 
   return (
     <div className="sync-unlock-modal" role="dialog" aria-modal="true" aria-labelledby="sync-unlock-title">
@@ -23,15 +24,15 @@ export default function SyncUnlockModal({
         <h2 id="sync-unlock-title">ซิงค์มื้ออาหาร</h2>
         {hasDailyLogs ? (
           <p>
-            เครื่องนี้มีมื้อวันนี้แล้ว กรอกรหัสผ่านเพื่อส่งขึ้นคลาวด์ ให้มือถือดึงไปใช้ได้
+            หน้านี้มียอดวันนี้แล้ว กรอกรหัสผ่านแล้วกดส่งขึ้นคลาวด์ จากนั้นค่อยไปดึงบนมือถือ
           </p>
         ) : (
           <>
-            <p>
-              เครื่องนี้ยังไม่มีมื้อวันนี้ กรอกรหัสผ่านเพื่อดึงจากคลาวด์
-            </p>
+            <p>มือถือยังไม่มีมื้อวันนี้</p>
             <p className="sync-unlock-modal-steps">
-              ถ้าขึ้นว่ายังไม่มีมื้อบนคลาวด์ ให้ไปที่คอมก่อน: เปิดเว็บเดียวกัน เข้าบัญชีนี้ แล้วกดซิงค์เพื่อส่งมื้อขึ้น จากนั้นกลับมากดซิงค์บนมือถืออีกครั้ง
+              ให้เปิดหน้าคอมที่เห็นยอดอาหารวันนี้แล้ว (พลังงานที่ได้รับไม่เป็น 0)
+              แล้วกดส่งมื้อขึ้นคลาวด์จนขึ้นว่าส่งสำเร็จ
+              ถ้าเปิดแท็บใหม่ที่ยังเป็น 0 จะส่งมื้อไม่ได้
             </p>
           </>
         )}
@@ -45,7 +46,9 @@ export default function SyncUnlockModal({
           className="sync-unlock-modal-input"
         />
         {error ? <p className="sync-unlock-modal-error">{error}</p> : null}
-        {hint ? <p className="sync-unlock-modal-hint">{hint}</p> : null}
+        {hint ? (
+          <p className={`sync-unlock-modal-hint${hintIsSuccess ? " is-success" : ""}`}>{hint}</p>
+        ) : null}
         <button type="submit" className="sync-unlock-modal-btn" disabled={busy}>
           {busy ? "กำลังซิงค์..." : hasDailyLogs ? "ส่งมื้อขึ้นคลาวด์" : "ดึงมื้อจากคลาวด์"}
         </button>

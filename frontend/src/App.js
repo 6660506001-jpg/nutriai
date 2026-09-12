@@ -29,7 +29,7 @@ import {
 import { loadUserDataFromCloud, saveUserDataToCloud } from "./utils/syncApi";
 import SyncUnlockModal from "./components/ui/SyncUnlockModal";
 import { clearSyncPassword, getSyncPassword, setSyncPassword } from "./utils/syncCredentials";
-import { packCloudPayload, resolveSessionOnLogin, sessionHasDailyLogs, sessionHasLogData } from "./utils/sessionCloudMerge";
+import { applyCloudPayload, countDailyItems, packCloudPayload, resolveSessionOnLogin, sessionHasDailyLogs, sessionHasLogData } from "./utils/sessionCloudMerge";
 import { stripSimulatedHistory } from "./utils/dailyArchive";
 import { hasSeenUserGuide, markUserGuideSeen } from "./utils/userGuideStorage";
 import {
@@ -355,14 +355,20 @@ export default function App() {
         setSyncUnlockOpen(false);
       } else if (localHasDaily) {
         const { lastDate } = loadUserSession(user.username);
-        await saveUserDataToCloud(
-          user.username,
-          clean,
-          packCloudPayload({ dailyMeals, activities, historyData, lastDate, user }),
-        );
-        setSyncUnlockOpen(false);
+        const payload = packCloudPayload({ dailyMeals, activities, historyData, lastDate, user });
+        await saveUserDataToCloud(user.username, clean, payload);
+        const check = await loadUserDataFromCloud(user.username, clean);
+        const stored = applyCloudPayload(check?.payload, user);
+        if (!sessionHasDailyLogs(stored || {})) {
+          setSyncUnlockError("ส่งแล้วแต่คลาวด์ยังว่าง ลองกดส่งอีกครั้ง");
+          return;
+        }
+        const itemCount = countDailyItems(stored);
+        setSyncUnlockHint(`ส่งสำเร็จ ${itemCount} รายการ — กลับไปมือถือแล้วกดดึงมื้อจากคลาวด์`);
+        setCloudReady(true);
+        return;
       } else {
-        setSyncUnlockHint("คลาวด์ยังว่างอยู่ — เปิดเว็บเดียวกันบนคอม เข้าบัญชีนี้ แล้วกด「ส่งมื้อขึ้นคลาวด์」ก่อน แล้วกลับมากดดึงมื้ออีกครั้ง");
+        setSyncUnlockHint("คลาวด์ยังว่าง — ต้องส่งจากหน้าคอมที่มียอดวันนี้แล้ว (พลังงานที่ได้รับไม่เป็น 0) ไม่ใช่แท็บใหม่ที่ยังเป็น 0");
       }
       setCloudReady(true);
     } catch (error) {
@@ -769,8 +775,8 @@ export default function App() {
             <div className="sync-needed-banner">
               <p>
                 {hasDailyLogs
-                  ? "มื้อนี้อยู่แค่เครื่องนี้ — กรอกรหัสผ่านเพื่อส่งไปมือถือ"
-                  : "เครื่องนี้ยังไม่มีมื้อวันนี้ — ดึงจากคลาวด์หรือส่งจากคอมก่อน"}
+                  ? "หน้านี้มียอดวันนี้ — กดซิงค์เพื่อส่งขึ้นคลาวด์ให้มือถือ"
+                  : "มือถือยังไม่มีมื้อ — ต้องส่งจากหน้าคอมที่มียอดวันนี้แล้ว ไม่ใช่แท็บที่ยังเป็น 0"}
               </p>
               <button type="button" className="sync-needed-banner-btn" onClick={openSyncUnlock}>
                 ซิงค์มื้ออาหาร

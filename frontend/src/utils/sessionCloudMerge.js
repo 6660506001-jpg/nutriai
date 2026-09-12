@@ -7,6 +7,11 @@ export function sessionHasDailyLogs({ dailyMeals, activities }) {
   return hasMeals || hasActs;
 }
 
+export function countDailyItems({ dailyMeals, activities }) {
+  const meals = Object.values(dailyMeals || {}).reduce((sum, items) => sum + (items?.length || 0), 0);
+  return meals + (activities || []).length;
+}
+
 export function sessionHasLogData({ dailyMeals, activities, historyData }) {
   const hasHistory = (historyData || []).length > 0;
   return sessionHasDailyLogs({ dailyMeals, activities }) || hasHistory;
