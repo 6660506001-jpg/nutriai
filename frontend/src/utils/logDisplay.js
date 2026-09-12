@@ -8,17 +8,17 @@ export const MEAL_WINDOWS = {
   "มื้อเช้า": {
     short: "เช้า",
     rangeLabel: "04:00–10:59 น.",
-    uxNote: "ครอบคลุมผู้ใช้งานช่วงเช้าตรู่และมื้อเช้าสาย",
+    uxNote: "เช้าตรู่และมื้อเช้าสาย",
   },
   "มื้อกลางวัน": {
     short: "กลางวัน",
     rangeLabel: "11:00–15:59 น.",
-    uxNote: "ครอบคลุมช่วงเวลาอาหารกลางวันและมื้อบ่าย",
+    uxNote: "อาหารกลางวันและมื้อบ่าย",
   },
   "มื้อเย็น": {
     short: "เย็น",
     rangeLabel: "16:00–03:59 น.",
-    uxNote: "ครอบคลุมช่วงเวลาอาหารค่ำและมื้อดึก",
+    uxNote: "อาหารค่ำและมื้อดึก",
   },
 };
 
@@ -41,7 +41,7 @@ export const getMealAutoHint = (mealType, date = new Date()) => {
   const prefix = getMealPeriodByTime(date) === mealType
     ? "ระบบเลือกให้อัตโนมัติ"
     : getMealShort(mealType);
-  return `${prefix} · ${meta.rangeLabel} · ${meta.uxNote}`;
+  return `${prefix} · ${meta.rangeLabel}`;
 };
 
 export const formatTodayLabel = (date = new Date()) =>
