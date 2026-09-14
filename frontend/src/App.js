@@ -356,6 +356,7 @@ export default function App() {
       );
       const localHasDaily = sessionHasDailyLogs({ dailyMeals, activities });
       const resolvedHasDaily = resolved && sessionHasDailyLogs(resolved);
+      const resolvedHasAny = resolved && sessionHasLogData(resolved);
       if (resolvedHasDaily && (!localHasDaily || !uploadLocal)) {
         applyResolvedCloudSession(resolved, user);
         setCloudPushVerified(true);
@@ -375,8 +376,11 @@ export default function App() {
         setSyncUnlockHint(`ส่งสำเร็จ ${itemCount} รายการ — กลับไปมือถือแล้วกดดึงมื้อจากคลาวด์`);
         setCloudReady(true);
         return;
+      } else if (resolvedHasAny) {
+        applyResolvedCloudSession(resolved, user);
+        setSyncUnlockOpen(false);
       } else {
-        setSyncUnlockHint("คลาวด์ยังว่าง — ต้องส่งจากหน้าคอมที่มียอดวันนี้แล้ว (พลังงานที่ได้รับไม่เป็น 0) ไม่ใช่แท็บใหม่ที่ยังเป็น 0");
+        setSyncUnlockHint("ยังไม่มีมื้อวันนี้บนคลาวด์");
       }
       setCloudReady(true);
     } catch (error) {
@@ -794,7 +798,7 @@ export default function App() {
               <p>
                 {hasDailyLogs
                   ? "หน้านี้มียอดวันนี้แล้ว — กดส่งขึ้นคลาวด์จนขึ้นว่าส่งสำเร็จ แล้วค่อยไปดึงบนมือถือ"
-                  : "มือถือยังไม่มีมื้อ — ต้องส่งจากหน้าคอมที่มียอดวันนี้แล้ว ไม่ใช่แท็บที่ยังเป็น 0"}
+                  : "ยังไม่มีมื้อวันนี้บนเครื่องนี้"}
               </p>
               <button type="button" className="sync-needed-banner-btn" onClick={openSyncUnlock}>
                 ซิงค์มื้ออาหาร
