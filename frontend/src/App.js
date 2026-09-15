@@ -155,12 +155,22 @@ export default function App() {
       historyData: stripSimulatedHistory(resolved.historyData),
       activities: resolved.activities,
     });
+    const keepIncomingLogs = (
+      sessionHasDailyLogs(resolved)
+      && !sessionHasDailyLogs(archived)
+    );
+    const nextMeals = keepIncomingLogs ? resolved.dailyMeals : archived.dailyMeals;
+    const nextActivities = keepIncomingLogs ? resolved.activities : archived.activities;
     setUser(archived.user);
-    setDailyMeals(archived.dailyMeals);
+    setDailyMeals(nextMeals);
     setHistoryData(archived.historyData);
-    setActivities(archived.activities);
-    saveUserSession(archived.user.username, archived);
-    return archived;
+    setActivities(nextActivities);
+    saveUserSession(archived.user.username, {
+      ...archived,
+      dailyMeals: nextMeals,
+      activities: nextActivities,
+    });
+    return { ...archived, dailyMeals: nextMeals, activities: nextActivities };
   };
 
   const pullCloudSession = async (username, password, snapshotUser, snapshotLogs) => {
@@ -194,7 +204,7 @@ export default function App() {
         if (cancelled || !resolved) return;
         const localHasDaily = sessionHasDailyLogs({ dailyMeals, activities });
         const resolvedHasDaily = sessionHasDailyLogs(resolved);
-        if (resolvedHasDaily) {
+        if (resolvedHasDaily || (!localHasDaily && sessionHasLogData(resolved))) {
           applyResolvedCloudSession(resolved, user);
         } else if (uploadLocal && localHasDaily) {
           const { lastDate } = loadUserSession(user.username);
@@ -237,7 +247,9 @@ export default function App() {
       cloudPullingRef.current = true;
       pullCloudSession(user.username, password, user, { dailyMeals, activities, historyData })
         .then(({ session: resolved }) => {
-          if (resolved && sessionHasDailyLogs(resolved)) {
+          if (!resolved) return;
+          const localHasDaily = sessionHasDailyLogs({ dailyMeals, activities });
+          if (sessionHasDailyLogs(resolved) || (!localHasDaily && sessionHasLogData(resolved))) {
             applyResolvedCloudSession(resolved, user);
           }
         })
@@ -267,11 +279,10 @@ export default function App() {
       clearTimeout(cloudSyncTimerRef.current);
     }
     cloudSyncTimerRef.current = setTimeout(() => {
-      const { lastDate } = loadUserSession(user.username);
       saveUserDataToCloud(
         user.username,
         password,
-        packCloudPayload({ dailyMeals, activities, historyData, lastDate, user }),
+        packCloudPayload({ dailyMeals, activities, historyData, lastDate: getTodayKey(), user }),
       ).catch(() => {});
     }, 800);
 
@@ -346,7 +357,7 @@ export default function App() {
     setSyncUnlockHint("");
     try {
       setSyncPassword(user.username, clean);
-      const { session: resolved, uploadLocal } = await pullCloudSession(
+      const { session: resolved } = await pullCloudSession(
         user.username,
         clean,
         user,
@@ -355,15 +366,20 @@ export default function App() {
       const localHasDaily = sessionHasDailyLogs({ dailyMeals, activities });
       const resolvedHasDaily = resolved && sessionHasDailyLogs(resolved);
       const resolvedHasAny = resolved && sessionHasLogData(resolved);
-      if (resolvedHasDaily && (!localHasDaily || !uploadLocal)) {
+      if (resolvedHasDaily) {
         applyResolvedCloudSession(resolved, user);
         setCloudPushVerified(true);
         setSyncUnlockOpen(false);
         setCloudReady(true);
         return;
       } else if (localHasDaily) {
-        const { lastDate } = loadUserSession(user.username);
-        const payload = packCloudPayload({ dailyMeals, activities, historyData, lastDate, user });
+        const payload = packCloudPayload({
+          dailyMeals,
+          activities,
+          historyData,
+          lastDate: getTodayKey(),
+          user,
+        });
         await saveUserDataToCloud(user.username, clean, payload);
         const check = await loadUserDataFromCloud(user.username, clean);
         const stored = applyCloudPayload(check?.payload, user);

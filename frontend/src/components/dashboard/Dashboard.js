@@ -6,7 +6,7 @@ import { analyzeThreeMealsSummary } from "../../utils/mealRecommendations";
 import { getProfessionalPrediction, buildHomeDietAdviceBrief } from "../../utils/aiPrediction";
 import { generateMenuRecommendations, VENUE_MODES } from "../../utils/menuRecommendations";
 import { buildAdaptiveActivitySuggestion } from "../../utils/adaptiveActivitySuggester";
-import { getMealShort, mealTotalsFromDaily } from "../../utils/logDisplay";
+import { getMealShort, getTodayKey, mealTotalsFromDaily } from "../../utils/logDisplay";
 import { summarizeDailyRewards } from "../../utils/mealRewards";
 import { styles } from "../../styles/appStyles";
 import DashboardStatusHero from "../ui/DashboardStatusHero";
@@ -61,7 +61,7 @@ export default function Dashboard({
       [activeMealTab]: [...prev[activeMealTab], {
         ...foodEntry,
         loggedAt: foodEntry.loggedAt || new Date().toISOString(),
-        loggedDate: foodEntry.loggedDate || new Date().toLocaleDateString("en-CA"),
+        loggedDate: foodEntry.loggedDate || getTodayKey(),
         mealPeriod: activeMealTab,
       }],
     }));

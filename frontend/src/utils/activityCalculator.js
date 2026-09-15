@@ -1,3 +1,5 @@
+import { getTodayKey } from "./dailyArchive";
+
 export const ACTIVITY_INTENSITY_OPTIONS = [
   {
     id: "light",
@@ -67,7 +69,7 @@ export const buildActivityLogEntry = ({
     durationMinutes: Number(durationMinutes),
     intensity: intensityOption.id,
     intensityLabel: intensityOption.label,
-    loggedDate: new Date().toLocaleDateString("en-CA"),
+    loggedDate: getTodayKey(),
     loggedAt: new Date().toISOString(),
     logLabel: `${activity.name} · ${durationMinutes} นาที · ${intensityOption.label}`,
   };

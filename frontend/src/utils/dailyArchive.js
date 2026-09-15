@@ -1,9 +1,25 @@
-export const getTodayKey = () => new Date().toLocaleDateString("en-CA");
+/** Gregorian YYYY-MM-DD — do not use toLocaleDateString (Thai devices may return พ.ศ.). */
+export const toDateKey = (date = new Date()) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+export const normalizeDateKey = (key) => {
+  const match = String(key || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return String(key || "").trim();
+  let year = Number(match[1]);
+  if (year >= 2400) year -= 543;
+  return `${year}-${match[2]}-${match[3]}`;
+};
+
+export const getTodayKey = () => toDateKey(new Date());
 
 export const getYesterdayKey = () => {
   const date = new Date();
   date.setDate(date.getDate() - 1);
-  return date.toLocaleDateString("en-CA");
+  return toDateKey(date);
 };
 
 export const formatThaiArchiveDate = (isoDate) =>
@@ -78,7 +94,10 @@ export const mergeArchiveEntry = (existing, incoming) => {
 export const upsertHistoryEntry = (history, entry) => {
   if (!entry) return history;
   const list = Array.isArray(history) ? [...history] : [];
-  const index = list.findIndex((day) => day.dateKey === entry.dateKey || day.date === entry.date);
+  const index = list.findIndex((day) => (
+    normalizeDateKey(day.dateKey) === normalizeDateKey(entry.dateKey)
+    || day.date === entry.date
+  ));
 
   if (index >= 0) {
     list[index] = mergeArchiveEntry(list[index], entry);
@@ -200,7 +219,7 @@ export const mergeTodayIntoHistory = ({ history, dailyMeals, activities, weight 
   const todayKey = getTodayKey();
   const list = Array.isArray(history) ? [...history] : [];
   const withoutToday = list.filter(
-    (day) => day.dateKey !== todayKey && day.date !== formatThaiArchiveDate(todayKey),
+    (day) => normalizeDateKey(day.dateKey) !== todayKey && day.date !== formatThaiArchiveDate(todayKey),
   );
 
   const todayEntry = buildArchiveEntry({
@@ -215,9 +234,10 @@ export const mergeTodayIntoHistory = ({ history, dailyMeals, activities, weight 
 };
 
 export const recoverStaleActivities = ({ history, activities, weight, todayKey }) => {
-  const staleActivities = (activities || []).filter(
-    (item) => !item.loggedDate || item.loggedDate !== todayKey,
-  );
+  const staleActivities = (activities || []).filter((item) => {
+    const key = normalizeDateKey(item?.loggedDate);
+    return key && key !== todayKey;
+  });
 
   if (!staleActivities.length) {
     return {
@@ -236,9 +256,10 @@ export const recoverStaleActivities = ({ history, activities, weight, todayKey }
   });
 
   const updatedHistory = upsertHistoryEntry(history, entry);
-  const remainingActivities = (activities || []).filter(
-    (item) => item.loggedDate === todayKey,
-  );
+  const remainingActivities = (activities || []).filter((item) => {
+    const key = normalizeDateKey(item?.loggedDate);
+    return !key || key === todayKey;
+  });
 
   return {
     history: updatedHistory,
