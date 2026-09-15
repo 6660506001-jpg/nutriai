@@ -6872,22 +6872,18 @@ export default function AppVisualEffects() {
         color: #c2410c;
         line-height: 1.45;
       }
-      .food-plate-size-head {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 8px;
-      }
-      .food-plate-size-head .custom-food-label,
-      .food-plate-size-head label {
-        margin: 0;
-      }
       .food-plate-size-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 8px;
+        margin-top: 8px;
+      }
+      .food-plate-size-grid .press-tip-wrap {
+        display: block;
+        min-width: 0;
       }
       .food-plate-size-card {
+        width: 100%;
         margin: 0;
         padding: 12px 8px;
         border: 1px solid #e2e8f0;

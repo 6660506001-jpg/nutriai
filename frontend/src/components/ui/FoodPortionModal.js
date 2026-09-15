@@ -14,7 +14,7 @@ import { canSaveFoodEntry, isUnverifiedFoodEntry } from "../../utils/foodEstimat
 import { DRINK_SWEETNESS_OPTIONS, isDrinkFood, supportsDrinkSweetness } from "../../utils/drinkSweetness";
 import { getMatchingAvoidanceKeywords } from "../../utils/foodPreferences";
 import FoodAvoidanceWarning from "./FoodAvoidanceWarning";
-import InfoTip from "./InfoTip";
+import PressTip from "./PressTip";
 import { styles } from "../../styles/appStyles";
 
 const DEFAULT_SELECTION = {
@@ -270,35 +270,31 @@ export default function FoodPortionModal({
 
           {portionType === "plate" && (
             <div style={styles.customFoodField}>
-              <div className="food-plate-size-head">
-                <label style={styles.customFoodLabel}>ขนาดจาน</label>
-                <InfoTip
-                  label="ขนาดจาน"
-                  idPrefix="plate-size"
-                  prefer="below"
-                  tooltip={{
-                    title: "ขนาดจาน",
-                    subtitle: "เทียบกับจานข้าวราดร้านทั่วไป เช่น ข้าวมันไก่ ข้าวกะเพรา",
-                    ranges: PLATE_SIZE_OPTIONS.map((option) => ({
-                      range: option.label,
-                      label: `${option.meaning} · ประมาณ ${option.grams} กรัม`,
-                    })),
-                  }}
-                />
-              </div>
+              <label style={styles.customFoodLabel}>ขนาดจาน</label>
               <div className="food-plate-size-grid" role="group" aria-label="ขนาดจาน">
                 {PLATE_SIZE_OPTIONS.map((option) => {
                   const active = plateSize === option.id;
                   return (
-                    <button
+                    <PressTip
                       key={option.id}
-                      type="button"
-                      onClick={() => setPlateSize(option.id)}
-                      className={`food-plate-size-card${active ? " is-active" : ""}`}
-                      aria-pressed={active}
+                      label={option.label}
+                      prefer="below"
+                      maxWidth={240}
+                      tooltip={{
+                        title: `จาน${option.label}`,
+                        body: option.meaning,
+                        note: `ประมาณ ${option.grams} กรัม · เทียบจานข้าวราดร้านทั่วไป`,
+                      }}
                     >
-                      {option.label}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => setPlateSize(option.id)}
+                        className={`food-plate-size-card${active ? " is-active" : ""}`}
+                        aria-pressed={active}
+                      >
+                        {option.label}
+                      </button>
+                    </PressTip>
                   );
                 })}
               </div>
