@@ -2097,7 +2097,7 @@ export default function AppVisualEffects() {
         visibility: hidden;
         pointer-events: none;
         transform: none;
-        z-index: 1200;
+        z-index: 5100;
       }
       .stat-card-tooltip--fixed.is-visible {
         opacity: 1;
@@ -6872,52 +6872,37 @@ export default function AppVisualEffects() {
         color: #c2410c;
         line-height: 1.45;
       }
-      .food-plate-size-grid {
+      .food-plate-size-head {
         display: flex;
-        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      .food-plate-size-head .custom-food-label,
+      .food-plate-size-head label {
+        margin: 0;
+      }
+      .food-plate-size-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 8px;
-        margin-top: 8px;
       }
       .food-plate-size-card {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 2px;
-        width: 100%;
         margin: 0;
-        padding: 10px 12px;
+        padding: 12px 8px;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
         background: #f8fafc;
         color: #0f172a;
-        text-align: left;
-        cursor: pointer;
         font: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
       }
       .food-plate-size-card.is-active {
         background: var(--nutri-primary, #f97316);
         border-color: var(--nutri-primary, #f97316);
         color: #fff;
-      }
-      .food-plate-size-card-label {
-        font-size: 15px;
-        font-weight: 800;
-        line-height: 1.2;
-      }
-      .food-plate-size-card-meaning {
-        font-size: 12px;
-        font-weight: 600;
-        line-height: 1.4;
-        color: #475569;
-      }
-      .food-plate-size-card.is-active .food-plate-size-card-meaning,
-      .food-plate-size-card.is-active .food-plate-size-card-grams {
-        color: rgba(255, 255, 255, 0.92);
-      }
-      .food-plate-size-card-grams {
-        font-size: 11px;
-        font-weight: 700;
-        color: #64748b;
       }
 
       .food-preferences-card {

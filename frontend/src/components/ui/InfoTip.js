@@ -93,6 +93,7 @@ export default function InfoTip({
   className = "",
   idPrefix = "info-tip",
   preferInline = false,
+  prefer,
 }) {
   const tipId = `${idPrefix}-${String(label).replace(/\s+/g, "-")}`;
   const [tipOpen, setTipOpen] = useState(false);
@@ -133,7 +134,11 @@ export default function InfoTip({
 
       const tooltipEl = tooltipRef.current;
       const tooltipHeight = tooltipEl?.offsetHeight || 180;
-      const position = computeTooltipPosition(button.getBoundingClientRect(), tooltipHeight);
+      const position = computeTooltipPosition(
+        button.getBoundingClientRect(),
+        tooltipHeight,
+        prefer ? { prefer } : undefined,
+      );
 
       setTipStyle({
         width: position.width,
@@ -153,7 +158,7 @@ export default function InfoTip({
       window.removeEventListener("resize", positionTooltip);
       window.removeEventListener("scroll", positionTooltip, true);
     };
-  }, [tipOpen, preferInline, tooltip]);
+  }, [tipOpen, preferInline, tooltip, prefer]);
 
   useEffect(() => {
     if (!tipOpen) setTipStyle(null);

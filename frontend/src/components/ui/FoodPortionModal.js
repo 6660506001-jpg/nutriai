@@ -14,6 +14,7 @@ import { canSaveFoodEntry, isUnverifiedFoodEntry } from "../../utils/foodEstimat
 import { DRINK_SWEETNESS_OPTIONS, isDrinkFood, supportsDrinkSweetness } from "../../utils/drinkSweetness";
 import { getMatchingAvoidanceKeywords } from "../../utils/foodPreferences";
 import FoodAvoidanceWarning from "./FoodAvoidanceWarning";
+import InfoTip from "./InfoTip";
 import { styles } from "../../styles/appStyles";
 
 const DEFAULT_SELECTION = {
@@ -269,10 +270,22 @@ export default function FoodPortionModal({
 
           {portionType === "plate" && (
             <div style={styles.customFoodField}>
-              <label style={styles.customFoodLabel}>ขนาดจาน</label>
-              <p style={styles.portionTypeHint}>
-                เทียบกับจานข้าวราดร้านทั่วไป เช่น ข้าวมันไก่ ข้าวกะเพรา
-              </p>
+              <div className="food-plate-size-head">
+                <label style={styles.customFoodLabel}>ขนาดจาน</label>
+                <InfoTip
+                  label="ขนาดจาน"
+                  idPrefix="plate-size"
+                  prefer="below"
+                  tooltip={{
+                    title: "ขนาดจาน",
+                    subtitle: "เทียบกับจานข้าวราดร้านทั่วไป เช่น ข้าวมันไก่ ข้าวกะเพรา",
+                    ranges: PLATE_SIZE_OPTIONS.map((option) => ({
+                      range: option.label,
+                      label: `${option.meaning} · ประมาณ ${option.grams} กรัม`,
+                    })),
+                  }}
+                />
+              </div>
               <div className="food-plate-size-grid" role="group" aria-label="ขนาดจาน">
                 {PLATE_SIZE_OPTIONS.map((option) => {
                   const active = plateSize === option.id;
@@ -284,9 +297,7 @@ export default function FoodPortionModal({
                       className={`food-plate-size-card${active ? " is-active" : ""}`}
                       aria-pressed={active}
                     >
-                      <strong className="food-plate-size-card-label">{option.label}</strong>
-                      <span className="food-plate-size-card-meaning">{option.meaning}</span>
-                      <small className="food-plate-size-card-grams">ประมาณ {option.grams} กรัม</small>
+                      {option.label}
                     </button>
                   );
                 })}
