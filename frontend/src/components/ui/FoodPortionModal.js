@@ -270,30 +270,27 @@ export default function FoodPortionModal({
           {portionType === "plate" && (
             <div style={styles.customFoodField}>
               <label style={styles.customFoodLabel}>ขนาดจาน</label>
-              <div className="meal-tab-row">
-                {PLATE_SIZE_OPTIONS.map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => setPlateSize(option.id)}
-                    style={{
-                      flex: 1,
-                      padding: "8px",
-                      borderRadius: "10px",
-                      border: "none",
-                      background: plateSize === option.id ? Colors.primary : Colors.bgSoft,
-                      color: plateSize === option.id ? "white" : Colors.textDark,
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
               <p style={styles.portionTypeHint}>
-                เล็ก ~100g · ปกติ ~150g · พิเศษ ~220g
+                เทียบกับจานข้าวราดร้านทั่วไป เช่น ข้าวมันไก่ ข้าวกะเพรา
               </p>
+              <div className="food-plate-size-grid" role="group" aria-label="ขนาดจาน">
+                {PLATE_SIZE_OPTIONS.map((option) => {
+                  const active = plateSize === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setPlateSize(option.id)}
+                      className={`food-plate-size-card${active ? " is-active" : ""}`}
+                      aria-pressed={active}
+                    >
+                      <strong className="food-plate-size-card-label">{option.label}</strong>
+                      <span className="food-plate-size-card-meaning">{option.meaning}</span>
+                      <small className="food-plate-size-card-grams">ประมาณ {option.grams} กรัม</small>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
 

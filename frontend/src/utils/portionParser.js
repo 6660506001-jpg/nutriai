@@ -26,9 +26,24 @@ export const FOOD_PORTION_TYPES = [
 ];
 
 export const PLATE_SIZE_OPTIONS = [
-  { id: "small", label: "เล็ก", grams: 100 },
-  { id: "normal", label: "ปกติ", grams: 150 },
-  { id: "large", label: "พิเศษ", grams: 220 },
+  {
+    id: "small",
+    label: "เล็ก",
+    grams: 100,
+    meaning: "ทานน้อย หรือจานเด็ก ข้าวไม่เต็มจาน",
+  },
+  {
+    id: "normal",
+    label: "ปกติ",
+    grams: 150,
+    meaning: "จานมาตรฐานร้าน มื้อหลักทั่วไป",
+  },
+  {
+    id: "large",
+    label: "พิเศษ",
+    grams: 220,
+    meaning: "สั่งพิเศษ จานใหญ่ ข้าวและกับข้าวเยอะขึ้น",
+  },
 ];
 
 export const DRINK_PORTION_TYPES = [
