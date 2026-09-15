@@ -48,31 +48,103 @@ export function applyCloudPayload(payload, serverUser) {
   };
 }
 
-/** Pick newer snapshot when both local and cloud have logs. */
+function itemMergeKey(item) {
+  if (!item || typeof item !== "object") return "";
+  if (item.id != null && String(item.id)) return `id:${item.id}`;
+  return [item.name, item.loggedAt, item.calories, item.mealPeriod, item.durationMinutes]
+    .map((value) => String(value ?? ""))
+    .join("|");
+}
+
+function mergeItemList(primary, secondary) {
+  const seen = new Set();
+  const out = [];
+  [...(primary || []), ...(secondary || [])].forEach((item) => {
+    const key = itemMergeKey(item);
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    out.push(item);
+  });
+  return out;
+}
+
+function mergeMealMaps(primary, secondary) {
+  const keys = new Set([
+    ...Object.keys(EMPTY_MEALS),
+    ...Object.keys(primary || {}),
+    ...Object.keys(secondary || {}),
+  ]);
+  const merged = { ...EMPTY_MEALS };
+  keys.forEach((key) => {
+    merged[key] = mergeItemList(primary?.[key], secondary?.[key]);
+  });
+  return merged;
+}
+
+function mergeHistoryLists(primary, secondary) {
+  const seen = new Set();
+  const out = [];
+  [...(primary || []), ...(secondary || [])].forEach((entry) => {
+    const key = String(entry?.id || entry?.dateKey || "");
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    out.push(entry);
+  });
+  return out;
+}
+
+/** Prefer today's meals on cloud when this device has none. History alone must not win. */
 export function resolveSessionOnLogin(localSession, cloudResult, serverUser) {
   const cloudApplied = applyCloudPayload(cloudResult?.payload, serverUser);
-  const localHas = sessionHasLogData(localSession);
-  const cloudHas = cloudApplied && sessionHasLogData(cloudApplied);
+  const localDaily = sessionHasDailyLogs(localSession || {});
+  const cloudDaily = Boolean(cloudApplied && sessionHasDailyLogs(cloudApplied));
+  const mergedHistory = mergeHistoryLists(
+    cloudApplied?.historyData,
+    localSession?.historyData,
+  );
 
-  if (!cloudHas && !localHas) {
-    return { session: localSession, uploadLocal: false };
+  if (!cloudDaily && !localDaily) {
+    return {
+      session: {
+        ...(localSession || {}),
+        historyData: mergedHistory,
+      },
+      uploadLocal: false,
+    };
   }
 
-  if (cloudHas && !localHas) {
-    return { session: cloudApplied, uploadLocal: false };
+  if (cloudDaily && !localDaily) {
+    return {
+      session: {
+        ...cloudApplied,
+        historyData: mergedHistory,
+      },
+      uploadLocal: false,
+    };
   }
 
-  if (!cloudHas && localHas) {
-    return { session: localSession, uploadLocal: true };
+  if (!cloudDaily && localDaily) {
+    return {
+      session: {
+        ...localSession,
+        historyData: mergedHistory,
+      },
+      uploadLocal: true,
+    };
   }
 
-  const localTs = Number(localSession.syncUpdatedAt) || 0;
-  const cloudTs = cloudResult?.updated_at
-    ? new Date(cloudResult.updated_at).getTime()
-    : 0;
-
-  if (cloudTs >= localTs) {
-    return { session: cloudApplied, uploadLocal: false };
-  }
-  return { session: localSession, uploadLocal: true };
+  return {
+    session: {
+      ...cloudApplied,
+      dailyMeals: mergeMealMaps(cloudApplied.dailyMeals, localSession.dailyMeals),
+      activities: mergeItemList(cloudApplied.activities, localSession.activities),
+      historyData: mergedHistory,
+      lastDate: cloudApplied.lastDate || localSession.lastDate,
+      user: {
+        ...(localSession.user || {}),
+        ...(cloudApplied.user || {}),
+      },
+    },
+    uploadLocal: true,
+  };
 }

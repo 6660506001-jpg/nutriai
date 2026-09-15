@@ -194,9 +194,9 @@ export default function App() {
         if (cancelled || !resolved) return;
         const localHasDaily = sessionHasDailyLogs({ dailyMeals, activities });
         const resolvedHasDaily = sessionHasDailyLogs(resolved);
-        if (resolvedHasDaily && (!localHasDaily || !uploadLocal)) {
+        if (resolvedHasDaily) {
           applyResolvedCloudSession(resolved, user);
-        } else if (uploadLocal && sessionHasDailyLogs({ dailyMeals, activities })) {
+        } else if (uploadLocal && localHasDaily) {
           const { lastDate } = loadUserSession(user.username);
           return saveUserDataToCloud(
             user.username,
@@ -236,11 +236,8 @@ export default function App() {
       if (cloudPullingRef.current) return;
       cloudPullingRef.current = true;
       pullCloudSession(user.username, password, user, { dailyMeals, activities, historyData })
-        .then(({ session: resolved, uploadLocal }) => {
-          if (!resolved) return;
-          const localHasDaily = sessionHasDailyLogs({ dailyMeals, activities });
-          const resolvedHasDaily = sessionHasDailyLogs(resolved);
-          if (resolvedHasDaily && (!localHasDaily || !uploadLocal)) {
+        .then(({ session: resolved }) => {
+          if (resolved && sessionHasDailyLogs(resolved)) {
             applyResolvedCloudSession(resolved, user);
           }
         })
@@ -264,7 +261,7 @@ export default function App() {
     if (!isLoggedIn || !user?.username) return undefined;
     const password = getSyncPassword(user.username);
     if (!password) return undefined;
-    if (!sessionHasLogData({ dailyMeals, activities, historyData })) return undefined;
+    if (!sessionHasDailyLogs({ dailyMeals, activities })) return undefined;
 
     if (cloudSyncTimerRef.current) {
       clearTimeout(cloudSyncTimerRef.current);
@@ -362,6 +359,8 @@ export default function App() {
         applyResolvedCloudSession(resolved, user);
         setCloudPushVerified(true);
         setSyncUnlockOpen(false);
+        setCloudReady(true);
+        return;
       } else if (localHasDaily) {
         const { lastDate } = loadUserSession(user.username);
         const payload = packCloudPayload({ dailyMeals, activities, historyData, lastDate, user });
@@ -635,6 +634,11 @@ export default function App() {
   );
   const openSyncUnlock = () => {
     setSyncUnlockError("");
+    const password = user?.username ? getSyncPassword(user.username) : "";
+    if (password && !hasDailyLogs) {
+      handleUnlockSync(password);
+      return;
+    }
     setSyncUnlockOpen(true);
   };
 

@@ -115,6 +115,38 @@ def payload_has_daily_logs(payload):
     return bool(payload.get("activities"))
 
 
+def _item_merge_key(item):
+    if not isinstance(item, dict):
+        return ""
+    item_id = item.get("id")
+    if item_id is not None and str(item_id):
+        return f"id:{item_id}"
+    return "|".join(
+        str(item.get(field) or "")
+        for field in ("name", "loggedAt", "calories", "mealPeriod", "durationMinutes")
+    )
+
+
+def merge_item_lists(primary, secondary):
+    seen = set()
+    merged = []
+    for item in list(primary or []) + list(secondary or []):
+        key = _item_merge_key(item)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        merged.append(item)
+    return merged
+
+
+def merge_meal_maps(primary, secondary):
+    keys = set((primary or {}).keys()) | set((secondary or {}).keys())
+    return {
+        key: merge_item_lists((primary or {}).get(key), (secondary or {}).get(key))
+        for key in keys
+    }
+
+
 def merge_sync_payload(existing, incoming):
     if not incoming:
         return existing or incoming
@@ -125,6 +157,11 @@ def merge_sync_payload(existing, incoming):
         merged = dict(incoming)
         merged["dailyMeals"] = existing.get("dailyMeals", incoming.get("dailyMeals"))
         merged["activities"] = existing.get("activities", incoming.get("activities"))
+        return merged
+    if same_day and payload_has_daily_logs(existing) and payload_has_daily_logs(incoming):
+        merged = dict(incoming)
+        merged["dailyMeals"] = merge_meal_maps(existing.get("dailyMeals"), incoming.get("dailyMeals"))
+        merged["activities"] = merge_item_lists(existing.get("activities"), incoming.get("activities"))
         return merged
     return incoming
 
