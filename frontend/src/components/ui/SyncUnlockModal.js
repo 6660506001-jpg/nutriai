@@ -3,6 +3,7 @@ import React, { useState } from "react";
 export default function SyncUnlockModal({
   username,
   hasDailyLogs,
+  isPhone = false,
   busy,
   error,
   hint,
@@ -10,7 +11,17 @@ export default function SyncUnlockModal({
   onSkip,
 }) {
   const [password, setPassword] = useState("");
-  const hintIsSuccess = String(hint || "").startsWith("ส่งสำเร็จ");
+  const hintIsSuccess = String(hint || "").startsWith("ส่งสำเร็จ") || String(hint || "").startsWith("ซิงค์แล้ว");
+
+  let description = "กรอกรหัสผ่านเพื่อดึงมื้อวันนี้จากคลาวด์";
+  let actionLabel = "ดึงมื้อจากคลาวด์";
+  if (hasDailyLogs && isPhone) {
+    description = "มื้อวันนี้มีบนมือถือแล้ว กรอกรหัสผ่านหากต้องการบันทึกลงคลาวด์ด้วย";
+    actionLabel = "บันทึกลงคลาวด์";
+  } else if (hasDailyLogs) {
+    description = "หน้านี้มียอดวันนี้แล้ว กรอกรหัสผ่านเพื่อส่งให้มือถือ";
+    actionLabel = "ส่งมื้อขึ้นคลาวด์";
+  }
 
   return (
     <div className="sync-unlock-modal" role="dialog" aria-modal="true" aria-labelledby="sync-unlock-title">
@@ -22,13 +33,7 @@ export default function SyncUnlockModal({
         }}
       >
         <h2 id="sync-unlock-title">ซิงค์มื้ออาหาร</h2>
-        {hasDailyLogs ? (
-          <p>หน้านี้มียอดวันนี้แล้ว กรอกรหัสผ่านเพื่อส่งให้มือถือ</p>
-        ) : (
-          <p>
-            มือถือยังไม่มีมื้อวันนี้ เพราะมื้อถูกเก็บในเบราว์เซอร์ของคอม จนกว่าหน้าคอมนั้นจะส่งขึ้นคลาวด์สำเร็จ
-          </p>
-        )}
+        <p>{description}</p>
         <p className="sync-unlock-modal-user">บัญชี: <strong>{username}</strong></p>
         <input
           type="password"
@@ -43,13 +48,11 @@ export default function SyncUnlockModal({
           <p className={`sync-unlock-modal-hint${hintIsSuccess ? " is-success" : ""}`}>{hint}</p>
         ) : null}
         <button type="submit" className="sync-unlock-modal-btn" disabled={busy}>
-          {busy ? "กำลังซิงค์..." : hasDailyLogs ? "ส่งมื้อขึ้นคลาวด์" : "ดึงมื้อจากคลาวด์"}
+          {busy ? "กำลังซิงค์..." : actionLabel}
         </button>
-        {hasDailyLogs ? null : (
-          <button type="button" className="sync-unlock-modal-skip" onClick={onSkip} disabled={busy}>
-            ข้ามไปก่อน
-          </button>
-        )}
+        <button type="button" className="sync-unlock-modal-skip" onClick={onSkip} disabled={busy}>
+          ปิด
+        </button>
       </form>
     </div>
   );

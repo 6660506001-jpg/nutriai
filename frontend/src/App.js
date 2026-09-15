@@ -29,7 +29,7 @@ import {
 import { loadUserDataFromCloud, saveUserDataToCloud } from "./utils/syncApi";
 import SyncUnlockModal from "./components/ui/SyncUnlockModal";
 import { clearSyncPassword, getSyncPassword, setSyncPassword } from "./utils/syncCredentials";
-import { applyCloudPayload, countDailyItems, packCloudPayload, resolveSessionOnLogin, sessionHasDailyLogs, sessionHasLogData } from "./utils/sessionCloudMerge";
+import { applyCloudPayload, packCloudPayload, resolveSessionOnLogin, sessionHasDailyLogs, sessionHasLogData } from "./utils/sessionCloudMerge";
 import { stripSimulatedHistory } from "./utils/dailyArchive";
 import { hasSeenUserGuide, markUserGuideSeen } from "./utils/userGuideStorage";
 import {
@@ -115,7 +115,8 @@ export default function App() {
   const [syncUnlockHint, setSyncUnlockHint] = useState("");
   const [syncUnlockOpen, setSyncUnlockOpen] = useState(() => {
     const name = bootSession?.user?.username;
-    return Boolean(name && !getSyncPassword(name));
+    if (!name || getSyncPassword(name)) return false;
+    return !sessionHasDailyLogs(bootSession || {});
   });
   const [cloudPushVerified, setCloudPushVerified] = useState(false);
   const isMobile = useIsMobile();
@@ -371,10 +372,9 @@ export default function App() {
           setSyncUnlockError("ส่งแล้วแต่คลาวด์ยังว่าง ลองกดส่งอีกครั้ง");
           return;
         }
-        const itemCount = countDailyItems(stored);
         setCloudPushVerified(true);
-        setSyncUnlockHint(`ส่งสำเร็จ ${itemCount} รายการ — กลับไปมือถือแล้วกดดึงมื้อจากคลาวด์`);
         setCloudReady(true);
+        setSyncUnlockOpen(false);
         return;
       } else if (resolvedHasAny) {
         applyResolvedCloudSession(resolved, user);
@@ -652,6 +652,7 @@ export default function App() {
         <SyncUnlockModal
           username={user.username}
           hasDailyLogs={hasDailyLogs}
+          isPhone={isMobile}
           busy={syncUnlockBusy}
           error={syncUnlockError}
           hint={syncUnlockHint}
