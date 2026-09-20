@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { HiPlus, HiSearch, HiAdjustments } from "react-icons/hi";
 import { getApiBaseUrl } from "../../constants/config";
 import { THAI_DRINK_QUICK_PICKS, THAI_FOOD_QUICK_PICKS, THAI_FRUIT_QUICK_PICKS } from "../../constants/pageMeta";
-import { canEstimateCustomFood, canSaveFoodEntry, estimateCustomFood, getEstimateSourceLabel, prepareCustomFoodEstimate, searchThaiFoods } from "../../utils/foodEstimator";
+import { canEstimateCustomFood, canSaveFoodEntry, estimateCustomFood, getEstimateSourceLabel, looksLikeFoodQuery, looksLikeInvalidFoodName, prepareCustomFoodEstimate, searchThaiFoods } from "../../utils/foodEstimator";
 import {
   filterFoodResults,
   tagSearchResults,
@@ -86,7 +86,11 @@ export default function FoodLogPage({
     return false;
   });
   const shouldOfferAiEstimate =
-    trimmedQuery.length >= 2 && !isSearching && !hasStrongMatch;
+    trimmedQuery.length >= 2
+    && !isSearching
+    && !hasStrongMatch
+    && !looksLikeInvalidFoodName(trimmedQuery)
+    && looksLikeFoodQuery(trimmedQuery);
   const canAddCustomFood = canEstimateCustomFood(customPreview, trimmedQuery);
 
   const mealTotals = mealTotalsFromDaily(dailyMeals);

@@ -105,7 +105,7 @@ def _keyword_estimate(name):
     for keywords, nutrition in FOOD_RULES:
         if any(keyword.lower() in lowered or keyword in name for keyword in keywords):
             return dict(nutrition), "rule"
-    return dict(DEFAULT_NUTRITION), "rule_default"
+    return None
 
 
 def _build_result(name, nutrition, source, matched_alias=None, portion_note=None):
@@ -194,6 +194,9 @@ def estimate_food_from_name(name, cursor=None):
             portion_note,
         )
 
-    nutrition, source = _keyword_estimate(match_name)
+    keyword = _keyword_estimate(match_name)
+    if not keyword:
+        return None
+    nutrition, source = keyword
     scaled = scale_nutrition(nutrition, portion)
     return _build_result(clean_name, scaled, source, portion_note=portion_note)

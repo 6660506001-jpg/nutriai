@@ -223,6 +223,8 @@ export const estimateFoodLocally = async (name) => {
     };
   }
 
+  if (!looksLikeFoodQuery(name)) return null;
+
   return {
     name: portion.originalName,
     ...DEFAULT_NUTRITION,
@@ -243,13 +245,17 @@ export const estimateCustomFood = async (name) => {
     });
     if (res.ok) {
       const data = await res.json();
+      if (isGenericFoodEstimate(data) && !looksLikeFoodQuery(cleanName)) return null;
+      if (looksLikeInvalidFoodName(cleanName)) return null;
       return { ...data, custom: true };
     }
   } catch (err) {
     console.warn("Food estimate API unavailable, using local reference:", err);
   }
 
-  return { ...(await estimateFoodLocally(cleanName)), custom: true };
+  const local = await estimateFoodLocally(cleanName);
+  if (!local) return null;
+  return { ...local, custom: true };
 };
 
 export const isGenericFoodEstimate = (estimate) => {
@@ -276,7 +282,7 @@ export const canEstimateCustomFood = (estimate, name) => {
   const baseName = portion.foodName || name;
   const entry = { ...estimate, name, baseName };
   if (canSaveFoodEntry(entry)) return true;
-  if (isGenericFoodEstimate(entry) && Number(entry.calories) > 0 && !looksLikeInvalidFoodName(baseName)) {
+  if (isGenericFoodEstimate(entry) && Number(entry.calories) > 0 && looksLikeFoodQuery(baseName)) {
     return true;
   }
   return false;
@@ -298,13 +304,22 @@ export const prepareCustomFoodEstimate = (estimate, name) => {
 
 const INVALID_FOOD_NAME_CHARS = /[(){}[\]<>@#$%^&*+=|\\;:"/?!~`]/;
 
+const FOOD_HINT_RE = /ข้าว|ก๋วย|เตี๋ยว|เส้น|ผัด|ทอด|ต้ม|ตุ๋น|แกง|ยำ|ลาบ|ส้มตำ|โจ๊ก|ไข่|ไก่|หมู|เนื้อ|กุ้ง|ปลา|เป็ด|หมึก|ปู|เต้าหู้|นม|กาแฟ|ชา|โกโก้|น้ำ|ขนม|เค้ก|ปัง|พิซซ่า|pizza|burger|sandwich|rice|chicken|salad|soup|noodle|yogurt|steak|sushi|pasta|บราวนี่|ช็อก|สเต็ก|ซูชิ|แซนด์|สลัด|ผลไม้|กล้วย|ส้ม|แอปเปิ้ล|มะม่วง|มะละกอ|องุ่น|แตงโม|ทุเรียน|มังคุด|ลำไย|ลิ้นจี่|ฝรั่ง|โอเลี้ยง|ไมโล|นมสด|น้ำผลไม้|ไอศกรีม|ไอติม|ลูกชิ้น|ไส้กรอก|แฮม|เบคอน|มันฝรั่ง|เฟรนช์|แฮมเบอร์เกอร์/i;
+
+export const looksLikeFoodQuery = (name) => {
+  const text = String(name || "").trim();
+  if (!text || looksLikeInvalidFoodName(text)) return false;
+  return FOOD_HINT_RE.test(text);
+};
+
 export const looksLikeInvalidFoodName = (name) => {
   const text = String(name || "").trim();
   if (text.length < 2) return true;
   if (INVALID_FOOD_NAME_CHARS.test(text)) return true;
 
+  const compact = text.replace(/\s/g, "");
   const thaiChars = (text.match(/[\u0E00-\u0E7F]/g) || []).length;
-  const thaiRatio = thaiChars / text.replace(/\s/g, "").length;
+  const thaiRatio = thaiChars / Math.max(compact.length, 1);
   const latinOnly = /^[a-zA-Z0-9\s\-'.]+$/;
 
   if (thaiChars === 0 && !latinOnly.test(text)) return true;
@@ -315,6 +330,11 @@ export const looksLikeInvalidFoodName = (name) => {
     const hasVowel = /[\u0E30-\u0E3A\u0E40-\u0E4E]/.test(thaiOnly);
     const longConsonantRun = /[\u0E01-\u0E2E]{5,}/.test(thaiOnly);
     if (!hasVowel && longConsonantRun) return true;
+  }
+
+  const hasFoodHint = FOOD_HINT_RE.test(text);
+  if (!hasFoodHint && /([\u0E00-\u0E7Fa-zA-Z0-9]{2,4})\1/.test(compact)) {
+    return true;
   }
 
   return false;
