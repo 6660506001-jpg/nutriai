@@ -4786,10 +4786,12 @@ export default function AppVisualEffects() {
           height: 34px !important;
         }
         .login-form-panel-responsive {
-          padding: 28px 20px !important;
+          padding: 22px 16px 20px !important;
         }
         .login-grid-2-responsive {
-          grid-template-columns: 1fr !important;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+          gap: 10px !important;
+          width: 100%;
         }
         .avatar-modal-card {
           padding: 14px !important;

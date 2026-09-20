@@ -561,14 +561,15 @@ export const styles = {
   loginGrid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' },
   loginInput: {
     width: '100%',
-    padding: '13px 14px',
+    maxWidth: '100%',
+    padding: '10px 12px',
     borderRadius: '12px',
     border: '1px solid #e2e8f0',
     marginBottom: 0,
     background: '#f8fafc',
     outline: 'none',
     boxSizing: 'border-box',
-    fontSize: '14px',
+    fontSize: '16px',
     fontWeight: '600',
     color: '#0f172a'
   },

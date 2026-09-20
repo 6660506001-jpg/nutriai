@@ -38,17 +38,14 @@ export default function AuthPage({
   const submitLockRef = useRef(false);
 
   useEffect(() => {
-    const clearAutofill = () => {
-      if (usernameRef.current) usernameRef.current.value = "";
-      if (passwordRef.current) passwordRef.current.value = "";
-    };
-    clearAutofill();
-    const timer = window.setTimeout(clearAutofill, 100);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    setFormData((prev) => ({ ...prev, username: "", password: "", age: "", weight: "", height: "" }));
+    setFormData({
+      username: "",
+      password: "",
+      age: "",
+      weight: "",
+      height: "",
+      gender: "Female",
+    });
     setFoodPreferences(EMPTY_FOOD_PREFERENCES);
     setLoginError("");
     if (usernameRef.current) usernameRef.current.value = "";
@@ -179,7 +176,14 @@ export default function AuthPage({
       <div className="nutri-page-bg login-page-bg login-page-mobile" style={styles.loginPage}>
         <BlurredFoodBackground />
         <div
-          style={styles.loginShell}
+          style={{
+            ...styles.loginShell,
+            overflow: "hidden",
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
+            boxSizing: "border-box",
+          }}
           className={`login-shell-responsive login-shell-theme-live${themePulse ? " theme-live-pulse" : ""}`}
         >
           <div style={styles.loginBrandPanel} className="login-brand-panel-responsive login-brand-panel-theme-live">
@@ -261,9 +265,9 @@ export default function AuthPage({
                   ref={usernameRef}
                   className="login-input-pro"
                   style={styles.loginInput}
-                  placeholder="กรอกชื่อผู้ใช้งาน"
+                  placeholder="ตั้งชื่อผู้ใช้"
                   name="nutri-auth-user"
-                  autoComplete="off"
+                  autoComplete={isLogin ? "username" : "off"}
                   autoCapitalize="none"
                   autoCorrect="off"
                   spellCheck={false}
@@ -278,9 +282,9 @@ export default function AuthPage({
                   className="login-input-pro"
                   style={styles.loginInput}
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="ตั้งรหัสผ่าน"
                   name="nutri-auth-password"
-                  autoComplete="new-password"
+                  autoComplete={isLogin ? "current-password" : "new-password"}
                   enterKeyHint="go"
                   defaultValue=""
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -289,7 +293,7 @@ export default function AuthPage({
               {!isLogin && (
                 <div className="login-grid-2-responsive" style={styles.loginGrid2}>
                   <LoginField label="อายุ">
-                    <input className="login-input-pro" style={styles.loginInput} type="number" placeholder="21" value={formData.age} onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value, 10) || "" })} />
+                    <input className="login-input-pro" style={styles.loginInput} type="number" inputMode="numeric" placeholder="ปี" value={formData.age} onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value, 10) || "" })} />
                   </LoginField>
                   <LoginField label="เพศ">
                     <select className="login-input-pro" style={styles.loginInput} value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })}>
@@ -298,10 +302,10 @@ export default function AuthPage({
                     </select>
                   </LoginField>
                   <LoginField label="น้ำหนัก (kg)">
-                    <input className="login-input-pro" style={styles.loginInput} type="number" placeholder="50" value={formData.weight} onChange={(e) => setFormData({ ...formData, weight: parseInt(e.target.value, 10) || "" })} />
+                    <input className="login-input-pro" style={styles.loginInput} type="number" inputMode="decimal" placeholder="กก." value={formData.weight} onChange={(e) => setFormData({ ...formData, weight: parseInt(e.target.value, 10) || "" })} />
                   </LoginField>
                   <LoginField label="ส่วนสูง (cm)">
-                    <input className="login-input-pro" style={styles.loginInput} type="number" placeholder="160" value={formData.height} onChange={(e) => setFormData({ ...formData, height: parseInt(e.target.value, 10) || "" })} />
+                    <input className="login-input-pro" style={styles.loginInput} type="number" inputMode="decimal" placeholder="ซม." value={formData.height} onChange={(e) => setFormData({ ...formData, height: parseInt(e.target.value, 10) || "" })} />
                   </LoginField>
                 </div>
               )}

@@ -5,6 +5,11 @@ export default function LoginVisualEffects() {
     <style>{`
       .login-input-pro {
         transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        -webkit-appearance: none;
+        appearance: none;
       }
       .login-input-pro:focus {
         outline: none;
@@ -35,21 +40,63 @@ export default function LoginVisualEffects() {
       .login-form-touch {
         position: relative;
         z-index: 1;
+        width: 100%;
+        max-width: 100%;
+      }
+      .login-field {
+        min-width: 0;
       }
       .login-page-mobile {
         min-height: 100dvh;
+        overflow-x: hidden !important;
         overflow-y: auto;
         touch-action: manipulation;
-        align-items: center;
+        align-items: stretch;
         justify-content: flex-start;
-        padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+        padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)) !important;
         box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
       }
       .login-page-mobile .login-shell-responsive {
-        overflow: visible;
+        overflow: hidden;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+      .login-page-mobile .login-form-panel-responsive {
         width: 100%;
-        max-width: 440px;
-        margin: auto 0;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+      .login-page-mobile .login-form-touch,
+      .login-page-mobile .login-grid-2-responsive,
+      .login-page-mobile .login-field {
+        min-width: 0;
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .login-page-mobile .login-input-pro,
+      .login-page-mobile select.login-input-pro {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+      }
+      .login-page-mobile input[type="number"] {
+        -moz-appearance: textfield;
+      }
+      .login-page-mobile input[type="number"]::-webkit-inner-spin-button,
+      .login-page-mobile input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
       }
       .login-form-header-mobile {
         display: flex;
@@ -366,8 +413,15 @@ export default function LoginVisualEffects() {
           display: none !important;
         }
         .login-form-panel-responsive {
-          padding: 24px 20px 28px !important;
+          padding: 20px 14px 22px !important;
           border-radius: 20px;
+        }
+        .login-grid-2-responsive {
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+          gap: 8px 10px !important;
+        }
+        .login-page-mobile .login-input-pro:focus {
+          box-shadow: 0 0 0 2px var(--nutri-accent-alpha-12);
         }
         .login-form-header-mobile .login-form-title-mobile,
         .login-form-header-mobile h2 {
@@ -405,23 +459,54 @@ export default function LoginVisualEffects() {
       }
       @media (max-width: 480px) {
         .login-form-panel-responsive {
-          padding: 20px 16px 24px !important;
+          padding: 18px 14px 20px !important;
           border-radius: 18px !important;
         }
         .login-form-header-mobile h2 {
           font-size: 22px !important;
         }
-        .login-input-pro,
-        .login-form-touch select {
+        .login-form-header-mobile {
+          margin-bottom: 12px;
+          gap: 8px;
+        }
+        .login-grid-2-responsive {
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+          gap: 8px 10px !important;
+        }
+        .login-page-mobile .login-field {
+          margin-bottom: 8px !important;
+        }
+        .login-page-mobile {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+        .login-form-touch .login-input-pro,
+        .login-form-touch select.login-input-pro {
           font-size: 16px !important;
-          min-height: 48px;
+          min-height: 44px;
+          height: 44px;
+          padding: 8px 12px !important;
+          border-radius: 10px !important;
+          line-height: 1.2;
+          width: 100%;
+          max-width: 100%;
+          box-sizing: border-box;
+        }
+        .login-form-touch select.login-input-pro {
+          padding-right: 28px !important;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23475569' d='M1.2 1.2 6 6l4.8-4.8'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 10px center;
+          background-size: 12px;
         }
         .login-submit-btn {
-          min-height: 48px;
+          min-height: 46px;
           font-size: 16px !important;
+          margin-top: 4px;
         }
         .login-tab-btn {
-          min-height: 44px;
+          min-height: 40px;
+          padding: 8px 10px !important;
         }
         .share-access-mobile-only {
           margin-top: 14px;
