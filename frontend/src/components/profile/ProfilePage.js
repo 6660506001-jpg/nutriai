@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
-  HiOutlineUserCircle, HiFire, HiOutlineTrendingUp, HiOutlineIdentification, HiX, HiOutlineLogout, HiOutlineBookOpen,
+  HiOutlineUserCircle, HiFire, HiOutlineTrendingUp, HiOutlineIdentification, HiX, HiOutlineLogout,
 } from "react-icons/hi";
 import { MdEdit } from "react-icons/md";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -121,41 +121,16 @@ export default function ProfilePage({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [showAvatarModal]);
 
-  const renderAccountActions = (variant = "top") => {
-    const showQuickLinks = variant !== "bottom" && (onNavigateToFood || onNavigateToActivity);
-    if (!onOpenGuide && !onLogout && !showQuickLinks) return null;
+  const renderAccountActions = () => {
+    if (!onLogout) return null;
     return (
-      <div className={`profile-account-actions profile-account-actions--${variant}`}>
-        <p className="profile-account-actions-label">
-          {variant === "bottom" ? "ออกจากบัญชี" : "บัญชีและความช่วยเหลือ"}
-        </p>
-        {showQuickLinks ? (
-          <div className="profile-quick-links">
-            {onNavigateToFood ? (
-              <button type="button" className="profile-action-btn profile-action-btn--primary" onClick={onNavigateToFood}>
-                บันทึกอาหาร
-              </button>
-            ) : null}
-            {onNavigateToActivity ? (
-              <button type="button" className="profile-action-btn profile-action-btn--ghost" onClick={onNavigateToActivity}>
-                บันทึกกิจกรรม
-              </button>
-            ) : null}
-          </div>
-        ) : null}
+      <div className="profile-account-actions profile-account-actions--bottom">
+        <p className="profile-account-actions-label">ออกจากบัญชี</p>
         <div className="profile-mobile-actions">
-          {onOpenGuide && variant !== "bottom" ? (
-            <button type="button" className="profile-action-btn profile-action-btn--ghost" onClick={onOpenGuide}>
-              <HiOutlineBookOpen size={18} aria-hidden />
-              วิธีใช้งาน
-            </button>
-          ) : null}
-          {onLogout ? (
-            <button type="button" className="profile-action-btn profile-action-btn--danger" onClick={onLogout}>
-              <HiOutlineLogout size={18} aria-hidden />
-              ออกจากระบบ
-            </button>
-          ) : null}
+          <button type="button" className="profile-action-btn profile-action-btn--danger" onClick={onLogout}>
+            <HiOutlineLogout size={18} aria-hidden />
+            ออกจากระบบ
+          </button>
         </div>
       </div>
     );
@@ -202,8 +177,6 @@ export default function ProfilePage({
           </p>
         </div>
       </div>
-
-      {renderAccountActions("top")}
 
       {showAvatarModal && user.profileImage ? (
         <div style={styles.avatarModalOverlay} onClick={() => setShowAvatarModal(false)}>
@@ -330,7 +303,7 @@ export default function ProfilePage({
         </div>
       </div>
 
-      {renderAccountActions("bottom")}
+      {renderAccountActions()}
     </div>
   );
 }
