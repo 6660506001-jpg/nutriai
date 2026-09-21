@@ -242,15 +242,20 @@ export default function FoodLogPage({
             {!isSearching && filteredSearchList.length === 0 && visibleSearchList.length > 0 && (
               <div className="log-search-status">ไม่พบเมนูตามตัวกรอง — ลองปรับตัวกรอง</div>
             )}
+            {!isSearching && visibleSearchList.length === 0 && shouldOfferAiEstimate && (
+              <div className="log-search-status">ไม่พบในฐานข้อมูล — ประเมินจากชื่อเมนูด้านล่างได้</div>
+            )}
             {!isSearching && visibleSearchList.length === 0 && !shouldOfferAiEstimate && (
-              <div className="log-search-status">ไม่พบเมนูในฐานข้อมูล</div>
+              <div className="log-search-status">ไม่พบเมนูในฐานข้อมูล — ลองพิมพ์ชื่ออาหารให้ชัดขึ้น</div>
             )}
           </div>
 
           {shouldOfferAiEstimate && (
             <div className="log-search-ai-panel">
-              {visibleSearchList.length > 0 && (
+              {visibleSearchList.length > 0 ? (
                 <p className="log-search-custom-hint">ไม่ใช่เมนูด้านบน? ใช้ AI ประเมินแทน</p>
+              ) : (
+                <p className="log-search-custom-hint">เมนูนี้ยังไม่อยู่ในฐาน ให้ AI ประเมินแคลแล้วบันทึกได้</p>
               )}
               {isEstimating ? (
                 <div className="log-search-status log-search-status--ai">AI กำลังประเมิน &ldquo;{trimmedQuery}&rdquo;...</div>

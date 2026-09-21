@@ -71,12 +71,20 @@ export const stripPortionSuffix = (name) =>
 const NOODLE_BOWL_GRAMS = 400;
 const RICE_DISH_NAME = /^ข้าว(?!โพด|เกรียบ|ตัง|พอง|เม่า)/;
 const NOODLE_BOWL_NAME = /ก๋วยเตี๋ยว|ก๋วยเตี่ยว|ก๋วยจั๊บ|ก๋วยจ๊บ|บะหมี่|เย็นตาโฟ|เกาเหลา/;
+const PASTA_PLATE_NAME = /สปาเก็ต|พาสต้า|spaghetti|pasta|มะกะโรนี|เพนเน่|ลาซานญ่า|คาโบนาร่า/;
 
 export const isNoodleBowlFood = (food) => {
   const name = stripPortionSuffix(food?.baseName || food?.name || "");
   if (!name) return false;
   if (RICE_DISH_NAME.test(name)) return false;
+  if (PASTA_PLATE_NAME.test(name)) return false;
   return NOODLE_BOWL_NAME.test(name) || /noodle/i.test(name);
+};
+
+export const isPastaPlateFood = (food) => {
+  const name = stripPortionSuffix(`${food?.baseName || ""} ${food?.name || ""}`);
+  if (!name.trim()) return false;
+  return PASTA_PLATE_NAME.test(name);
 };
 
 const parseNumber = (raw) => {
@@ -167,6 +175,10 @@ export const NOODLE_PORTION_TYPES = [
   { id: "cup", label: "ถ้วย", hint: "ระบุจำนวนถ้วย" },
 ];
 
+export const PASTA_PORTION_TYPES = [
+  { id: "plate", label: "จาน", hint: "เลือกขนาดจาน" },
+];
+
 export const isRiceDishFood = (food) => {
   const name = stripPortionSuffix(food?.baseName || food?.name || "");
   if (!name) return false;
@@ -177,6 +189,7 @@ export const isRiceDishFood = (food) => {
 export const getPortionTypesForFood = (food) => {
   if (isDrinkFood(food)) return DRINK_PORTION_TYPES;
   if (isRiceDishFood(food)) return RICE_PORTION_TYPES;
+  if (isPastaPlateFood(food)) return PASTA_PORTION_TYPES;
   if (isNoodleBowlFood(food)) return NOODLE_PORTION_TYPES;
 
   const meta = resolveServingMeta(food);

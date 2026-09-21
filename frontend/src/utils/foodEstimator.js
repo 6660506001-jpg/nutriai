@@ -335,7 +335,10 @@ const FOOD_HINT_RE = /ข้าว|ก๋วย|เตี๋ยว|เส้น|
 export const looksLikeFoodQuery = (name) => {
   const text = String(name || "").trim();
   if (!text || looksLikeInvalidFoodName(text)) return false;
-  return FOOD_HINT_RE.test(text);
+  if (FOOD_HINT_RE.test(text)) return true;
+  const thaiChars = (text.match(/[\u0E00-\u0E7F]/g) || []).length;
+  if (thaiChars >= 3 && /[\u0E30-\u0E3A\u0E40-\u0E4E]/.test(text)) return true;
+  return /^[a-zA-Z][a-zA-Z\s'-]{2,}$/.test(text);
 };
 
 export const looksLikeInvalidFoodName = (name) => {

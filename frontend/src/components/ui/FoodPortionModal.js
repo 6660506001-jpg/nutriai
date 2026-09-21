@@ -4,10 +4,12 @@ import { HiX } from "react-icons/hi";
 import { Colors } from "../../constants/colors";
 import {
   PLATE_SIZE_OPTIONS,
+  PASTA_PORTION_TYPES,
   buildFoodLogEntry,
   getGlassSizeOptions,
   getPortionTypesForFood,
   isNoodleBowlFood,
+  isPastaPlateFood,
   isRiceDishFood,
   resolveServingMeta,
   stripPortionSuffix,
@@ -47,7 +49,7 @@ export default function FoodPortionModal({
       return;
     }
     const meta = resolveServingMeta(food);
-    if (isRiceDishFood(food)) {
+    if (isRiceDishFood(food) || isPastaPlateFood(food)) {
       setPortionType("plate");
       setAmount("1");
       setPlateSize(DEFAULT_SELECTION.plateSize);
@@ -112,7 +114,9 @@ export default function FoodPortionModal({
   if (!food) return null;
 
   const servingMeta = resolveServingMeta(food);
-  const portionTypes = getPortionTypesForFood(food);
+  const portionTypes = isPastaPlateFood(food)
+    ? PASTA_PORTION_TYPES
+    : getPortionTypesForFood(food);
   const nutritionUnverified = isUnverifiedFoodEntry(food);
   const canSave = canSaveFoodEntry(food);
   const showSweetness = supportsDrinkSweetness(food);
