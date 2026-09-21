@@ -1308,7 +1308,7 @@ export default function AppVisualEffects() {
           width: 100%;
         }
         .user-guide-start-actions {
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
         }
         .nutri-menu-card {
           grid-template-columns: 1fr;
@@ -2166,8 +2166,9 @@ export default function AppVisualEffects() {
         align-items: center;
         justify-content: center;
         padding: 16px;
-        background: rgba(15, 23, 42, 0.55);
-        backdrop-filter: blur(4px);
+        background: rgba(15, 23, 42, 0.42);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
       }
       .user-guide-foot--simple .user-guide-close-btn {
         width: 100%;
@@ -2178,26 +2179,32 @@ export default function AppVisualEffects() {
       }
       .user-guide-start-btn {
         width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
         border: none;
-        border-radius: 12px;
-        padding: 12px 16px;
+        border-radius: 14px;
+        padding: 11px 12px;
         background: var(--nutri-food-accent, #2563eb);
         color: #fff;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 800;
         cursor: pointer;
-        min-height: 48px;
+        min-height: 44px;
+        box-shadow: 0 8px 16px rgba(37, 99, 235, 0.18);
       }
 
       .user-guide-start-actions {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 8px;
         width: 100%;
       }
 
       .user-guide-start-btn--activity {
         background: var(--nutri-activity-accent, #059669);
+        box-shadow: 0 8px 16px rgba(5, 150, 105, 0.18);
       }
 
       .log-add-activity-fab {
@@ -2335,7 +2342,8 @@ export default function AppVisualEffects() {
 
       .user-guide-start-btn--meals {
         width: 100%;
-        background: linear-gradient(145deg, #f97316, #ea580c);
+        background: linear-gradient(145deg, #fb923c, #ea580c);
+        box-shadow: 0 8px 16px rgba(234, 88, 12, 0.2);
       }
 
       .nutri-quick-steps {
@@ -2448,38 +2456,51 @@ export default function AppVisualEffects() {
       }
 
       .user-guide-modal--compact {
-        width: min(440px, 100%);
-        max-height: none;
+        width: min(420px, 100%);
+        max-height: min(92vh, 720px);
       }
       .user-guide-quick-steps {
         list-style: none;
         margin: 0;
-        padding: 16px 20px;
+        padding: 14px 16px 8px;
         display: grid;
-        gap: 10px;
+        gap: 8px;
       }
       .user-guide-quick-step {
         display: flex;
         align-items: flex-start;
-        gap: 10px;
-        padding: 12px 14px;
-        border-radius: 14px;
-        background: var(--nutri-bg-soft, #f8fafc);
-        border: 1px solid var(--nutri-border, #e2e8f0);
+        gap: 12px;
+        padding: 12px 12px 12px 10px;
+        border-radius: 16px;
+        background: #fff;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
       }
-      .user-guide-quick-num {
+      .user-guide-quick-icon-wrap {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 22px;
-        height: 22px;
-        border-radius: 999px;
-        background: var(--nutri-primary);
-        color: #fff;
-        font-size: 11px;
-        font-weight: 900;
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
         flex-shrink: 0;
-        margin-top: 2px;
+        color: #2563eb;
+        background: rgba(37, 99, 235, 0.12);
+      }
+      .user-guide-quick-step--activity .user-guide-quick-icon-wrap {
+        color: #059669;
+        background: rgba(5, 150, 105, 0.12);
+      }
+      .user-guide-quick-step--meals .user-guide-quick-icon-wrap {
+        color: #c2410c;
+        background: rgba(251, 146, 60, 0.16);
+      }
+      .user-guide-quick-step--history .user-guide-quick-icon-wrap {
+        color: #7c3aed;
+        background: rgba(124, 58, 237, 0.12);
+      }
+      .user-guide-quick-num {
+        display: none;
       }
       .user-guide-quick-icon {
         font-size: 22px;
@@ -2490,25 +2511,56 @@ export default function AppVisualEffects() {
         min-width: 0;
       }
       .user-guide-quick-title {
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 8px;
         font-size: 14px;
         font-weight: 800;
         color: var(--nutri-text-dark, #0f172a);
         margin-bottom: 2px;
       }
+      .user-guide-quick-index {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 900;
+        color: #64748b;
+        background: #f1f5f9;
+      }
       .user-guide-quick-text {
         margin: 0;
-        font-size: 13px;
-        line-height: 1.45;
+        font-size: 12.5px;
+        line-height: 1.5;
         font-weight: 600;
         color: var(--nutri-text-muted, #64748b);
       }
       .user-guide-foot--simple {
         justify-content: center;
-        padding-top: 4px;
+        padding: 8px 16px 18px;
+        gap: 10px;
+      }
+      .user-guide-foot-label {
+        margin: 0;
+        width: 100%;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        color: #94a3b8;
       }
       .user-guide-foot--simple .user-guide-close-btn {
         width: 100%;
+        border-radius: 999px;
+        background: #fff;
+        color: var(--nutri-text-dark, #0f172a);
+        border: 1px solid #e2e8f0;
+        box-shadow: none;
+      }
+      .user-guide-foot--simple .user-guide-close-btn:hover {
+        background: #f8fafc;
       }
       .user-guide-modal {
         width: min(640px, 100%);
@@ -2516,39 +2568,47 @@ export default function AppVisualEffects() {
         min-height: 0;
         display: flex;
         flex-direction: column;
-        background: var(--nutri-surface, #fff);
-        border-radius: 22px;
-        box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
+        background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+        border-radius: 24px;
+        box-shadow: 0 28px 60px rgba(15, 23, 42, 0.24);
         overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.7);
       }
       .user-guide-head {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         gap: 12px;
-        padding: 20px 20px 14px;
-        border-bottom: 1px solid var(--nutri-border, #e2e8f0);
-        background: linear-gradient(135deg, color-mix(in srgb, var(--nutri-primary) 10%, #fff) 0%, #fff 100%);
+        padding: 20px 18px 14px;
+        border-bottom: 0;
+        background: linear-gradient(180deg, rgba(37, 99, 235, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
       }
       .user-guide-head-text {
         min-width: 0;
       }
       .user-guide-kicker {
-        margin: 0 0 2px;
-        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin: 0 0 8px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 11px;
         font-weight: 800;
-        color: var(--nutri-primary);
+        letter-spacing: 0.02em;
+        color: #2563eb;
+        background: rgba(37, 99, 235, 0.1);
       }
       .user-guide-title {
         margin: 0;
-        font-size: 24px;
+        font-size: 22px;
         font-weight: 900;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.03em;
         color: var(--nutri-text-dark, #0f172a);
       }
       .user-guide-intro {
         margin: 6px 0 0;
-        font-size: 14px;
+        font-size: 13px;
         line-height: 1.5;
         color: var(--nutri-text-muted, #64748b);
       }
