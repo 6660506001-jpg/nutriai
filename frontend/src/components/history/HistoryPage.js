@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { HiFire, HiCalendar, HiChevronDown } from "react-icons/hi";
+import { HiFire, HiCalendar, HiChevronDown, HiPrinter } from "react-icons/hi";
 import { MdHistory } from "react-icons/md";
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Colors } from "../../constants/colors";
@@ -53,10 +53,16 @@ const groupHistoryByMonth = (history) => {
     }));
 };
 
+const mealKcal = (meal) => Number(meal?.cal ?? meal?.calories ?? meal?.kcal ?? 0);
+
 export default function HistoryPage({ historyData, dailyMeals, activities, userWeight, userTdee }) {
   const [expandedId, setExpandedId] = useState(null);
   const [expandedMonths, setExpandedMonths] = useState(() => new Set());
   const [chartRange, setChartRange] = useState("day");
+  const [chartOpen, setChartOpen] = useState(
+    () => typeof window !== "undefined" && window.innerWidth > 768,
+  );
+  const [isPrintingChart, setIsPrintingChart] = useState(false);
   const [chartColors, setChartColors] = useState(getChartThemeColors);
   const [isCompactChart, setIsCompactChart] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches,
@@ -99,16 +105,25 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
     return () => media.removeEventListener("change", syncCompact);
   }, []);
 
+  useEffect(() => {
+    const finishPrint = () => {
+      document.body.classList.remove("is-printing-history");
+      setIsPrintingChart(false);
+    };
+    window.addEventListener("afterprint", finishPrint);
+    return () => window.removeEventListener("afterprint", finishPrint);
+  }, []);
+
   const mapHistoryDay = (day) => {
     const items = day.meals || [];
     const foodCals = items
       .filter((item) => item.itemType !== "activity")
-      .reduce((sum, meal) => sum + (Number(meal.cal) || 0), 0);
+      .reduce((sum, meal) => sum + mealKcal(meal), 0);
     const activityCals = items
       .filter((item) => item.itemType === "activity")
-      .reduce((sum, meal) => sum + (Number(meal.cal) || 0), 0);
-    const totalCal = Number(day.foodCals) || foodCals;
-    const burnCals = Number(day.activityCals) || activityCals;
+      .reduce((sum, meal) => sum + mealKcal(meal), 0);
+    const totalCal = Number(day.foodCals) > 0 ? Number(day.foodCals) : foodCals;
+    const burnCals = Number(day.activityCals) > 0 ? Number(day.activityCals) : activityCals;
     const netCal = Number.isFinite(day.netCal) ? day.netCal : totalCal - burnCals;
     const expandKey = day.dateKey || day.date || String(day.id || "");
 
@@ -185,7 +200,7 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
         ) : null}
       </div>
       <div style={{ fontWeight: '800', color: meal.itemType === "activity" ? Colors.success : Colors.textDark }}>
-        {meal.itemType === "activity" ? `−${meal.cal}` : meal.cal} kcal
+        {meal.itemType === "activity" ? `−${mealKcal(meal)}` : mealKcal(meal)} kcal
       </div>
     </div>
   );
@@ -218,10 +233,11 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
           </div>
           <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
             <span className="history-day-net" style={{ fontSize: "14px", fontWeight: "800", color: Colors.primary }}>
-              สุทธิ {day.netCal} kcal
+              สุทธิ {Number(day.netCal || 0).toLocaleString()} kcal
             </span>
             <span style={{ fontSize: "13px", color: Colors.textGray }}>
-              กิน {day.totalCal}{day.activityCals > 0 ? ` · เผา ${day.activityCals}` : ""}
+              กิน {Number(day.totalCal || 0).toLocaleString()} kcal
+              {day.activityCals > 0 ? ` · เผา ${Number(day.activityCals).toLocaleString()} kcal` : ""}
             </span>
             <HiChevronDown style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "0.3s" }} />
           </div>
@@ -287,6 +303,23 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
   const chartRangeLabel = chartRange === "day" ? "รายวัน" : chartRange === "week" ? "รายสัปดาห์" : "รายเดือน";
   const chartAverageLabel = chartRange === "day" ? "เฉลี่ยสัปดาห์นี้" : "เฉลี่ยต่อช่วงที่มีข้อมูล";
   const chartPeriodText = HISTORY_CHART_PERIODS[chartRange];
+
+  const handlePrintChart = () => {
+    if (!chartData.length) {
+      window.alert("ยังไม่มีข้อมูลกราฟให้พิมพ์");
+      return;
+    }
+    setChartOpen(true);
+    setIsPrintingChart(true);
+    document.body.classList.add("is-printing-history");
+    window.setTimeout(() => {
+      window.print();
+      window.setTimeout(() => {
+        document.body.classList.remove("is-printing-history");
+        setIsPrintingChart(false);
+      }, 800);
+    }, 450);
+  };
 
   const formatAxisKcal = (value) => {
     const n = Number(value);
@@ -424,8 +457,8 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
             stroke="none"
             fill="url(#historyFoodFill)"
             fillOpacity={1}
-            isAnimationActive
-            animationDuration={700}
+            isAnimationActive={!isPrintingChart}
+            animationDuration={isPrintingChart ? 0 : 700}
             animationEasing="ease-out"
           />
           <Line
@@ -439,8 +472,8 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
             activeDot={chartActiveDotProps(chartColors.primary, chartColors.primaryLight)}
             hide={false}
             legendType="none"
-            isAnimationActive
-            animationDuration={700}
+            isAnimationActive={!isPrintingChart}
+            animationDuration={isPrintingChart ? 0 : 700}
             animationEasing="ease-out"
           />
           <Area
@@ -451,8 +484,8 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
             stroke="none"
             fill="url(#historyActivityFill)"
             fillOpacity={1}
-            isAnimationActive
-            animationDuration={700}
+            isAnimationActive={!isPrintingChart}
+            animationDuration={isPrintingChart ? 0 : 700}
             animationEasing="ease-out"
           />
           <Line
@@ -465,8 +498,8 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
             dot={chartDotProps(chartColors.success)}
             activeDot={chartActiveDotProps(chartColors.success, chartColors.successLight)}
             legendType="none"
-            isAnimationActive
-            animationDuration={700}
+            isAnimationActive={!isPrintingChart}
+            animationDuration={isPrintingChart ? 0 : 700}
             animationEasing="ease-out"
           />
         </ComposedChart>
@@ -511,14 +544,32 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
         className="dash-collapse-history-chart"
         title="กราฟกิน vs เผา"
         preview={`${chartRangeLabel} · กิน ${chartAverage} · เผา ${activityChartAverage} kcal`}
-        defaultOpen={false}
+        open={chartOpen}
+        onOpenChange={setChartOpen}
+        collapseOnMobile={false}
       >
       <div style={{...styles.card, marginTop: 0}} className="hover-lift-card responsive-card history-combined-chart-card">
-        <div style={{...styles.cardTitle, marginBottom: '16px'}}>
-          <HiFire color={Colors.primary}/> สรุปแคลอรี่และกิจกรรม{chartRangeLabel}
-          <InfoTip tooltip={FEATURE_TOOLTIPS.history} label="กราปประวัติ" idPrefix="history-chart" size={15} />
+        <div className="history-chart-card-head" style={{...styles.cardTitle, marginBottom: '16px'}}>
+          <span className="history-chart-card-title">
+            <HiFire color={Colors.primary}/> สรุปแคลอรี่และกิจกรรม{chartRangeLabel}
+            <InfoTip tooltip={FEATURE_TOOLTIPS.history} label="กราปประวัติ" idPrefix="history-chart" size={15} />
+          </span>
+          <button
+            type="button"
+            className="history-chart-print-btn"
+            onClick={handlePrintChart}
+            disabled={!chartData.length}
+          >
+            <HiPrinter aria-hidden />
+            พิมพ์กราฟ
+          </button>
         </div>
-        <div style={styles.historyChartToggle}>
+        <div className="history-chart-print-banner">
+          <strong>NutriAI</strong>
+          <span>กราฟกิน vs เผา · {chartPeriodText}</span>
+          <span>{chartAverageLabel}: กิน {chartAverage} · เผา {activityChartAverage} kcal</span>
+        </div>
+        <div className="history-chart-toggle" style={styles.historyChartToggle}>
           <button
             type="button"
             onClick={() => setChartRange("day")}
