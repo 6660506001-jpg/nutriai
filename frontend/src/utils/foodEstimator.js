@@ -1,14 +1,41 @@
 import { getApiBaseUrl } from "../constants/config";
+import bundledThaiFoods from "../data/thai_foods.json";
 import { formatPortionNote, parsePortion, scaleNutrition, stripPortionSuffix } from "./portionParser";
 import { parseFoodTextLocally } from "./nlpFoodParser";
 
 const DEFAULT_NUTRITION = { calories: 450, protein: 20, carbs: 52, fat: 16 };
-const THAI_FOODS_URL = `${process.env.PUBLIC_URL || ""}/data/thai_foods.json`;
 
-let thaiFoodsCache = null;
+const bundledList = Array.isArray(bundledThaiFoods)
+  ? bundledThaiFoods
+  : Array.isArray(bundledThaiFoods?.default)
+    ? bundledThaiFoods.default
+    : [];
+
+const EXTRA_THAI_FOODS = [
+  {
+    names: ["สปาเก็ตตี", "สปาเก็ตตี้", "สปาเกตตี", "สปาเกตตี้", "spaghetti", "พาสต้า", "pasta"],
+    calories: 450,
+    protein: 14,
+    carbs: 68,
+    fat: 12,
+    defaultServingGrams: 300,
+    defaultServingLabel: "1 จาน",
+  },
+  {
+    names: ["เกาเหลา", "เกาเหลาน้ำ", "เกาเหลาเนื้อ", "เกาเหลาหมู"],
+    calories: 280,
+    protein: 24,
+    carbs: 10,
+    fat: 16,
+    defaultServingGrams: 400,
+    defaultServingLabel: "1 ถ้วย",
+  },
+];
+
+let thaiFoodsCache = [...EXTRA_THAI_FOODS, ...bundledList];
 let aliasIndexCache = null;
 
-const normalize = (text) => String(text || "").trim().toLowerCase().replace(/\s+/g, " ");
+const normalize = (text) => String(text || "").trim().toLowerCase().normalize("NFC").replace(/\s+/g, " ");
 
 const similarity = (a, b) => {
   if (!a || !b) return 0;
@@ -36,17 +63,7 @@ const similarity = (a, b) => {
   return 1 - distance / Math.max(a.length, b.length);
 };
 
-export const loadThaiFoods = async () => {
-  if (thaiFoodsCache) return thaiFoodsCache;
-  try {
-    const res = await fetch(THAI_FOODS_URL);
-    if (!res.ok) return [];
-    thaiFoodsCache = await res.json();
-    return thaiFoodsCache;
-  } catch {
-    return [];
-  }
-};
+export const loadThaiFoods = async () => thaiFoodsCache;
 
 const buildAliasIndex = (foods) => {
   if (aliasIndexCache) return aliasIndexCache;
@@ -89,6 +106,15 @@ export const searchThaiFoods = async (query, limit = 12) => {
       if (aliasNorm === norm) {
         bestAlias = alias;
         bestScore = 1;
+        return;
+      }
+      if (aliasNorm.includes(norm) || norm.includes(aliasNorm)) {
+        const overlap = Math.min(aliasNorm.length, norm.length) / Math.max(aliasNorm.length, norm.length);
+        const containScore = 0.82 + overlap * 0.18;
+        if (containScore > bestScore) {
+          bestScore = containScore;
+          bestAlias = alias;
+        }
         return;
       }
       const score = similarity(norm, aliasNorm);
@@ -304,7 +330,7 @@ export const prepareCustomFoodEstimate = (estimate, name) => {
 
 const INVALID_FOOD_NAME_CHARS = /[(){}[\]<>@#$%^&*+=|\\;:"/?!~`]/;
 
-const FOOD_HINT_RE = /ข้าว|ก๋วย|เตี๋ยว|เส้น|ผัด|ทอด|ต้ม|ตุ๋น|แกง|ยำ|ลาบ|ส้มตำ|โจ๊ก|ไข่|ไก่|หมู|เนื้อ|กุ้ง|ปลา|เป็ด|หมึก|ปู|เต้าหู้|นม|กาแฟ|ชา|โกโก้|น้ำ|ขนม|เค้ก|ปัง|พิซซ่า|pizza|burger|sandwich|rice|chicken|salad|soup|noodle|yogurt|steak|sushi|pasta|บราวนี่|ช็อก|สเต็ก|ซูชิ|แซนด์|สลัด|ผลไม้|กล้วย|ส้ม|แอปเปิ้ล|มะม่วง|มะละกอ|องุ่น|แตงโม|ทุเรียน|มังคุด|ลำไย|ลิ้นจี่|ฝรั่ง|โอเลี้ยง|ไมโล|นมสด|น้ำผลไม้|ไอศกรีม|ไอติม|ลูกชิ้น|ไส้กรอก|แฮม|เบคอน|มันฝรั่ง|เฟรนช์|แฮมเบอร์เกอร์/i;
+const FOOD_HINT_RE = /ข้าว|ก๋วย|เตี๋ยว|เส้น|ผัด|ทอด|ต้ม|ตุ๋น|แกง|ยำ|ลาบ|ส้มตำ|โจ๊ก|เกาเหลา|เย็นตาโฟ|ไข่|ไก่|หมู|เนื้อ|กุ้ง|ปลา|เป็ด|หมึก|ปู|เต้าหู้|นม|กาแฟ|ชา|โกโก้|น้ำ|ขนม|เค้ก|ปัง|พิซซ่า|pizza|burger|sandwich|rice|chicken|salad|soup|noodle|yogurt|steak|sushi|pasta|สปาเก็ต|พาสต้า|บราวนี่|ช็อก|สเต็ก|ซูชิ|แซนด์|สลัด|ผลไม้|กล้วย|ส้ม|แอปเปิ้ล|มะม่วง|มะละกอ|องุ่น|แตงโม|ทุเรียน|มังคุด|ลำไย|ลิ้นจี่|ฝรั่ง|โอเลี้ยง|ไมโล|นมสด|น้ำผลไม้|ไอศกรีม|ไอติม|ลูกชิ้น|ไส้กรอก|แฮม|เบคอน|มันฝรั่ง|เฟรนช์|แฮมเบอร์เกอร์/i;
 
 export const looksLikeFoodQuery = (name) => {
   const text = String(name || "").trim();

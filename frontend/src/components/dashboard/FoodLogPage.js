@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { HiPlus, HiSearch, HiAdjustments } from "react-icons/hi";
 import { getApiBaseUrl } from "../../constants/config";
 import { THAI_DRINK_QUICK_PICKS, THAI_FOOD_QUICK_PICKS, THAI_FRUIT_QUICK_PICKS } from "../../constants/pageMeta";
+import { matchCommonFoodFallbacks } from "../../constants/commonFoodFallbacks";
 import { canEstimateCustomFood, canSaveFoodEntry, estimateCustomFood, getEstimateSourceLabel, looksLikeFoodQuery, looksLikeInvalidFoodName, prepareCustomFoodEstimate, searchThaiFoods } from "../../utils/foodEstimator";
 import {
   filterFoodResults,
+  mergeFoodSearchResults,
   tagSearchResults,
 } from "../../utils/logSearchHelpers";
 import {
@@ -405,21 +407,36 @@ export default function FoodLogPage({
     setIsSearching(true);
     const delayDebounce = setTimeout(async () => {
       try {
-        const res = await fetch(`${getApiBaseUrl()}/api/foods/search?q=${encodeURIComponent(query)}`);
-        const data = res.ok ? await res.json() : [];
+        const localResults = mergeFoodSearchResults(
+          filterFoodResults(await searchThaiFoods(query), query),
+          matchCommonFoodFallbacks(query),
+        );
         if (isStale()) return;
-        const apiResults = filterFoodResults(data, query);
-        const results = apiResults.length > 0 ? apiResults : filterFoodResults(await searchThaiFoods(query), query);
-        setSearchList(tagSearchResults(results, "food"));
+        setSearchList(tagSearchResults(localResults, "food"));
+
+        let apiResults = [];
+        try {
+          const res = await fetch(`${getApiBaseUrl()}/api/foods/search?q=${encodeURIComponent(query)}`);
+          const data = res.ok ? await res.json() : [];
+          if (isStale()) return;
+          apiResults = filterFoodResults(data, query);
+        } catch (err) {
+          console.error("API Error:", err);
+        }
+        if (isStale()) return;
+        setSearchList(tagSearchResults(mergeFoodSearchResults(localResults, apiResults), "food"));
       } catch (err) {
-        console.error("API Error:", err);
+        console.error("Search Error:", err);
         if (!isStale()) {
-          setSearchList(tagSearchResults(filterFoodResults(await searchThaiFoods(query), query), "food"));
+          setSearchList(tagSearchResults(mergeFoodSearchResults(
+            filterFoodResults(await searchThaiFoods(query), query),
+            matchCommonFoodFallbacks(query),
+          ), "food"));
         }
       } finally {
         if (!isStale()) setIsSearching(false);
       }
-    }, 400);
+    }, 250);
 
     return () => clearTimeout(delayDebounce);
   }, [searchTerm]);

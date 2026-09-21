@@ -1,5 +1,4 @@
 import React, { Suspense, lazy, useState, useEffect, useMemo, useRef } from "react";
-import { BrowserRouter as Router } from "react-router-dom";
 import { HiOutlineUserCircle } from "react-icons/hi";
 import { MdOutlineSpaceDashboard, MdHistory, MdRestaurant, MdMenuBook, MdDirectionsRun, MdWavingHand, MdHelpOutline } from "react-icons/md";
 import { calculateHealthData, calculateMacros } from "./utils/healthCalculations";
@@ -23,7 +22,6 @@ import {
   loadUserSession,
   saveUserSession,
   clearLegacySessionKeys,
-  findStoredUsername,
   clearLastUsername,
 } from "./utils/userStorage";
 import { loadUserDataFromCloud, saveUserDataToCloud } from "./utils/syncApi";
@@ -66,23 +64,8 @@ function TabLoading() {
   return <div style={{ padding: 24, color: "#64748b" }}>กำลังโหลด...</div>;
 }
 
-function bootstrapLastSession() {
-  const username = findStoredUsername();
-  if (!username) return null;
-  const localSession = loadUserSession(username);
-  if (!localSession.user?.username) return null;
-  return applyDailyArchive({
-    lastDate: localSession.lastDate,
-    user: localSession.user,
-    dailyMeals: localSession.dailyMeals,
-    historyData: stripSimulatedHistory(localSession.historyData),
-    activities: localSession.activities,
-  });
-}
-
 export default function App() {
-  const [bootSession] = useState(bootstrapLastSession);
-  const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(bootSession?.user));
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentTab, setCurrentTab] = useState("dashboard");
   const [themeId, setThemeId] = useState(getStoredThemeId);
   const [appearanceMode, setAppearanceMode] = useState(getStoredAppearance);
@@ -101,10 +84,10 @@ export default function App() {
     return unsubscribeSystemAppearance;
   }, [themeId, appearanceMode, followDevice, customPrimary]);
 
-  const [user, setUser] = useState(() => bootSession?.user || null);
-  const [dailyMeals, setDailyMeals] = useState(() => bootSession?.dailyMeals || ({ ...EMPTY_MEALS }));
-  const [historyData, setHistoryData] = useState(() => bootSession?.historyData || []);
-  const [activities, setActivities] = useState(() => bootSession?.activities || []);
+  const [user, setUser] = useState(null);
+  const [dailyMeals, setDailyMeals] = useState(() => ({ ...EMPTY_MEALS }));
+  const [historyData, setHistoryData] = useState([]);
+  const [activities, setActivities] = useState([]);
   const [activeMealTab, setActiveMealTab] = useState(getMealPeriodByTime);
   const [activityLaunchPreset, setActivityLaunchPreset] = useState(null);
   const [showUserGuide, setShowUserGuide] = useState(false);
@@ -113,11 +96,7 @@ export default function App() {
   const [syncUnlockError, setSyncUnlockError] = useState("");
   const [syncUnlockBusy, setSyncUnlockBusy] = useState(false);
   const [syncUnlockHint, setSyncUnlockHint] = useState("");
-  const [syncUnlockOpen, setSyncUnlockOpen] = useState(() => {
-    const name = bootSession?.user?.username;
-    if (!name || getSyncPassword(name)) return false;
-    return !sessionHasDailyLogs(bootSession || {});
-  });
+  const [syncUnlockOpen, setSyncUnlockOpen] = useState(false);
   const [cloudPushVerified, setCloudPushVerified] = useState(false);
   const isMobile = useIsMobile();
   const cloudSyncTimerRef = useRef(null);
@@ -143,6 +122,37 @@ export default function App() {
     });
   }, [isLoggedIn, user, dailyMeals, activities, historyData]);
 
+  useEffect(() => {
+    if (!isLoggedIn || !user?.username) return undefined;
+
+    const rollToToday = () => {
+      const archived = applyDailyArchive({
+        lastDate: loadUserSession(user.username).lastDate,
+        user,
+        dailyMeals,
+        historyData,
+        activities,
+      });
+      const mealsChanged = JSON.stringify(archived.dailyMeals) !== JSON.stringify(dailyMeals);
+      const actsChanged = JSON.stringify(archived.activities) !== JSON.stringify(activities);
+      if (!mealsChanged && !actsChanged) return;
+      setDailyMeals(archived.dailyMeals);
+      setActivities(archived.activities);
+      setHistoryData(archived.historyData);
+      saveUserSession(user.username, archived);
+    };
+
+    rollToToday();
+    const intervalId = window.setInterval(rollToToday, 30000);
+    window.addEventListener("focus", rollToToday);
+    document.addEventListener("visibilitychange", rollToToday);
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", rollToToday);
+      document.removeEventListener("visibilitychange", rollToToday);
+    };
+  }, [isLoggedIn, user, dailyMeals, activities, historyData]);
+
   const applyResolvedCloudSession = (resolved, fallbackUser) => {
     const archived = applyDailyArchive({
       lastDate: resolved.lastDate,
@@ -155,22 +165,12 @@ export default function App() {
       historyData: stripSimulatedHistory(resolved.historyData),
       activities: resolved.activities,
     });
-    const keepIncomingLogs = (
-      sessionHasDailyLogs(resolved)
-      && !sessionHasDailyLogs(archived)
-    );
-    const nextMeals = keepIncomingLogs ? resolved.dailyMeals : archived.dailyMeals;
-    const nextActivities = keepIncomingLogs ? resolved.activities : archived.activities;
     setUser(archived.user);
-    setDailyMeals(nextMeals);
+    setDailyMeals(archived.dailyMeals);
     setHistoryData(archived.historyData);
-    setActivities(nextActivities);
-    saveUserSession(archived.user.username, {
-      ...archived,
-      dailyMeals: nextMeals,
-      activities: nextActivities,
-    });
-    return { ...archived, dailyMeals: nextMeals, activities: nextActivities };
+    setActivities(archived.activities);
+    saveUserSession(archived.user.username, archived);
+    return archived;
   };
 
   const pullCloudSession = async (username, password, snapshotUser, snapshotLogs) => {
@@ -214,15 +214,13 @@ export default function App() {
             packCloudPayload({ dailyMeals, activities, historyData, lastDate, user }),
           );
         } else if (!localHasDaily && !resolvedHasDaily) {
-          setSyncUnlockHint("ยังไม่มีมื้อบนคลาวด์ — กรอกรหัสผ่านบนคอมเพื่อส่งมื้อมา แล้วกดซิงค์บนมือถืออีกครั้ง");
+          setSyncUnlockHint("ยังไม่มีมื้อบนคลาวด์ — บันทึกมื้อบนคอมแล้วกดซิงค์บนมือถืออีกครั้ง");
         }
         return undefined;
       })
       .catch((error) => {
-        if (!cancelled && !sessionHasDailyLogs({ dailyMeals, activities })) {
-          setSyncUnlockHint(error?.message || "ดึงมื้อจากคลาวด์ไม่สำเร็จ");
-          setSyncUnlockOpen(true);
-        }
+        if (cancelled || sessionHasDailyLogs({ dailyMeals, activities })) return;
+        setSyncUnlockHint(error?.message || "ดึงมื้อจากคลาวด์ไม่สำเร็จ");
       })
       .finally(() => {
         cloudPullingRef.current = false;
@@ -297,7 +295,6 @@ export default function App() {
     if (!isLoggedIn || !user?.username || isMobile) return;
     if (!sessionHasDailyLogs({ dailyMeals, activities })) return;
     if (cloudPushVerified || syncUnlockBusy) return;
-    setSyncUnlockOpen(true);
     const password = getSyncPassword(user.username);
     if (!password || autoPushTriedRef.current) return;
     autoPushTriedRef.current = true;
@@ -643,23 +640,9 @@ export default function App() {
   const isFirstTimeUser = !hasAnyLogHistory;
   const showDashboardRings = isMobile && currentTab === "dashboard";
   const hasDailyLogs = sessionHasDailyLogs({ dailyMeals, activities });
-  const showSyncBanner = Boolean(
-    isLoggedIn && user?.username && currentTab === "dashboard" && (
-      !hasDailyLogs || (!isMobile && hasDailyLogs && !cloudPushVerified)
-    )
-  );
-  const openSyncUnlock = () => {
-    setSyncUnlockError("");
-    const password = user?.username ? getSyncPassword(user.username) : "";
-    if (password && !hasDailyLogs) {
-      handleUnlockSync(password);
-      return;
-    }
-    setSyncUnlockOpen(true);
-  };
 
   return (
-    <Router>
+    <>
       <AppVisualEffects />
       <DailyCompleteToast payload={completeToast} onClose={dismissToast} />
       <FoodPreferencesModal
@@ -723,15 +706,6 @@ export default function App() {
                         getUserInitials(user.username)
                       )}
                     </span>
-                    {showSyncBanner ? (
-                      <button
-                        type="button"
-                        className="app-header-sync-btn"
-                        onClick={openSyncUnlock}
-                      >
-                        ซิงค์
-                      </button>
-                    ) : null}
                     <button
                       type="button"
                       className="app-header-help-btn app-header-help-btn--icon"
@@ -776,15 +750,6 @@ export default function App() {
                       </span>
                     </>
                   )}
-                  {hasDailyLogs && !cloudPushVerified ? (
-                    <button
-                      type="button"
-                      className="app-header-sync-btn"
-                      onClick={openSyncUnlock}
-                    >
-                      ส่งขึ้นคลาวด์
-                    </button>
-                  ) : null}
                   <button
                     type="button"
                     className="app-header-help-btn"
@@ -814,19 +779,8 @@ export default function App() {
               </>
             )}
           </header>
-          {showSyncBanner ? (
-            <div className="sync-needed-banner">
-              <p>
-                {hasDailyLogs
-                  ? "หน้านี้มียอดวันนี้แล้ว — กดส่งขึ้นคลาวด์จนขึ้นว่าส่งสำเร็จ แล้วค่อยไปดึงบนมือถือ"
-                  : "ยังไม่มีมื้อวันนี้บนเครื่องนี้"}
-              </p>
-              <button type="button" className="sync-needed-banner-btn" onClick={openSyncUnlock}>
-                ซิงค์มื้ออาหาร
-              </button>
-            </div>
-          ) : null}
           {!isMobile ? <AppPageHint text={pageMeta.hint} /> : null}
+
           <div className="app-scroll" style={styles.scrollContent}>
             <Suspense fallback={<TabLoading />}>
             {(currentTab === "dashboard" || currentTab === "meals") && (
@@ -896,6 +850,6 @@ export default function App() {
           </div>
         </main>
       </div>
-    </Router>
+    </>
   );
 }

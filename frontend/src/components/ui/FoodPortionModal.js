@@ -7,6 +7,8 @@ import {
   buildFoodLogEntry,
   getGlassSizeOptions,
   getPortionTypesForFood,
+  isNoodleBowlFood,
+  isRiceDishFood,
   resolveServingMeta,
   stripPortionSuffix,
 } from "../../utils/portionParser";
@@ -45,6 +47,18 @@ export default function FoodPortionModal({
       return;
     }
     const meta = resolveServingMeta(food);
+    if (isRiceDishFood(food)) {
+      setPortionType("plate");
+      setAmount("1");
+      setPlateSize(DEFAULT_SELECTION.plateSize);
+      return;
+    }
+    if (isNoodleBowlFood(food)) {
+      setPortionType("cup");
+      setAmount("1");
+      setPlateSize(DEFAULT_SELECTION.plateSize);
+      return;
+    }
     if (meta) {
       setPortionType(meta.type);
       setAmount("1");
@@ -215,7 +229,16 @@ export default function FoodPortionModal({
           ) : (
           <div style={styles.customFoodField}>
             <label style={styles.customFoodLabel}>หน่วยปริมาณ</label>
-            <div style={styles.portionTypeGroup}>
+            <div
+              style={{
+                ...styles.portionTypeGroup,
+                gridTemplateColumns: portionTypes.length === 1
+                  ? "minmax(0, 1fr)"
+                  : portionTypes.length === 2
+                    ? "minmax(0, 1fr) minmax(0, 1fr)"
+                    : "repeat(3, minmax(0, 1fr))",
+              }}
+            >
               {portionTypes.map((option) => (
                 <button
                   key={option.id}

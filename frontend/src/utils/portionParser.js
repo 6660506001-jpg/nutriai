@@ -68,6 +68,17 @@ const CUP_UNITS = ["ถ้วย", "แก้ว"];
 export const stripPortionSuffix = (name) =>
   String(name || "").replace(/\s*\([^)]+\)\s*$/g, "").trim();
 
+const NOODLE_BOWL_GRAMS = 400;
+const RICE_DISH_NAME = /^ข้าว(?!โพด|เกรียบ|ตัง|พอง|เม่า)/;
+const NOODLE_BOWL_NAME = /ก๋วยเตี๋ยว|ก๋วยเตี่ยว|ก๋วยจั๊บ|ก๋วยจ๊บ|บะหมี่|เย็นตาโฟ|เกาเหลา/;
+
+export const isNoodleBowlFood = (food) => {
+  const name = stripPortionSuffix(food?.baseName || food?.name || "");
+  if (!name) return false;
+  if (RICE_DISH_NAME.test(name)) return false;
+  return NOODLE_BOWL_NAME.test(name) || /noodle/i.test(name);
+};
+
 const parseNumber = (raw) => {
   if (raw == null) return 1;
   const token = String(raw).trim().toLowerCase();
@@ -114,6 +125,18 @@ export const resolveServingMeta = (food) => {
   }
 
   const cleanName = stripPortionSuffix(food?.baseName || food?.name || "");
+  if (isNoodleBowlFood({ ...food, baseName: cleanName, name: cleanName })) {
+    const gramsPerUnit = totalGrams || NOODLE_BOWL_GRAMS;
+    return {
+      type: "cup",
+      unit: "ถ้วย",
+      unitLabel: "ถ้วย",
+      baseCount: 1,
+      gramsPerUnit,
+      referenceLabel: totalGrams ? `1 ถ้วย (~${totalGrams}g)` : "1 ถ้วย",
+      hint: totalGrams ? `1 ถ้วย ≈ ${totalGrams}g` : "ระบุจำนวนถ้วย",
+    };
+  }
   if (/^ไข่(?:ต้ม|ลวก|ตุ๋น|ดาว|ทอด)/.test(cleanName)) {
     const gramsPerUnit = totalGrams || 50;
     return {
@@ -135,8 +158,26 @@ export const FRUIT_PORTION_TYPES = [
   { id: "gram", label: "กรัม (g)", hint: "ระบุน้ำหนัก" },
 ];
 
+export const RICE_PORTION_TYPES = [
+  { id: "plate", label: "จาน", hint: "เลือกขนาดจาน" },
+  { id: "tbsp", label: "ทัพพี", hint: "1 ทัพพี ≈ 80g" },
+];
+
+export const NOODLE_PORTION_TYPES = [
+  { id: "cup", label: "ถ้วย", hint: "ระบุจำนวนถ้วย" },
+];
+
+export const isRiceDishFood = (food) => {
+  const name = stripPortionSuffix(food?.baseName || food?.name || "");
+  if (!name) return false;
+  if (RICE_DISH_NAME.test(name)) return true;
+  return /\brice\b/i.test(name) && !/popcorn|corn/i.test(name);
+};
+
 export const getPortionTypesForFood = (food) => {
   if (isDrinkFood(food)) return DRINK_PORTION_TYPES;
+  if (isRiceDishFood(food)) return RICE_PORTION_TYPES;
+  if (isNoodleBowlFood(food)) return NOODLE_PORTION_TYPES;
 
   const meta = resolveServingMeta(food);
   const baseTypes = (food?.category === "fruit" || isFruitFood(food))
@@ -342,7 +383,7 @@ export const buildFoodLogEntry = (food, selection) => {
   const portion = buildPortionFromSelection({
     ...portionSelection,
     servingGrams,
-    servingUnit: servingMeta?.unit || "ลูก",
+    servingUnit: servingMeta?.unit || (selection.type === "cup" ? "ถ้วย" : "ลูก"),
     baseServingCount: servingMeta?.baseCount || 1,
   });
   const foodForScale = drinkNormalGrams && !food?.defaultServingGrams

@@ -48,6 +48,18 @@ export const filterActivityResults = (items, query) =>
     .filter(isLikelyActivityItem)
     .filter((item) => matchesQuery(item, query));
 
+export const mergeFoodSearchResults = (...lists) => {
+  const seen = new Set();
+  const out = [];
+  lists.flat().forEach((item) => {
+    const key = String(item?.baseName || item?.name || "").trim().toLowerCase();
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    out.push(item);
+  });
+  return out;
+};
+
 export const mergeActivityResults = (primary, secondary) => {
   const seen = new Set();
   return [...primary, ...secondary].filter((item) => {
