@@ -20,9 +20,10 @@ export default function DashboardRings({
   const remaining = goal - (eaten - burned);
   const over = remaining < 0;
   const overflow = over ? Math.abs(remaining) : 0;
-  const scale = eaten > goal ? eaten : goal;
-  const usedPct = scale > 0 ? (Math.min(eaten, goal) / scale) * 100 : 0;
-  const overPct = scale > 0 && eaten > goal ? ((eaten - goal) / scale) * 100 : 0;
+  const scale = Math.max(eaten, burned, goal, 1);
+  const eatenPct = (eaten / scale) * 100;
+  const burnedPct = (burned / scale) * 100;
+  const goalPct = (goal / scale) * 100;
 
   return (
     <div
@@ -43,20 +44,40 @@ export default function DashboardRings({
       </div>
 
       <div
-        className={`dash-energy-bar${eaten > goal ? " is-over" : ""}`}
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={Math.round(goal)}
-        aria-valuenow={Math.round(eaten)}
-        aria-label={`พลังงานที่ได้รับ ${Math.round(eaten)} จากเป้าหมายพลังงาน ${Math.round(goal)} กิโลแคลอรี`}
+        className="dash-energy-compare"
+        role="img"
+        aria-label={`พลังงานที่ได้รับ ${Math.round(eaten)} กิโลแคลอรี พลังงานที่เผาผลาญ ${Math.round(burned)} กิโลแคลอรี เป้าหมาย ${Math.round(goal)} กิโลแคลอรี`}
       >
-        <span className="dash-energy-bar-track">
-          <span className="dash-energy-bar-used" style={{ width: `${usedPct}%` }} />
-          {overPct > 0 ? <span className="dash-energy-bar-over" style={{ width: `${overPct}%` }} /> : null}
-        </span>
-        <span className="dash-energy-bar-meta">
-          {`พลังงานที่ได้รับ ${Math.round(eaten).toLocaleString("th-TH")} / ${Math.round(goal).toLocaleString("th-TH")} กิโลแคลอรี`}
-        </span>
+        <div className="dash-energy-compare-legend">
+          <span className="dash-energy-compare-swatch dash-energy-compare-swatch--intake" />
+          พลังงานที่ได้รับ
+          <span className="dash-energy-compare-swatch dash-energy-compare-swatch--burn" />
+          พลังงานที่เผาผลาญ
+          <span className="dash-energy-compare-swatch dash-energy-compare-swatch--goal" />
+          เป้าหมาย
+        </div>
+
+        <div className="dash-energy-compare-row">
+          <span className="dash-energy-compare-label">พลังงานที่ได้รับ</span>
+          <div className="dash-energy-compare-track">
+            <span className="dash-energy-compare-fill dash-energy-compare-fill--intake" style={{ width: `${eatenPct}%` }} />
+            <span className="dash-energy-compare-goal" style={{ left: `${goalPct}%` }} aria-hidden />
+          </div>
+          <strong className="dash-energy-compare-value">{Math.round(eaten).toLocaleString("th-TH")}</strong>
+        </div>
+
+        <div className="dash-energy-compare-row">
+          <span className="dash-energy-compare-label">พลังงานที่เผาผลาญ</span>
+          <div className="dash-energy-compare-track">
+            <span className="dash-energy-compare-fill dash-energy-compare-fill--burn" style={{ width: `${burnedPct}%` }} />
+            <span className="dash-energy-compare-goal" style={{ left: `${goalPct}%` }} aria-hidden />
+          </div>
+          <strong className="dash-energy-compare-value">{Math.round(burned).toLocaleString("th-TH")}</strong>
+        </div>
+
+        <p className="dash-energy-compare-meta">
+          เทียบกับเป้าหมาย {Math.round(goal).toLocaleString("th-TH")} กิโลแคลอรี
+        </p>
       </div>
 
       <div className="dash-energy-mini">
