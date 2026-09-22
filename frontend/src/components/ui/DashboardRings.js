@@ -65,14 +65,6 @@ export default function DashboardRings({
           : `พลังงานคงเหลือ ${fmt(remaining)} กิโลแคลอรี จากเป้าหมายพลังงาน ${fmt(goal)} พลังงานที่ได้รับ ${fmt(eaten)} พลังงานที่เผาผลาญ ${fmt(burned)}`
       }
     >
-      <div className={`dash-energy-hero${over ? " is-over" : ""}`}>
-        <span className="dash-energy-hero-label">{over ? "เกินเป้าหมาย" : "พลังงานคงเหลือ"}</span>
-        <strong className="dash-energy-hero-value">
-          {fmt(Math.abs(remaining))}
-        </strong>
-        <span className="dash-energy-hero-unit">กิโลแคลอรี</span>
-      </div>
-
       <div className="dash-energy-pair">
         <PairCard
           tone="eat"
@@ -91,6 +83,14 @@ export default function DashboardRings({
         />
       </div>
       <p className="dash-energy-goal-note">เส้นตั้งคือเป้าหมายพลังงานวันนี้ {fmt(goal)} กิโลแคลอรี</p>
+
+      <div className={`dash-energy-hero${over ? " is-over" : ""}`}>
+        <span className="dash-energy-hero-label">{over ? "เกินเป้าหมาย" : "พลังงานคงเหลือ"}</span>
+        <strong className="dash-energy-hero-value">
+          {fmt(Math.abs(remaining))}
+        </strong>
+        <span className="dash-energy-hero-unit">กิโลแคลอรี</span>
+      </div>
 
       <DashboardMacroStrip
         protein={protein}
