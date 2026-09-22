@@ -6605,10 +6605,11 @@ export default function AppVisualEffects() {
       .daily-total-label,
       .activity-totals-label {
         font-size: 11px;
-        font-weight: 700;
+        font-weight: 800;
         color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0;
+        text-transform: none;
+        line-height: 1.25;
       }
       .daily-total-value,
       .activity-totals-value {

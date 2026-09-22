@@ -216,17 +216,17 @@ export function DailyTotalsBar({
     <div className="daily-totals-bar">
       <div className="daily-totals-main">
         <div className="daily-total-cell">
-          <span className="daily-total-label">กิน</span>
-          <span className="daily-total-value daily-total-value--food">{foodCals} <small>kcal</small></span>
+          <span className="daily-total-label">พลังงานที่ได้รับ</span>
+          <span className="daily-total-value daily-total-value--food">{foodCals} <small>กิโลแคลอรี</small></span>
         </div>
         <div className="daily-total-cell">
-          <span className="daily-total-label">เผา</span>
-          <span className="daily-total-value daily-total-value--burn">−{activityCals} <small>kcal</small></span>
+          <span className="daily-total-label">พลังงานที่เผาผลาญ</span>
+          <span className="daily-total-value daily-total-value--burn">−{activityCals} <small>กิโลแคลอรี</small></span>
         </div>
         {showNet && (
           <div className="daily-total-cell daily-total-cell--net">
-            <span className="daily-total-label">สุทธิ</span>
-            <span className="daily-total-value daily-total-value--net">{net} <small>kcal</small></span>
+            <span className="daily-total-label">พลังงานสุทธิ</span>
+            <span className="daily-total-value daily-total-value--net">{net} <small>กิโลแคลอรี</small></span>
           </div>
         )}
       </div>
