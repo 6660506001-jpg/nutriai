@@ -10,7 +10,6 @@ import { getMealShort, getTodayKey, mealTotalsFromDaily } from "../../utils/logD
 import { summarizeDailyRewards } from "../../utils/mealRewards";
 import { styles } from "../../styles/appStyles";
 import DashboardStatusHero from "../ui/DashboardStatusHero";
-import HomeActionGrid from "../ui/HomeActionGrid";
 import MenuRecommendationCard from "../ui/MenuRecommendationCard";
 import AiMacroMeters from "../ui/AiMacroMeters";
 import WhatIfFoodSimulator from "../ui/WhatIfFoodSimulator";
@@ -432,17 +431,6 @@ export default function Dashboard({
           />
           <DashboardHomeAdvice brief={homeAdviceBrief} />
         </div>
-      )}
-
-      {viewMode === "home" && !isMobile && (
-        <HomeActionGrid
-          foodCals={foodCals}
-          activityCals={activityCals}
-          mealPoints={dailyRewards.totalPoints}
-          onFood={onNavigateToFood}
-          onActivity={() => onNavigateToActivity()}
-          onMeals={onNavigateToMeals}
-        />
       )}
 
       {viewMode === "home" && hasRecordsLogged && (
