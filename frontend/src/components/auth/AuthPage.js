@@ -265,7 +265,7 @@ export default function AuthPage({
                   ref={usernameRef}
                   className="login-input-pro"
                   style={styles.loginInput}
-                  placeholder="ตั้งชื่อผู้ใช้"
+                  placeholder={isLogin ? "กรอกชื่อผู้ใช้" : "ตั้งชื่อผู้ใช้"}
                   name="nutri-auth-user"
                   autoComplete={isLogin ? "username" : "off"}
                   autoCapitalize="none"
@@ -282,7 +282,7 @@ export default function AuthPage({
                   className="login-input-pro"
                   style={styles.loginInput}
                   type="password"
-                  placeholder="ตั้งรหัสผ่าน"
+                  placeholder={isLogin ? "กรอกรหัสผ่าน" : "ตั้งรหัสผ่าน"}
                   name="nutri-auth-password"
                   autoComplete={isLogin ? "current-password" : "new-password"}
                   enterKeyHint="go"
