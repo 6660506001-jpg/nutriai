@@ -428,13 +428,21 @@ export default function Dashboard({
           />
           <DashboardHomeAdvice brief={homeAdviceBrief} />
           {hasRecordsLogged ? (
-            <DashboardDaySummary
-              foodCals={foodCals}
-              activityCals={activityCals}
-              dailyMeals={dailyMeals}
-              activities={activities}
-              dailyRewards={dailyRewards}
-            />
+            <DashCollapsible
+              className="dash-collapse-summary dash-home-meals-block"
+              title="สรุปแต่ละมื้อวันนี้"
+              preview={`${foodCals.toLocaleString("th-TH")} กิโลแคลอรี`}
+              defaultOpen
+              collapseOnMobile={false}
+            >
+              <DashboardDaySummary
+                foodCals={foodCals}
+                activityCals={activityCals}
+                dailyMeals={dailyMeals}
+                activities={activities}
+                dailyRewards={dailyRewards}
+              />
+            </DashCollapsible>
           ) : null}
         </div>
       )}

@@ -49,8 +49,7 @@ export default function DashboardDaySummary({
   const meals = mealSummariesFromDaily(dailyMeals, activities);
 
   return (
-    <section className="dashboard-day-summary dash-home-meals-block">
-      <h2 className="dashboard-day-summary-heading">สรุปแต่ละมื้อวันนี้</h2>
+    <section className="dashboard-day-summary">
       <div className="dashboard-day-summary-date">{formatTodayLabel()}</div>
       <DailyTotalsBar foodCals={foodCals} activityCals={activityCals} />
       <div className="day-meal-summaries">

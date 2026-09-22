@@ -5199,6 +5199,11 @@ export default function AppVisualEffects() {
       }
       .dash-collapse-summary .dashboard-day-summary {
         margin: 0;
+        padding: 0 12px 12px;
+        border: none;
+        box-shadow: none;
+        background: transparent;
+        border-radius: 0;
       }
       .dash-collapse-ai .dash-collapse-body {
         padding-top: 0;
