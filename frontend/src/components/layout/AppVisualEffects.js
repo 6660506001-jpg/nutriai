@@ -2247,11 +2247,6 @@ export default function AppVisualEffects() {
       .app-main--mobile .app-page-hint {
         display: none !important;
       }
-      @media (max-width: 1024px) {
-        .app-page-hint {
-          display: none !important;
-        }
-      }
       .app-page-hint-icon {
         flex-shrink: 0;
         margin-top: 1px;
@@ -5099,12 +5094,15 @@ export default function AppVisualEffects() {
       .dash-home-stack .dash-home-stats-block {
         order: 1;
       }
-      .dash-home-stack .dash-home-menu-pick {
+      .dash-home-stack .dash-home-meals-block {
         order: 2;
+      }
+      .dash-home-stack .dash-home-menu-pick {
+        order: 3;
         margin-top: 0;
       }
       .dash-home-stack .dash-home-advice-block {
-        order: 3;
+        order: 4;
         margin: 0;
         padding: 14px;
         border-radius: var(--nutri-radius-lg, 18px);

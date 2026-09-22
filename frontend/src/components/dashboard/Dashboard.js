@@ -346,9 +346,6 @@ export default function Dashboard({
       headline: analysis.headline,
     });
   }, [analysis, user.tdee, netCals]);
-  const summaryPreview = hasRecordsLogged
-    ? `พลังงานที่ได้รับ ${foodCals} · พลังงานที่เผาผลาญ ${activityCals} · พลังงานสุทธิ ${netCals >= 0 ? netCals : `−${Math.abs(netCals)}`} กิโลแคลอรี`
-    : "";
 
   return (
     <div style={styles.pageLayout} className={`dashboard-overview dashboard-home-simple dashboard-view-${viewMode}`}>
@@ -419,6 +416,15 @@ export default function Dashboard({
             activityCals={activityCals}
             netCals={netCals}
           />
+          {hasRecordsLogged ? (
+            <DashboardDaySummary
+              foodCals={foodCals}
+              activityCals={activityCals}
+              dailyMeals={dailyMeals}
+              activities={activities}
+              dailyRewards={dailyRewards}
+            />
+          ) : null}
           <DashboardHomeMenuPick
             menu={bestAiMenu}
             loading={menuLoading && !bestAiMenu}
@@ -431,23 +437,6 @@ export default function Dashboard({
           />
           <DashboardHomeAdvice brief={homeAdviceBrief} />
         </div>
-      )}
-
-      {viewMode === "home" && hasRecordsLogged && (
-        <DashCollapsible
-          className="dash-collapse-summary"
-          title="สรุปวันนี้"
-          preview={summaryPreview}
-          defaultOpen={!isMobile}
-        >
-          <DashboardDaySummary
-            foodCals={foodCals}
-            activityCals={activityCals}
-            dailyMeals={dailyMeals}
-            activities={activities}
-            dailyRewards={dailyRewards}
-          />
-        </DashCollapsible>
       )}
 
       {viewMode === "meals" && analysis.recommendationTargets?.canRecommend && !showMenuRecommendations && (

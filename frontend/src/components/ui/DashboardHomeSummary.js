@@ -9,7 +9,7 @@ function useHomeSummaryMetrics({
 }) {
   const intakeNote =
     activityCals > 0
-      ? `กิน ${foodCals.toLocaleString("th-TH")} · เผา ${activityCals.toLocaleString("th-TH")} · สุทธิ ${netCals.toLocaleString("th-TH")}`
+      ? `พลังงานที่ได้รับ ${foodCals.toLocaleString("th-TH")} · พลังงานที่เผาผลาญ ${activityCals.toLocaleString("th-TH")} · พลังงานสุทธิ ${netCals.toLocaleString("th-TH")}`
       : null;
   return { intakeNote };
 }

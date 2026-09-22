@@ -1,3 +1,10 @@
+.dashboard-day-summary-heading {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
 .day-meal-summaries {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
