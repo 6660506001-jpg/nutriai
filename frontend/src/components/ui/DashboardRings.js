@@ -84,8 +84,6 @@ export default function DashboardRings({
   const overflow = over ? Math.abs(remaining) : 0;
   const used = Math.max(0, eaten - burned);
   const uid = React.useId().replace(/:/g, "");
-  const barScale = Math.max(eaten, burned, goal, 1);
-  const barPct = (n) => Math.min(100, (n / barScale) * 100);
   const story = over
     ? `ใช้แล้ว ${fmt(used)} จากเป้าหมาย ${fmt(goal)} กิโลแคลอรี · เกิน ${fmt(overflow)}`
     : `ใช้แล้ว ${fmt(used)} จากเป้าหมาย ${fmt(goal)} กิโลแคลอรี · คงเหลือ ${fmt(remaining)}`;
@@ -124,9 +122,7 @@ export default function DashboardRings({
         </div>
 
         <div className="dash-energy-rows">
-          <EnergyRow tone="eat" label="ที่ได้รับ" value={eaten} widthPct={barPct(eaten)} />
-          <EnergyRow tone="burn" label="ที่เผาผลาญ" value={burned} widthPct={barPct(burned)} />
-          <EnergyRow tone="goal" label="เป้าหมาย" value={goal} widthPct={barPct(goal)} />
+          <EnergyRow tone="goal" label="เป้าหมายพลังงาน" value={goal} widthPct={100} />
         </div>
         <p className="dash-energy-story">{story}</p>
       </div>

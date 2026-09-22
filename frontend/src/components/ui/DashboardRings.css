@@ -108,7 +108,7 @@
 
 .dash-energy-row {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) 52px;
+  grid-template-columns: 108px minmax(0, 1fr) 52px;
   align-items: center;
   gap: 8px;
 }
@@ -262,7 +262,7 @@
   }
 
   .dash-energy-row {
-    grid-template-columns: 68px minmax(0, 1fr) 48px;
+    grid-template-columns: 96px minmax(0, 1fr) 48px;
     gap: 6px;
   }
 }
