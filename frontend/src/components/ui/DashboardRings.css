@@ -15,16 +15,16 @@
 
 .dash-energy-ring-block {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   justify-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 16px;
 }
 
 .dash-energy-ring {
   position: relative;
-  width: 140px;
-  height: 140px;
+  width: 118px;
+  height: 118px;
 }
 
 .dash-energy-ring svg {
@@ -41,6 +41,10 @@
   stroke: #d1fae5;
 }
 
+.dash-energy-ring--over .dash-energy-ring-track {
+  stroke: #ffedd5;
+}
+
 .dash-energy-ring-value {
   transition: stroke-dasharray 0.45s ease;
 }
@@ -54,7 +58,7 @@
   justify-content: center;
   text-align: center;
   pointer-events: none;
-  padding: 12px;
+  padding: 8px;
 }
 
 .dash-energy-ring-kicker {
@@ -68,9 +72,13 @@
   color: #047857;
 }
 
+.dash-energy-ring--over .dash-energy-ring-kicker {
+  color: #c2410c;
+}
+
 .dash-energy-ring-num {
   margin-top: 2px;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 900;
   letter-spacing: -0.04em;
   line-height: 1;
@@ -79,6 +87,10 @@
 
 .dash-energy-ring--burn .dash-energy-ring-num {
   color: #047857;
+}
+
+.dash-energy-ring--over .dash-energy-ring-num {
+  color: #c2410c;
 }
 
 .dash-energy-ring-unit {
@@ -237,12 +249,16 @@
 
 @media (max-width: 420px) {
   .dash-energy-ring {
-    width: 124px;
-    height: 124px;
+    width: 104px;
+    height: 104px;
+  }
+
+  .dash-energy-ring-kicker {
+    font-size: 9px;
   }
 
   .dash-energy-ring-num {
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .dash-energy-row {
@@ -260,7 +276,7 @@
 
   .dash-status-hero-energy .dash-energy-panel,
   .dash-status-hero-energy .dash-macro-rows {
-    max-width: 640px;
+    max-width: 720px;
     margin-left: auto;
     margin-right: auto;
   }
@@ -269,7 +285,16 @@
     padding: 20px 22px 16px;
   }
 
+  .dash-status-hero-energy .dash-energy-ring {
+    width: 132px;
+    height: 132px;
+  }
+
+  .dash-status-hero-energy .dash-energy-ring-num {
+    font-size: 24px;
+  }
+
   .dash-status-hero-energy .dash-energy-ring-block {
-    gap: 24px;
+    gap: 16px;
   }
 }

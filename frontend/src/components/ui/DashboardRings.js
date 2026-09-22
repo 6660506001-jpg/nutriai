@@ -112,6 +112,15 @@ export default function DashboardRings({
             from="#34d399"
             to="#059669"
           />
+          <EnergyRing
+            tone="over"
+            label="เกินเป้าหมาย"
+            value={overflow}
+            pct={overflow / goal}
+            gradId={`dashEnergyOver-${uid}`}
+            from="#fb923c"
+            to="#ea580c"
+          />
         </div>
 
         <div className="dash-energy-rows">
