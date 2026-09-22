@@ -2,6 +2,45 @@ import React from "react";
 import DashboardMacroStrip from "./DashboardMacroStrip";
 import "./DashboardRings.css";
 
+const fmt = (n) => Math.round(n).toLocaleString("th-TH");
+
+function BulletRow({
+  label,
+  value,
+  fillPct,
+  overPct = 0,
+  goalPct,
+  tone,
+}) {
+  return (
+    <div className={`dash-bullet-row dash-bullet-row--${tone}`}>
+      <div className="dash-bullet-head">
+        <span className="dash-bullet-label">{label}</span>
+        <strong className="dash-bullet-value">
+          {fmt(value)}
+          <small> กิโลแคลอรี</small>
+        </strong>
+      </div>
+      <div className="dash-bullet-chart">
+        <div className="dash-bullet-track">
+          <span
+            className={`dash-bullet-fill dash-bullet-fill--${tone}`}
+            style={{ width: `${fillPct}%` }}
+          />
+          {overPct > 0 ? (
+            <span className="dash-bullet-fill dash-bullet-fill--over" style={{ width: `${overPct}%` }} />
+          ) : null}
+        </div>
+        <span
+          className="dash-bullet-target"
+          style={{ left: `${goalPct}%` }}
+          title="เป้าหมายพลังงาน"
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardRings({
   foodCals = 0,
   activityCals = 0,
@@ -20,17 +59,12 @@ export default function DashboardRings({
   const remaining = goal - (eaten - burned);
   const over = remaining < 0;
   const overflow = over ? Math.abs(remaining) : 0;
-  const pairScale = Math.max(eaten, burned, 1);
-  const eatenPct = (eaten / pairScale) * 100;
-  const burnedPct = (burned / pairScale) * 100;
-  const net = eaten - burned;
-  const compareText = eaten === 0 && burned === 0
-    ? "ยังไม่มีรายการบันทึกวันนี้"
-    : net > 0
-      ? `พลังงานที่ได้รับมากกว่าที่เผาผลาญ ${Math.round(net).toLocaleString("th-TH")} กิโลแคลอรี`
-      : net < 0
-        ? `พลังงานที่เผาผลาญมากกว่าที่ได้รับ ${Math.round(Math.abs(net)).toLocaleString("th-TH")} กิโลแคลอรี`
-        : "พลังงานที่ได้รับเท่ากับการเผาผลาญ";
+  const scale = Math.max(eaten, burned, goal, 1) * 1.12;
+  const toPct = (n) => Math.min(100, (Math.max(0, n) / scale) * 100);
+  const goalPct = toPct(goal);
+  const eatenBasePct = toPct(Math.min(eaten, goal));
+  const eatenOverPct = eaten > goal ? toPct(eaten - goal) : 0;
+  const burnedPct = toPct(burned);
 
   return (
     <div
@@ -38,41 +72,38 @@ export default function DashboardRings({
       role="img"
       aria-label={
         over
-          ? `เกินเป้าหมายพลังงาน ${Math.round(overflow)} กิโลแคลอรี จากเป้าหมาย ${Math.round(goal)}`
-          : `พลังงานคงเหลือ ${Math.round(remaining)} กิโลแคลอรี จากเป้าหมายพลังงาน ${Math.round(goal)}`
+          ? `เกินเป้าหมายพลังงาน ${fmt(overflow)} กิโลแคลอรี จากเป้าหมาย ${fmt(goal)} พลังงานที่ได้รับ ${fmt(eaten)} พลังงานที่เผาผลาญ ${fmt(burned)}`
+          : `พลังงานคงเหลือ ${fmt(remaining)} กิโลแคลอรี จากเป้าหมายพลังงาน ${fmt(goal)} พลังงานที่ได้รับ ${fmt(eaten)} พลังงานที่เผาผลาญ ${fmt(burned)}`
       }
     >
       <div className={`dash-energy-hero${over ? " is-over" : ""}`}>
         <span className="dash-energy-hero-label">{over ? "เกินเป้าหมาย" : "พลังงานคงเหลือ"}</span>
         <strong className="dash-energy-hero-value">
-          {Math.abs(Math.round(remaining)).toLocaleString("th-TH")}
+          {fmt(Math.abs(remaining))}
         </strong>
         <span className="dash-energy-hero-unit">กิโลแคลอรี</span>
       </div>
 
-      <div
-        className="dash-energy-pair"
-        aria-label={`พลังงานที่ได้รับ ${Math.round(eaten)} กิโลแคลอรี พลังงานที่เผาผลาญ ${Math.round(burned)} กิโลแคลอรี`}
-      >
-        <div className="dash-energy-pair-card dash-energy-pair-card--eat">
-          <span className="dash-energy-pair-label">พลังงานที่ได้รับ</span>
-          <strong className="dash-energy-pair-num">{Math.round(eaten).toLocaleString("th-TH")}</strong>
-          <span className="dash-energy-pair-unit">กิโลแคลอรี</span>
-          <span className="dash-energy-pair-track">
-            <span className="dash-energy-pair-fill dash-energy-pair-fill--eat" style={{ width: `${eatenPct}%` }} />
-          </span>
-        </div>
-        <div className="dash-energy-pair-card dash-energy-pair-card--burn">
-          <span className="dash-energy-pair-label">พลังงานที่เผาผลาญ</span>
-          <strong className="dash-energy-pair-num">{Math.round(burned).toLocaleString("th-TH")}</strong>
-          <span className="dash-energy-pair-unit">กิโลแคลอรี</span>
-          <span className="dash-energy-pair-track">
-            <span className="dash-energy-pair-fill dash-energy-pair-fill--burn" style={{ width: `${burnedPct}%` }} />
-          </span>
-        </div>
+      <div className="dash-bullet">
+        <BulletRow
+          label="พลังงานที่ได้รับ"
+          value={eaten}
+          fillPct={eatenBasePct}
+          overPct={eatenOverPct}
+          goalPct={goalPct}
+          tone="eat"
+        />
+        <BulletRow
+          label="พลังงานที่เผาผลาญ"
+          value={burned}
+          fillPct={burnedPct}
+          goalPct={goalPct}
+          tone="burn"
+        />
+        <p className="dash-bullet-caption">
+          เส้นตั้งคือเป้าหมายพลังงานวันนี้ {fmt(goal)} กิโลแคลอรี
+        </p>
       </div>
-      <p className="dash-energy-pair-note">{compareText}</p>
-      <p className="dash-energy-goal-note">เป้าหมายพลังงานวันนี้ {Math.round(goal).toLocaleString("th-TH")} กิโลแคลอรี</p>
 
       <DashboardMacroStrip
         protein={protein}
