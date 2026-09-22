@@ -82,7 +82,7 @@ export default function DashboardRings({
           goalPct={goalPct}
         />
       </div>
-      <p className="dash-energy-goal-note">เส้นตั้งคือเป้าหมายพลังงานวันนี้ {fmt(goal)} กิโลแคลอรี</p>
+      <p className="dash-energy-goal-note">เป้าหมายพลังงานวันนี้ {fmt(goal)} กิโลแคลอรี</p>
 
       <div className={`dash-energy-hero${over ? " is-over" : ""}`}>
         <span className="dash-energy-hero-label">{over ? "เกินเป้าหมาย" : "พลังงานคงเหลือ"}</span>
