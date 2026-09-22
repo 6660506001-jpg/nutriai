@@ -2244,6 +2244,14 @@ export default function AppVisualEffects() {
         border: 1px solid rgba(59, 130, 246, 0.18);
         box-shadow: 0 4px 14px rgba(37, 99, 235, 0.06);
       }
+      .app-main--mobile .app-page-hint {
+        display: none !important;
+      }
+      @media (max-width: 1024px) {
+        .app-page-hint {
+          display: none !important;
+        }
+      }
       .app-page-hint-icon {
         flex-shrink: 0;
         margin-top: 1px;
