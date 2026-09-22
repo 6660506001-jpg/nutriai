@@ -25,12 +25,12 @@ export default function DashboardRings({
   const burnedPct = (burned / pairScale) * 100;
   const net = eaten - burned;
   const compareText = eaten === 0 && burned === 0
-    ? "ยังไม่มีบันทึกวันนี้"
+    ? "ยังไม่มีรายการบันทึกวันนี้"
     : net > 0
-      ? `กินมากกว่าเผา ${Math.round(net).toLocaleString("th-TH")} กิโลแคลอรี`
+      ? `พลังงานที่ได้รับมากกว่าที่เผาผลาญ ${Math.round(net).toLocaleString("th-TH")} กิโลแคลอรี`
       : net < 0
-        ? `เผามากกว่ากิน ${Math.round(Math.abs(net)).toLocaleString("th-TH")} กิโลแคลอรี`
-        : "กินเท่ากับที่เผา";
+        ? `พลังงานที่เผาผลาญมากกว่าที่ได้รับ ${Math.round(Math.abs(net)).toLocaleString("th-TH")} กิโลแคลอรี`
+        : "พลังงานที่ได้รับเท่ากับการเผาผลาญ";
 
   return (
     <div
@@ -52,10 +52,10 @@ export default function DashboardRings({
 
       <div
         className="dash-energy-pair"
-        aria-label={`กิน ${Math.round(eaten)} กิโลแคลอรี เผา ${Math.round(burned)} กิโลแคลอรี`}
+        aria-label={`พลังงานที่ได้รับ ${Math.round(eaten)} กิโลแคลอรี พลังงานที่เผาผลาญ ${Math.round(burned)} กิโลแคลอรี`}
       >
         <div className="dash-energy-pair-card dash-energy-pair-card--eat">
-          <span className="dash-energy-pair-label">กินวันนี้</span>
+          <span className="dash-energy-pair-label">พลังงานที่ได้รับ</span>
           <strong className="dash-energy-pair-num">{Math.round(eaten).toLocaleString("th-TH")}</strong>
           <span className="dash-energy-pair-unit">กิโลแคลอรี</span>
           <span className="dash-energy-pair-track">
@@ -63,7 +63,7 @@ export default function DashboardRings({
           </span>
         </div>
         <div className="dash-energy-pair-card dash-energy-pair-card--burn">
-          <span className="dash-energy-pair-label">เผาวันนี้</span>
+          <span className="dash-energy-pair-label">พลังงานที่เผาผลาญ</span>
           <strong className="dash-energy-pair-num">{Math.round(burned).toLocaleString("th-TH")}</strong>
           <span className="dash-energy-pair-unit">กิโลแคลอรี</span>
           <span className="dash-energy-pair-track">
@@ -72,7 +72,7 @@ export default function DashboardRings({
         </div>
       </div>
       <p className="dash-energy-pair-note">{compareText}</p>
-      <p className="dash-energy-goal-note">เป้าหมายวันนี้ {Math.round(goal).toLocaleString("th-TH")} กิโลแคลอรี</p>
+      <p className="dash-energy-goal-note">เป้าหมายพลังงานวันนี้ {Math.round(goal).toLocaleString("th-TH")} กิโลแคลอรี</p>
 
       <DashboardMacroStrip
         protein={protein}
