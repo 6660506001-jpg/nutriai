@@ -93,3 +93,30 @@ export const mealTotalsFromDaily = (dailyMeals) =>
     acc[mealType] = sumCalories(dailyMeals?.[mealType]);
     return acc;
   }, {});
+
+const sumMacroField = (items, key) =>
+  (Array.isArray(items) ? items : []).reduce(
+    (sum, item) => sum + (Number(item?.[key]) || 0),
+    0,
+  );
+
+export const mealSummariesFromDaily = (dailyMeals, activities = []) =>
+  MEAL_ORDER.map((mealType) => {
+    const foods = Array.isArray(dailyMeals?.[mealType]) ? dailyMeals[mealType] : [];
+    const mealActivities = (Array.isArray(activities) ? activities : []).filter(
+      (item) => (item?.mealPeriod || "") === mealType,
+    );
+    return {
+      mealType,
+      short: getMealShort(mealType),
+      foods,
+      foodNames: foods.map((item) => item?.name).filter(Boolean),
+      activities: mealActivities,
+      activityNames: mealActivities.map((item) => item?.name).filter(Boolean),
+      calories: sumCalories(foods),
+      protein: sumMacroField(foods, "protein"),
+      carbs: sumMacroField(foods, "carbs"),
+      fat: sumMacroField(foods, "fat"),
+      burned: sumCalories(mealActivities),
+    };
+  });

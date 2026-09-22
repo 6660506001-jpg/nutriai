@@ -1,0 +1,66 @@
+.day-meal-summaries {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.day-meal-card {
+  padding: 12px 12px 10px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  min-width: 0;
+}
+
+.day-meal-card.has-data {
+  background: #fff;
+  border-color: #dbe7f5;
+}
+
+.day-meal-card-title {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.day-meal-card-items,
+.day-meal-card-activity,
+.day-meal-card-empty,
+.day-meal-card-macros,
+.day-meal-card-burn {
+  margin: 0 0 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #475569;
+}
+
+.day-meal-card-empty {
+  color: #94a3b8;
+}
+
+.day-meal-card-energy {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #1d4ed8;
+}
+
+.day-meal-card-macros {
+  margin-bottom: 0;
+  font-weight: 700;
+}
+
+.day-meal-card-burn {
+  margin: 6px 0 0;
+  font-weight: 700;
+  color: #047857;
+}
+
+@media (max-width: 720px) {
+  .day-meal-summaries {
+    grid-template-columns: 1fr;
+  }
+}

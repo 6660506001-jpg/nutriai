@@ -8,7 +8,9 @@ import {
   formatTodayLabel,
   getMealShort,
   MEAL_ORDER,
+  mealSummariesFromDaily,
 } from "../../utils/logDisplay";
+import "./DailyLogDisplay.css";
 import { renderHearts, renderStars } from "../../utils/mealRewards";
 import { isUnverifiedFoodEntry } from "../../utils/foodEstimator";
 import FoodAvoidanceWarning from "./FoodAvoidanceWarning";
@@ -352,15 +354,59 @@ export function EmptyLogHint({ text }) {
   return <p className="log-empty-hint">{text}</p>;
 }
 
-export function DashboardDaySummary({ foodCals, activityCals, mealTotals, dailyRewards }) {
+export function DashboardDaySummary({
+  foodCals,
+  activityCals,
+  dailyMeals,
+  activities = [],
+  dailyRewards,
+}) {
+  const meals = mealSummariesFromDaily(dailyMeals, activities);
+  const fmt = (n) => Math.round(n).toLocaleString("th-TH");
+
   return (
     <section className="dashboard-day-summary">
       <div className="dashboard-day-summary-date">{formatTodayLabel()}</div>
       <DailyTotalsBar
         foodCals={foodCals}
         activityCals={activityCals}
-        mealTotals={mealTotals}
       />
+      <div className="day-meal-summaries">
+        {meals.map((meal) => {
+          const hasFood = meal.foods.length > 0;
+          const hasActivity = meal.activities.length > 0;
+          return (
+            <article key={meal.mealType} className={`day-meal-card${hasFood ? " has-data" : ""}`}>
+              <h4 className="day-meal-card-title">{meal.mealType}</h4>
+              {hasFood ? (
+                <p className="day-meal-card-items">{meal.foodNames.join(" · ")}</p>
+              ) : (
+                <p className="day-meal-card-empty">ยังไม่มีรายการอาหาร</p>
+              )}
+              {hasActivity ? (
+                <p className="day-meal-card-activity">
+                  กิจกรรม: {meal.activityNames.join(" · ")}
+                </p>
+              ) : null}
+              <p className="day-meal-card-energy">
+                {hasFood
+                  ? `${fmt(meal.calories)} กิโลแคลอรี`
+                  : "—"}
+              </p>
+              {hasFood ? (
+                <p className="day-meal-card-macros">
+                  โปรตีน {fmt(meal.protein)} กรัม · คาร์โบไฮเดรต {fmt(meal.carbs)} กรัม · ไขมัน {fmt(meal.fat)} กรัม
+                </p>
+              ) : null}
+              {hasActivity ? (
+                <p className="day-meal-card-burn">
+                  พลังงานที่เผาผลาญ {fmt(meal.burned)} กิโลแคลอรี
+                </p>
+              ) : null}
+            </article>
+          );
+        })}
+      </div>
       {dailyRewards && (
         <DailyRewardStrip
           totalPoints={dailyRewards.totalPoints}

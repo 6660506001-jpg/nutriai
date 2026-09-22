@@ -347,7 +347,7 @@ export default function Dashboard({
     });
   }, [analysis, user.tdee, netCals]);
   const summaryPreview = hasRecordsLogged
-    ? `กิน ${foodCals} · เผา ${activityCals} · สุทธิ ${netCals >= 0 ? netCals : `−${Math.abs(netCals)}`} kcal`
+    ? `พลังงานที่ได้รับ ${foodCals} · พลังงานที่เผาผลาญ ${activityCals} · พลังงานสุทธิ ${netCals >= 0 ? netCals : `−${Math.abs(netCals)}`} กิโลแคลอรี`
     : "";
 
   return (
@@ -443,7 +443,8 @@ export default function Dashboard({
           <DashboardDaySummary
             foodCals={foodCals}
             activityCals={activityCals}
-            mealTotals={mealTotals}
+            dailyMeals={dailyMeals}
+            activities={activities}
             dailyRewards={dailyRewards}
           />
         </DashCollapsible>
