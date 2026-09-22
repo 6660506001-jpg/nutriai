@@ -4,38 +4,27 @@ import "./DashboardRings.css";
 
 const fmt = (n) => Math.round(n).toLocaleString("th-TH");
 
-function BulletRow({
+function PairCard({
+  tone,
   label,
   value,
   fillPct,
   overPct = 0,
   goalPct,
-  tone,
 }) {
   return (
-    <div className={`dash-bullet-row dash-bullet-row--${tone}`}>
-      <div className="dash-bullet-head">
-        <span className="dash-bullet-label">{label}</span>
-        <strong className="dash-bullet-value">
-          {fmt(value)}
-          <small> กิโลแคลอรี</small>
-        </strong>
-      </div>
-      <div className="dash-bullet-chart">
-        <div className="dash-bullet-track">
-          <span
-            className={`dash-bullet-fill dash-bullet-fill--${tone}`}
-            style={{ width: `${fillPct}%` }}
-          />
+    <div className={`dash-energy-pair-card dash-energy-pair-card--${tone}`}>
+      <span className="dash-energy-pair-label">{label}</span>
+      <strong className="dash-energy-pair-num">{fmt(value)}</strong>
+      <span className="dash-energy-pair-unit">กิโลแคลอรี</span>
+      <div className="dash-energy-pair-chart">
+        <div className="dash-energy-pair-track">
+          <span className={`dash-energy-pair-fill dash-energy-pair-fill--${tone}`} style={{ width: `${fillPct}%` }} />
           {overPct > 0 ? (
-            <span className="dash-bullet-fill dash-bullet-fill--over" style={{ width: `${overPct}%` }} />
+            <span className="dash-energy-pair-fill dash-energy-pair-fill--over" style={{ width: `${overPct}%` }} />
           ) : null}
         </div>
-        <span
-          className="dash-bullet-target"
-          style={{ left: `${goalPct}%` }}
-          title="เป้าหมายพลังงาน"
-        />
+        <span className="dash-energy-pair-target" style={{ left: `${goalPct}%` }} title="เป้าหมายพลังงาน" />
       </div>
     </div>
   );
@@ -84,26 +73,24 @@ export default function DashboardRings({
         <span className="dash-energy-hero-unit">กิโลแคลอรี</span>
       </div>
 
-      <div className="dash-bullet">
-        <BulletRow
+      <div className="dash-energy-pair">
+        <PairCard
+          tone="eat"
           label="พลังงานที่ได้รับ"
           value={eaten}
           fillPct={eatenBasePct}
           overPct={eatenOverPct}
           goalPct={goalPct}
-          tone="eat"
         />
-        <BulletRow
+        <PairCard
+          tone="burn"
           label="พลังงานที่เผาผลาญ"
           value={burned}
           fillPct={burnedPct}
           goalPct={goalPct}
-          tone="burn"
         />
-        <p className="dash-bullet-caption">
-          เส้นตั้งคือเป้าหมายพลังงานวันนี้ {fmt(goal)} กิโลแคลอรี
-        </p>
       </div>
+      <p className="dash-energy-goal-note">เส้นตั้งคือเป้าหมายพลังงานวันนี้ {fmt(goal)} กิโลแคลอรี</p>
 
       <DashboardMacroStrip
         protein={protein}
