@@ -20,7 +20,7 @@ import {
   appendFoodPreference,
   normalizeFoodPreferences,
 } from "../../utils/foodPreferences";
-import { DashboardDaySummary } from "../ui/DailyLogDisplay";
+import DashboardDaySummary from "../ui/DashboardDaySummary";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import DashboardQuickFab from "../ui/DashboardQuickFab";
 import { DashboardHomeStats, DashboardHomeAdvice } from "../ui/DashboardHomeSummary";
