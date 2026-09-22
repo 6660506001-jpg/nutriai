@@ -5784,6 +5784,10 @@ export default function AppVisualEffects() {
         .log-page-block-hints { order: 6; }
         .log-page-block-notice { order: 7; }
         .log-page-block-advice { order: 8; }
+
+        .log-page-activity .log-page-block-search { order: 3; }
+        .log-page-activity .log-page-block-records { order: 4; }
+        .log-page-activity .log-page-block-hints { order: 5; }
       }
 
       .log-panel-records--top {
