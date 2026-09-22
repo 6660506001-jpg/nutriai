@@ -416,15 +416,6 @@ export default function Dashboard({
             activityCals={activityCals}
             netCals={netCals}
           />
-          {hasRecordsLogged ? (
-            <DashboardDaySummary
-              foodCals={foodCals}
-              activityCals={activityCals}
-              dailyMeals={dailyMeals}
-              activities={activities}
-              dailyRewards={dailyRewards}
-            />
-          ) : null}
           <DashboardHomeMenuPick
             menu={bestAiMenu}
             loading={menuLoading && !bestAiMenu}
@@ -436,6 +427,15 @@ export default function Dashboard({
             onRefresh={handleRefreshHomeAiMenu}
           />
           <DashboardHomeAdvice brief={homeAdviceBrief} />
+          {hasRecordsLogged ? (
+            <DashboardDaySummary
+              foodCals={foodCals}
+              activityCals={activityCals}
+              dailyMeals={dailyMeals}
+              activities={activities}
+              dailyRewards={dailyRewards}
+            />
+          ) : null}
         </div>
       )}
 

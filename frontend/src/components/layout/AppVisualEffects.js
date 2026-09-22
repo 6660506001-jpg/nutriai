@@ -5094,21 +5094,21 @@ export default function AppVisualEffects() {
       .dash-home-stack .dash-home-stats-block {
         order: 1;
       }
-      .dash-home-stack .dash-home-meals-block {
-        order: 2;
-      }
       .dash-home-stack .dash-home-menu-pick {
-        order: 3;
+        order: 2;
         margin-top: 0;
       }
       .dash-home-stack .dash-home-advice-block {
-        order: 4;
+        order: 3;
         margin: 0;
         padding: 14px;
         border-radius: var(--nutri-radius-lg, 18px);
         background: #fff;
         border: 1px solid var(--nutri-border, #e2e8f0);
         box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+      }
+      .dash-home-stack .dash-home-meals-block {
+        order: 4;
       }
       .dashboard-home-simple .dash-stats-compact {
         margin-bottom: 0;
