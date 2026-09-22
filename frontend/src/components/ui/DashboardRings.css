@@ -66,6 +66,7 @@
   border-radius: 16px;
   background: #fff;
   border: 1px solid #e2e8f0;
+  overflow: visible;
 }
 
 .dash-energy-pair-card--eat {
@@ -156,12 +157,65 @@
   position: absolute;
   top: 0;
   bottom: 0;
+  width: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transform: translateX(-50%);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.dash-energy-pair-target-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
   width: 3px;
   transform: translateX(-50%);
   border-radius: 999px;
   background: #0f172a;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
   pointer-events: none;
+}
+
+.dash-energy-pair-target-tip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.dash-energy-pair-target-tip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border: 5px solid transparent;
+  border-top-color: #0f172a;
+}
+
+.dash-energy-pair-target:hover .dash-energy-pair-target-tip,
+.dash-energy-pair-target:focus .dash-energy-pair-target-tip,
+.dash-energy-pair-target:focus-visible .dash-energy-pair-target-tip {
+  opacity: 1;
+}
+
+.dash-energy-pair-target:focus {
+  outline: none;
 }
 
 .dash-energy-goal-note {

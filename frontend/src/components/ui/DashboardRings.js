@@ -11,7 +11,9 @@ function PairCard({
   fillPct,
   overPct = 0,
   goalPct,
+  goal,
 }) {
+  const goalText = `${fmt(goal)} กิโลแคลอรี`;
   return (
     <div className={`dash-energy-pair-card dash-energy-pair-card--${tone}`}>
       <span className="dash-energy-pair-label">{label}</span>
@@ -24,7 +26,15 @@ function PairCard({
             <span className="dash-energy-pair-fill dash-energy-pair-fill--over" style={{ width: `${overPct}%` }} />
           ) : null}
         </div>
-        <span className="dash-energy-pair-target" style={{ left: `${goalPct}%` }} title="เป้าหมายพลังงาน" />
+        <button
+          type="button"
+          className="dash-energy-pair-target"
+          style={{ left: `${goalPct}%` }}
+          aria-label={`เป้าหมายพลังงาน ${goalText}`}
+        >
+          <span className="dash-energy-pair-target-line" aria-hidden="true" />
+          <span className="dash-energy-pair-target-tip">{goalText}</span>
+        </button>
       </div>
     </div>
   );
@@ -73,6 +83,7 @@ export default function DashboardRings({
           fillPct={eatenBasePct}
           overPct={eatenOverPct}
           goalPct={goalPct}
+          goal={goal}
         />
         <PairCard
           tone="burn"
@@ -80,6 +91,7 @@ export default function DashboardRings({
           value={burned}
           fillPct={burnedPct}
           goalPct={goalPct}
+          goal={goal}
         />
       </div>
       <p className="dash-energy-goal-note">เป้าหมายพลังงานวันนี้ {fmt(goal)} กิโลแคลอรี</p>
