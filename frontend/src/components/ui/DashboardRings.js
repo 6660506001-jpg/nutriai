@@ -4,8 +4,8 @@ import "./DashboardRings.css";
 
 const fmt = (n) => Math.round(n).toLocaleString("th-TH");
 
-const RING = 156;
-const STROKE = 13;
+const RING = 140;
+const STROKE = 12;
 const RADIUS = (RING - STROKE) / 2;
 const CIRC = 2 * Math.PI * RADIUS;
 
@@ -17,6 +17,49 @@ function EnergyRow({ tone, label, value, widthPct }) {
         <span className="dash-energy-row-fill" style={{ width: `${Math.max(widthPct, value > 0 ? 3 : 0)}%` }} />
       </div>
       <span className="dash-energy-row-value">{fmt(value)}</span>
+    </div>
+  );
+}
+
+function EnergyRing({ tone, label, value, pct, gradId, from, to }) {
+  const amount = Math.min(1, Math.max(0, pct));
+  const dash = CIRC * amount;
+  const gap = CIRC - dash;
+  return (
+    <div className={`dash-energy-ring dash-energy-ring--${tone}`}>
+      <svg width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`} aria-hidden="true">
+        <defs>
+          <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={from} />
+            <stop offset="100%" stopColor={to} />
+          </linearGradient>
+        </defs>
+        <circle
+          className="dash-energy-ring-track"
+          cx={RING / 2}
+          cy={RING / 2}
+          r={RADIUS}
+          fill="none"
+          strokeWidth={STROKE}
+        />
+        <circle
+          className="dash-energy-ring-value"
+          cx={RING / 2}
+          cy={RING / 2}
+          r={RADIUS}
+          fill="none"
+          stroke={`url(#${gradId})`}
+          strokeWidth={STROKE}
+          strokeLinecap="round"
+          strokeDasharray={`${dash} ${gap}`}
+          transform={`rotate(-90 ${RING / 2} ${RING / 2})`}
+        />
+      </svg>
+      <div className="dash-energy-ring-center">
+        <span className="dash-energy-ring-kicker">{label}</span>
+        <strong className="dash-energy-ring-num">{fmt(value)}</strong>
+        <span className="dash-energy-ring-unit">กิโลแคลอรี</span>
+      </div>
     </div>
   );
 }
@@ -40,11 +83,7 @@ export default function DashboardRings({
   const over = remaining < 0;
   const overflow = over ? Math.abs(remaining) : 0;
   const used = Math.max(0, eaten - burned);
-  const ringPct = Math.min(1, used / goal);
-  const dash = CIRC * ringPct;
-  const gap = CIRC - dash;
   const uid = React.useId().replace(/:/g, "");
-  const gradId = `dashEnergyRing-${uid}`;
   const barScale = Math.max(eaten, burned, goal, 1);
   const barPct = (n) => Math.min(100, (n / barScale) * 100);
   const story = over
@@ -53,43 +92,26 @@ export default function DashboardRings({
 
   return (
     <div className={`dash-energy-wrap ${className}`.trim()} aria-label={story}>
-      <div className={`dash-energy-panel${over ? " is-over" : ""}`}>
+      <div className="dash-energy-panel">
         <div className="dash-energy-ring-block">
-          <div className="dash-energy-ring" aria-hidden="true">
-            <svg width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`}>
-              <defs>
-                <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor={over ? "#fb923c" : "#60a5fa"} />
-                  <stop offset="100%" stopColor={over ? "#ea580c" : "#2563eb"} />
-                </linearGradient>
-              </defs>
-              <circle
-                className="dash-energy-ring-track"
-                cx={RING / 2}
-                cy={RING / 2}
-                r={RADIUS}
-                fill="none"
-                strokeWidth={STROKE}
-              />
-              <circle
-                className="dash-energy-ring-value"
-                cx={RING / 2}
-                cy={RING / 2}
-                r={RADIUS}
-                fill="none"
-                stroke={`url(#${gradId})`}
-                strokeWidth={STROKE}
-                strokeLinecap="round"
-                strokeDasharray={`${dash} ${gap}`}
-                transform={`rotate(-90 ${RING / 2} ${RING / 2})`}
-              />
-            </svg>
-            <div className="dash-energy-ring-center">
-              <span className="dash-energy-ring-kicker">{over ? "เกินเป้าหมาย" : "พลังงานคงเหลือ"}</span>
-              <strong className="dash-energy-ring-num">{fmt(Math.abs(remaining))}</strong>
-              <span className="dash-energy-ring-unit">กิโลแคลอรี</span>
-            </div>
-          </div>
+          <EnergyRing
+            tone="eat"
+            label="พลังงานที่ได้รับ"
+            value={eaten}
+            pct={eaten / goal}
+            gradId={`dashEnergyEat-${uid}`}
+            from="#60a5fa"
+            to="#2563eb"
+          />
+          <EnergyRing
+            tone="burn"
+            label="พลังงานที่เผาผลาญ"
+            value={burned}
+            pct={burned / goal}
+            gradId={`dashEnergyBurn-${uid}`}
+            from="#34d399"
+            to="#059669"
+          />
         </div>
 
         <div className="dash-energy-rows">

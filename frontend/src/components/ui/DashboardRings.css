@@ -13,30 +13,32 @@
   box-shadow: 0 10px 28px rgba(37, 99, 235, 0.06);
 }
 
-.dash-energy-panel.is-over {
-  background: linear-gradient(180deg, #fff8f1 0%, #ffffff 48%);
-  border-color: #fed7aa;
-  box-shadow: 0 10px 28px rgba(234, 88, 12, 0.06);
-}
-
 .dash-energy-ring-block {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  justify-items: center;
+  gap: 8px;
   margin-bottom: 16px;
 }
 
 .dash-energy-ring {
   position: relative;
-  width: 156px;
-  height: 156px;
+  width: 140px;
+  height: 140px;
+}
+
+.dash-energy-ring svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .dash-energy-ring-track {
   stroke: #e2e8f0;
 }
 
-.dash-energy-panel.is-over .dash-energy-ring-track {
-  stroke: #ffedd5;
+.dash-energy-ring--burn .dash-energy-ring-track {
+  stroke: #d1fae5;
 }
 
 .dash-energy-ring-value {
@@ -52,34 +54,36 @@
   justify-content: center;
   text-align: center;
   pointer-events: none;
+  padding: 12px;
 }
 
 .dash-energy-ring-kicker {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
-  color: #2563eb;
+  line-height: 1.25;
+  color: #1d4ed8;
 }
 
-.dash-energy-panel.is-over .dash-energy-ring-kicker {
-  color: #ea580c;
+.dash-energy-ring--burn .dash-energy-ring-kicker {
+  color: #047857;
 }
 
 .dash-energy-ring-num {
   margin-top: 2px;
-  font-size: 34px;
+  font-size: 26px;
   font-weight: 900;
   letter-spacing: -0.04em;
   line-height: 1;
   color: #1d4ed8;
 }
 
-.dash-energy-panel.is-over .dash-energy-ring-num {
-  color: #c2410c;
+.dash-energy-ring--burn .dash-energy-ring-num {
+  color: #047857;
 }
 
 .dash-energy-ring-unit {
   margin-top: 3px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: #64748b;
 }
@@ -232,6 +236,15 @@
 }
 
 @media (max-width: 420px) {
+  .dash-energy-ring {
+    width: 124px;
+    height: 124px;
+  }
+
+  .dash-energy-ring-num {
+    font-size: 22px;
+  }
+
   .dash-energy-row {
     grid-template-columns: 68px minmax(0, 1fr) 48px;
     gap: 6px;
@@ -253,18 +266,10 @@
   }
 
   .dash-status-hero-energy .dash-energy-panel {
-    display: grid;
-    grid-template-columns: 176px minmax(0, 1fr);
-    gap: 8px 28px;
-    align-items: center;
     padding: 20px 22px 16px;
   }
 
   .dash-status-hero-energy .dash-energy-ring-block {
-    margin-bottom: 0;
-  }
-
-  .dash-status-hero-energy .dash-energy-story {
-    grid-column: 1 / -1;
+    gap: 24px;
   }
 }
