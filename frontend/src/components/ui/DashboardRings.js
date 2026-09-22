@@ -4,42 +4,6 @@ import "./DashboardRings.css";
 
 const fmt = (n) => Math.round(n).toLocaleString("th-TH");
 
-function PairCard({
-  tone,
-  label,
-  value,
-  fillPct,
-  overPct = 0,
-  goalPct,
-  goal,
-}) {
-  const goalText = `${fmt(goal)} กิโลแคลอรี`;
-  return (
-    <div className={`dash-energy-pair-card dash-energy-pair-card--${tone}`}>
-      <span className="dash-energy-pair-label">{label}</span>
-      <strong className="dash-energy-pair-num">{fmt(value)}</strong>
-      <span className="dash-energy-pair-unit">กิโลแคลอรี</span>
-      <div className="dash-energy-pair-chart">
-        <div className="dash-energy-pair-track">
-          <span className={`dash-energy-pair-fill dash-energy-pair-fill--${tone}`} style={{ width: `${fillPct}%` }} />
-          {overPct > 0 ? (
-            <span className="dash-energy-pair-fill dash-energy-pair-fill--over" style={{ width: `${overPct}%` }} />
-          ) : null}
-        </div>
-        <button
-          type="button"
-          className="dash-energy-pair-target"
-          style={{ left: `${goalPct}%` }}
-          aria-label={`เป้าหมายพลังงาน ${goalText}`}
-        >
-          <span className="dash-energy-pair-target-line" aria-hidden="true" />
-          <span className="dash-energy-pair-target-tip">{goalText}</span>
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default function DashboardRings({
   foodCals = 0,
   activityCals = 0,
@@ -58,50 +22,44 @@ export default function DashboardRings({
   const remaining = goal - (eaten - burned);
   const over = remaining < 0;
   const overflow = over ? Math.abs(remaining) : 0;
-  const scale = Math.max(eaten, burned, goal, 1) * 1.12;
-  const toPct = (n) => Math.min(100, (Math.max(0, n) / scale) * 100);
-  const goalPct = toPct(goal);
-  const eatenBasePct = toPct(Math.min(eaten, goal));
-  const eatenOverPct = eaten > goal ? toPct(eaten - goal) : 0;
-  const burnedPct = toPct(burned);
+  const used = Math.max(0, eaten - burned);
+  const scale = Math.max(used, goal, 1);
+  const usedToGoalPct = (Math.min(used, goal) / scale) * 100;
+  const overflowPct = over ? (overflow / scale) * 100 : 0;
+  const story = over
+    ? `ใช้แล้ว ${fmt(used)} จากเป้าหมาย ${fmt(goal)} กิโลแคลอรี · เกิน ${fmt(overflow)}`
+    : `ใช้แล้ว ${fmt(used)} จากเป้าหมาย ${fmt(goal)} กิโลแคลอรี · คงเหลือ ${fmt(remaining)}`;
 
   return (
     <div
       className={`dash-energy-wrap ${className}`.trim()}
       role="img"
-      aria-label={
-        over
-          ? `เกินเป้าหมายพลังงาน ${fmt(overflow)} กิโลแคลอรี จากเป้าหมาย ${fmt(goal)} พลังงานที่ได้รับ ${fmt(eaten)} พลังงานที่เผาผลาญ ${fmt(burned)}`
-          : `พลังงานคงเหลือ ${fmt(remaining)} กิโลแคลอรี จากเป้าหมายพลังงาน ${fmt(goal)} พลังงานที่ได้รับ ${fmt(eaten)} พลังงานที่เผาผลาญ ${fmt(burned)}`
-      }
+      aria-label={story}
     >
       <div className="dash-energy-pair">
-        <PairCard
-          tone="eat"
-          label="พลังงานที่ได้รับ"
-          value={eaten}
-          fillPct={eatenBasePct}
-          overPct={eatenOverPct}
-          goalPct={goalPct}
-          goal={goal}
-        />
-        <PairCard
-          tone="burn"
-          label="พลังงานที่เผาผลาญ"
-          value={burned}
-          fillPct={burnedPct}
-          goalPct={goalPct}
-          goal={goal}
-        />
+        <div className="dash-energy-pair-card dash-energy-pair-card--eat">
+          <span className="dash-energy-pair-label">พลังงานที่ได้รับ</span>
+          <strong className="dash-energy-pair-num">{fmt(eaten)}</strong>
+          <span className="dash-energy-pair-unit">กิโลแคลอรี</span>
+        </div>
+        <div className="dash-energy-pair-card dash-energy-pair-card--burn">
+          <span className="dash-energy-pair-label">พลังงานที่เผาผลาญ</span>
+          <strong className="dash-energy-pair-num">{fmt(burned)}</strong>
+          <span className="dash-energy-pair-unit">กิโลแคลอรี</span>
+        </div>
       </div>
-      <p className="dash-energy-goal-note">เป้าหมายพลังงานวันนี้ {fmt(goal)} กิโลแคลอรี</p>
 
       <div className={`dash-energy-hero${over ? " is-over" : ""}`}>
         <span className="dash-energy-hero-label">{over ? "เกินเป้าหมาย" : "พลังงานคงเหลือ"}</span>
-        <strong className="dash-energy-hero-value">
-          {fmt(Math.abs(remaining))}
-        </strong>
+        <strong className="dash-energy-hero-value">{fmt(Math.abs(remaining))}</strong>
         <span className="dash-energy-hero-unit">กิโลแคลอรี</span>
+        <div className="dash-energy-bar" aria-hidden="true">
+          <span className="dash-energy-bar-track">
+            <span className="dash-energy-bar-used" style={{ width: `${usedToGoalPct}%` }} />
+            {over ? <span className="dash-energy-bar-over" style={{ width: `${overflowPct}%` }} /> : null}
+          </span>
+        </div>
+        <p className="dash-energy-story">{story}</p>
       </div>
 
       <DashboardMacroStrip
