@@ -20,10 +20,17 @@ export default function DashboardRings({
   const remaining = goal - (eaten - burned);
   const over = remaining < 0;
   const overflow = over ? Math.abs(remaining) : 0;
-  const scale = Math.max(eaten, burned, goal, 1);
-  const eatenPct = (eaten / scale) * 100;
-  const burnedPct = (burned / scale) * 100;
-  const goalPct = (goal / scale) * 100;
+  const pairScale = Math.max(eaten, burned, 1);
+  const eatenPct = (eaten / pairScale) * 100;
+  const burnedPct = (burned / pairScale) * 100;
+  const net = eaten - burned;
+  const compareText = eaten === 0 && burned === 0
+    ? "ยังไม่มีบันทึกวันนี้"
+    : net > 0
+      ? `กินมากกว่าเผา ${Math.round(net).toLocaleString("th-TH")} กิโลแคลอรี`
+      : net < 0
+        ? `เผามากกว่ากิน ${Math.round(Math.abs(net)).toLocaleString("th-TH")} กิโลแคลอรี`
+        : "กินเท่ากับที่เผา";
 
   return (
     <div
@@ -44,56 +51,28 @@ export default function DashboardRings({
       </div>
 
       <div
-        className="dash-energy-compare"
-        role="img"
-        aria-label={`พลังงานที่ได้รับ ${Math.round(eaten)} กิโลแคลอรี พลังงานที่เผาผลาญ ${Math.round(burned)} กิโลแคลอรี เป้าหมาย ${Math.round(goal)} กิโลแคลอรี`}
+        className="dash-energy-pair"
+        aria-label={`กิน ${Math.round(eaten)} กิโลแคลอรี เผา ${Math.round(burned)} กิโลแคลอรี`}
       >
-        <div className="dash-energy-compare-legend">
-          <span className="dash-energy-compare-swatch dash-energy-compare-swatch--intake" />
-          พลังงานที่ได้รับ
-          <span className="dash-energy-compare-swatch dash-energy-compare-swatch--burn" />
-          พลังงานที่เผาผลาญ
-          <span className="dash-energy-compare-swatch dash-energy-compare-swatch--goal" />
-          เป้าหมาย
+        <div className="dash-energy-pair-card dash-energy-pair-card--eat">
+          <span className="dash-energy-pair-label">กินวันนี้</span>
+          <strong className="dash-energy-pair-num">{Math.round(eaten).toLocaleString("th-TH")}</strong>
+          <span className="dash-energy-pair-unit">กิโลแคลอรี</span>
+          <span className="dash-energy-pair-track">
+            <span className="dash-energy-pair-fill dash-energy-pair-fill--eat" style={{ width: `${eatenPct}%` }} />
+          </span>
         </div>
-
-        <div className="dash-energy-compare-row">
-          <span className="dash-energy-compare-label">พลังงานที่ได้รับ</span>
-          <div className="dash-energy-compare-track">
-            <span className="dash-energy-compare-fill dash-energy-compare-fill--intake" style={{ width: `${eatenPct}%` }} />
-            <span className="dash-energy-compare-goal" style={{ left: `${goalPct}%` }} aria-hidden />
-          </div>
-          <strong className="dash-energy-compare-value">{Math.round(eaten).toLocaleString("th-TH")}</strong>
-        </div>
-
-        <div className="dash-energy-compare-row">
-          <span className="dash-energy-compare-label">พลังงานที่เผาผลาญ</span>
-          <div className="dash-energy-compare-track">
-            <span className="dash-energy-compare-fill dash-energy-compare-fill--burn" style={{ width: `${burnedPct}%` }} />
-            <span className="dash-energy-compare-goal" style={{ left: `${goalPct}%` }} aria-hidden />
-          </div>
-          <strong className="dash-energy-compare-value">{Math.round(burned).toLocaleString("th-TH")}</strong>
-        </div>
-
-        <p className="dash-energy-compare-meta">
-          เทียบกับเป้าหมาย {Math.round(goal).toLocaleString("th-TH")} กิโลแคลอรี
-        </p>
-      </div>
-
-      <div className="dash-energy-mini">
-        <div className="dash-energy-mini-item">
-          <span className="dash-energy-mini-label">เป้าหมายพลังงาน</span>
-          <strong className="dash-energy-mini-value">{Math.round(goal).toLocaleString("th-TH")}</strong>
-        </div>
-        <div className="dash-energy-mini-item">
-          <span className="dash-energy-mini-label">พลังงานที่ได้รับ</span>
-          <strong className="dash-energy-mini-value">{Math.round(eaten).toLocaleString("th-TH")}</strong>
-        </div>
-        <div className="dash-energy-mini-item">
-          <span className="dash-energy-mini-label">พลังงานที่เผาผลาญ</span>
-          <strong className="dash-energy-mini-value">{Math.round(burned).toLocaleString("th-TH")}</strong>
+        <div className="dash-energy-pair-card dash-energy-pair-card--burn">
+          <span className="dash-energy-pair-label">เผาวันนี้</span>
+          <strong className="dash-energy-pair-num">{Math.round(burned).toLocaleString("th-TH")}</strong>
+          <span className="dash-energy-pair-unit">กิโลแคลอรี</span>
+          <span className="dash-energy-pair-track">
+            <span className="dash-energy-pair-fill dash-energy-pair-fill--burn" style={{ width: `${burnedPct}%` }} />
+          </span>
         </div>
       </div>
+      <p className="dash-energy-pair-note">{compareText}</p>
+      <p className="dash-energy-goal-note">เป้าหมายวันนี้ {Math.round(goal).toLocaleString("th-TH")} กิโลแคลอรี</p>
 
       <DashboardMacroStrip
         protein={protein}
