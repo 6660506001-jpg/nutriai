@@ -14,6 +14,7 @@ import {
   sumCalories,
 } from "../../utils/logDisplay";
 import { styles } from "../../styles/appStyles";
+import { formatActivityDuration } from "../../utils/activityCalculator";
 import ActivityLogModal from "../ui/ActivityLogModal";
 import DashCollapsible from "../ui/DashCollapsible";
 import LogPageSummary from "../ui/LogPageSummary";
@@ -62,7 +63,7 @@ export default function ActivityLogPage({
 
   const recordsPreview = activities.length === 0
     ? "ยังไม่มีกิจกรรม"
-    : `−${activityCals} kcal · ${totalMinutes} น. · ${activities.length} รายการ`;
+    : `−${activityCals} kcal · ${formatActivityDuration(totalMinutes)} · ${activities.length} รายการ`;
 
   useEffect(() => {
     if (activities.length > 0) setRecordsOpen(true);
@@ -192,7 +193,7 @@ export default function ActivityLogPage({
     setRecordsOpen(true);
     setSaveNotice({
       name: activityEntry.name,
-      detail: `−${activityEntry.calories} kcal · ${activityEntry.durationMinutes} น.`,
+      detail: `−${activityEntry.calories} kcal · ${formatActivityDuration(activityEntry.durationMinutes)}`,
     });
     window.requestAnimationFrame(() => scrollToRecords());
   };

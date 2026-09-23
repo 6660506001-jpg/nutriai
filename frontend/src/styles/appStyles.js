@@ -172,6 +172,8 @@ export const styles = {
   },
   activityModalTitle: { fontSize: '16px', fontWeight: '900', color: Colors.secondary },
   activityModalSubtitle: { marginTop: '4px', fontSize: '14px', fontWeight: '700', color: Colors.primary },
+  activityDurationRow: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' },
+  activityDurationHint: { margin: '6px 0 0', fontSize: '11px', fontWeight: '600', color: Colors.textGray },
   activityIntensitySelect: {
     width: '100%',
     padding: '10px 12px',

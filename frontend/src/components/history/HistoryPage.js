@@ -12,6 +12,7 @@ import { FEATURE_TOOLTIPS } from "../../constants/featureTooltips";
 import DashCollapsible from "../ui/DashCollapsible";
 import InfoTip from "../ui/InfoTip";
 import { styles } from "../../styles/appStyles";
+import { formatActivityDuration } from "../../utils/activityCalculator";
 
 const getDayMonthKey = (day) => {
   if (day?.dateKey && /^\d{4}-\d{2}-\d{2}$/.test(String(day.dateKey))) {
@@ -196,7 +197,7 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
         </span>
         <span className="history-meal-name">{meal.name}</span>
         {meal.itemType === "activity" && meal.durationMinutes ? (
-          <span className="history-meal-meta">{meal.durationMinutes} น.</span>
+          <span className="history-meal-meta">{formatActivityDuration(meal.durationMinutes)}</span>
         ) : null}
       </div>
       <div style={{ fontWeight: '800', color: meal.itemType === "activity" ? Colors.success : Colors.textDark }}>

@@ -11,6 +11,7 @@ import {
 } from "../../utils/logDisplay";
 import { renderHearts, renderStars } from "../../utils/mealRewards";
 import { isUnverifiedFoodEntry } from "../../utils/foodEstimator";
+import { formatActivityDuration } from "../../utils/activityCalculator";
 import FoodAvoidanceWarning from "./FoodAvoidanceWarning";
 
 function IconRating({ items, variant = "star", label, size = "" }) {
@@ -313,7 +314,7 @@ export function ActivityLogRow({ item, onRemove }) {
       <span className="log-entry-time">{formatLogTime(item.loggedAt)}</span>
       <span className="log-entry-meal">{getMealShort(item.mealPeriod)}</span>
       <span className="log-entry-name">{item.name}</span>
-      <span className="log-entry-meta">{item.durationMinutes} น.</span>
+      <span className="log-entry-meta">{formatActivityDuration(item.durationMinutes)}</span>
       <span className="log-entry-kcal log-entry-kcal--burn">−{item.calories}</span>
       {onRemove && (
         <button type="button" className="log-entry-delete" onClick={onRemove} style={styles.btnDelete} aria-label="ลบ">

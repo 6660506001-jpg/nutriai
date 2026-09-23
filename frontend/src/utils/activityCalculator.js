@@ -22,6 +22,28 @@ export const ACTIVITY_INTENSITY_OPTIONS = [
 ];
 
 const BASE_DURATION_MINUTES = 30;
+export const MAX_ACTIVITY_DURATION_MINUTES = 600;
+
+export function splitDurationParts(totalMinutes) {
+  const total = Math.max(0, Math.round(Number(totalMinutes) || 0));
+  return {
+    hours: Math.floor(total / 60),
+    minutes: total % 60,
+  };
+}
+
+export function combineDurationMinutes(hours, minutes) {
+  const h = Math.max(0, Number(hours) || 0);
+  const m = Math.max(0, Number(minutes) || 0);
+  return Math.round(h * 60 + m);
+}
+
+export function formatActivityDuration(totalMinutes) {
+  const { hours, minutes } = splitDurationParts(totalMinutes);
+  if (hours > 0 && minutes > 0) return `${hours} ชม. ${minutes} น.`;
+  if (hours > 0) return `${hours} ชม.`;
+  return `${minutes} น.`;
+}
 
 export const getIntensityOption = (intensityId) =>
   ACTIVITY_INTENSITY_OPTIONS.find((option) => option.id === intensityId)
@@ -71,6 +93,6 @@ export const buildActivityLogEntry = ({
     intensityLabel: intensityOption.label,
     loggedDate: getTodayKey(),
     loggedAt: new Date().toISOString(),
-    logLabel: `${activity.name} · ${durationMinutes} นาที · ${intensityOption.label}`,
+    logLabel: `${activity.name} · ${formatActivityDuration(durationMinutes)} · ${intensityOption.label}`,
   };
 };

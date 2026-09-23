@@ -3,10 +3,22 @@ import { createPortal } from "react-dom";
 import { HiX } from "react-icons/hi";
 import {
   ACTIVITY_INTENSITY_OPTIONS,
+  MAX_ACTIVITY_DURATION_MINUTES,
   buildActivityLogEntry,
   calculateActivityCalories,
+  combineDurationMinutes,
+  formatActivityDuration,
+  splitDurationParts,
 } from "../../utils/activityCalculator";
 import { styles } from "../../styles/appStyles";
+
+function durationStateFromMinutes(totalMinutes) {
+  const { hours, minutes } = splitDurationParts(totalMinutes || 30);
+  return {
+    hours: hours > 0 ? String(hours) : "0",
+    minutes: String(minutes),
+  };
+}
 
 export default function ActivityLogModal({
   activity,
@@ -17,14 +29,17 @@ export default function ActivityLogModal({
   onClose,
   onConfirm,
 }) {
-  const [durationMinutes, setDurationMinutes] = useState(
-    String(suggestedDurationMinutes || 30),
-  );
+  const [durationHours, setDurationHours] = useState("0");
+  const [durationMinutes, setDurationMinutes] = useState("30");
   const [intensity, setIntensity] = useState(suggestedIntensity || "moderate");
 
   useEffect(() => {
     if (!activity) return;
-    setDurationMinutes(String(suggestedDurationMinutes || activity.defaultDurationMinutes || 30));
+    const next = durationStateFromMinutes(
+      suggestedDurationMinutes || activity.defaultDurationMinutes || 30,
+    );
+    setDurationHours(next.hours);
+    setDurationMinutes(next.minutes);
     setIntensity(suggestedIntensity || activity.defaultIntensity || "moderate");
   }, [activity, suggestedDurationMinutes, suggestedIntensity]);
 
@@ -45,34 +60,38 @@ export default function ActivityLogModal({
     };
   }, [activity]);
 
+  const totalMinutes = combineDurationMinutes(durationHours, durationMinutes);
+
   const previewCalories = useMemo(() => {
     if (!activity) return 0;
-    const minutes = Number(durationMinutes);
-    if (!minutes || minutes <= 0) return 0;
+    if (!totalMinutes || totalMinutes <= 0) return 0;
     return calculateActivityCalories({
       activity,
-      durationMinutes: minutes,
+      durationMinutes: totalMinutes,
       intensity,
       userWeight,
     });
-  }, [activity, durationMinutes, intensity, userWeight]);
+  }, [activity, totalMinutes, intensity, userWeight]);
 
   if (!activity) return null;
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const minutes = Number(durationMinutes);
-    if (!minutes || minutes <= 0) {
-      alert("กรุณากรอกระยะเวลา (นาที)");
+    if (!totalMinutes || totalMinutes <= 0) {
+      alert("กรุณากรอกระยะเวลาเป็นชั่วโมงหรือนาที");
       return;
     }
-    if (minutes > 600) {
-      alert("ระยะเวลาไม่ควรเกิน 600 นาที");
+    if (Number(durationMinutes) > 59) {
+      alert("นาทีต้องอยู่ระหว่าง 0–59 ถ้าเกิน 60 นาทีให้ใส่ที่ช่องชั่วโมง");
+      return;
+    }
+    if (totalMinutes > MAX_ACTIVITY_DURATION_MINUTES) {
+      alert("ระยะเวลาไม่ควรเกิน 10 ชั่วโมง");
       return;
     }
     onConfirm(buildActivityLogEntry({
       activity,
-      durationMinutes: minutes,
+      durationMinutes: totalMinutes,
       intensity,
       userWeight,
     }));
@@ -104,21 +123,47 @@ export default function ActivityLogModal({
 
         <form onSubmit={handleSubmit}>
           <div style={styles.customFoodField}>
-            <label style={styles.customFoodLabel} htmlFor="activity-duration">
-              ระยะเวลา (นาที) *
-            </label>
-            <input
-              id="activity-duration"
-              type="number"
-              min="1"
-              max="600"
-              step="1"
-              style={styles.customFoodInput}
-              placeholder="เช่น 30"
-              value={durationMinutes}
-              onChange={(event) => setDurationMinutes(event.target.value)}
-              autoFocus
-            />
+            <span style={styles.customFoodLabel}>ระยะเวลา *</span>
+            <div style={styles.activityDurationRow}>
+              <div>
+                <label style={styles.customFoodLabel} htmlFor="activity-duration-hours">
+                  ชั่วโมง
+                </label>
+                <input
+                  id="activity-duration-hours"
+                  type="number"
+                  min="0"
+                  max="10"
+                  step="1"
+                  inputMode="numeric"
+                  style={styles.customFoodInput}
+                  placeholder="0"
+                  value={durationHours}
+                  onChange={(event) => setDurationHours(event.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label style={styles.customFoodLabel} htmlFor="activity-duration-minutes">
+                  นาที
+                </label>
+                <input
+                  id="activity-duration-minutes"
+                  type="number"
+                  min="0"
+                  max="59"
+                  step="1"
+                  inputMode="numeric"
+                  style={styles.customFoodInput}
+                  placeholder="เช่น 30"
+                  value={durationMinutes}
+                  onChange={(event) => setDurationMinutes(event.target.value)}
+                />
+              </div>
+            </div>
+            {totalMinutes > 0 ? (
+              <p style={styles.activityDurationHint}>รวม {formatActivityDuration(totalMinutes)}</p>
+            ) : null}
           </div>
 
           <div style={styles.customFoodField}>
