@@ -1,139 +1,95 @@
 import {
   buildArchiveEntry,
   getTodayKey,
+  getYesterdayKey,
   normalizeDateKey,
-  recoverStaleActivities,
   toDateKey,
   upsertHistoryEntry,
 } from "./dailyArchive";
 import { EMPTY_MEALS } from "./userStorage";
+
+function emptyMeals() {
+  return { ...EMPTY_MEALS, "มื้อเช้า": [], "มื้อกลางวัน": [], "มื้อเย็น": [] };
+}
 
 function hasDailyLogs(dailyMeals, activities) {
   const hasMeals = Object.values(dailyMeals || {}).some((items) => items?.length > 0);
   return hasMeals || (activities || []).length > 0;
 }
 
-function itemDateKey(item) {
-  if (item?.loggedDate) return normalizeDateKey(item.loggedDate);
+export function itemDateKey(item) {
   if (item?.loggedAt) {
     const parsed = new Date(item.loggedAt);
     if (!Number.isNaN(parsed.getTime())) return toDateKey(parsed);
   }
+  if (item?.loggedDate) return normalizeDateKey(item.loggedDate);
   return "";
 }
 
-function partitionMeals(dailyMeals, today) {
-  const todayMeals = { ...EMPTY_MEALS };
-  const oldMeals = { ...EMPTY_MEALS };
-  Object.entries(dailyMeals || {}).forEach(([meal, items]) => {
-    todayMeals[meal] = [];
-    oldMeals[meal] = [];
-    (items || []).forEach((item) => {
-      if (itemDateKey(item) === today) todayMeals[meal].push(item);
-      else oldMeals[meal].push(item);
-    });
-  });
-  return { todayMeals, oldMeals };
-}
-
-function partitionActivities(activities, today) {
-  const todayActs = [];
-  const oldActs = [];
-  (activities || []).forEach((item) => {
-    if (itemDateKey(item) === today) todayActs.push(item);
-    else oldActs.push(item);
-  });
-  return { todayActs, oldActs };
-}
-
-function hydrateTodayFromHistory(historyData, today) {
-  const entry = (historyData || []).find((day) => (
-    normalizeDateKey(day?.dateKey || day?.id) === today
-  ));
-  if (!entry?.meals?.length) return null;
-
-  const meals = { ...EMPTY_MEALS };
-  const activities = [];
-  entry.meals.forEach((item) => {
-    if (item?.itemType === "activity") {
-      activities.push({
-        name: item.name,
-        calories: item.cal,
-        durationMinutes: item.durationMinutes,
-        intensityLabel: item.intensityLabel,
-        loggedAt: item.loggedAt,
-        loggedDate: today,
-        mealPeriod: item.type,
-      });
-      return;
-    }
-    const meal = meals[item?.type] ? item.type : "มื้อเย็น";
-    meals[meal] = [
-      ...(meals[meal] || []),
-      {
-        name: item.name,
-        calories: item.cal,
-        loggedAt: item.loggedAt,
-        loggedDate: today,
-        mealPeriod: meal,
-      },
-    ];
-  });
-
-  if (!hasDailyLogs(meals, activities)) return null;
-  return { dailyMeals: meals, activities };
+function resolveItemDate(item, today, last) {
+  const key = itemDateKey(item);
+  if (key) return key;
+  if (last && last !== today) return last;
+  return today;
 }
 
 export function applyDailyArchive({ lastDate, user, dailyMeals, historyData, activities }) {
   const today = getTodayKey();
   const last = normalizeDateKey(lastDate);
   let nextHistory = historyData || [];
-  let nextActivities = activities || [];
-  let nextMeals = dailyMeals || { ...EMPTY_MEALS };
+  const todayMeals = emptyMeals();
+  const todayActs = [];
+  const buckets = new Map();
 
-  if (last && last !== today) {
-    const { todayMeals, oldMeals } = partitionMeals(nextMeals, today);
-    const { todayActs, oldActs } = partitionActivities(nextActivities, today);
-    const archivedEntry = buildArchiveEntry({
-      dateKey: last,
-      weight: user?.weight,
-      dailyMeals: oldMeals,
-      activities: oldActs,
+  const bucketFor = (dateKey) => {
+    if (!buckets.has(dateKey)) {
+      buckets.set(dateKey, { dailyMeals: emptyMeals(), activities: [] });
+    }
+    return buckets.get(dateKey);
+  };
+
+  Object.entries(dailyMeals || {}).forEach(([meal, items]) => {
+    (items || []).forEach((item) => {
+      const dateKey = resolveItemDate(item, today, last);
+      if (dateKey === today) {
+        if (!todayMeals[meal]) todayMeals[meal] = [];
+        todayMeals[meal].push(item);
+        return;
+      }
+      const bucket = bucketFor(dateKey);
+      if (!bucket.dailyMeals[meal]) bucket.dailyMeals[meal] = [];
+      bucket.dailyMeals[meal].push(item);
     });
+  });
 
+  (activities || []).forEach((item) => {
+    const dateKey = resolveItemDate(item, today, last);
+    if (dateKey === today) {
+      todayActs.push(item);
+      return;
+    }
+    bucketFor(dateKey).activities.push(item);
+  });
+
+  buckets.forEach((bucket, dateKey) => {
+    if (!hasDailyLogs(bucket.dailyMeals, bucket.activities)) return;
+    const archivedEntry = buildArchiveEntry({
+      dateKey: dateKey || last || getYesterdayKey(),
+      weight: user?.weight,
+      dailyMeals: bucket.dailyMeals,
+      activities: bucket.activities,
+    });
     if (archivedEntry) {
       nextHistory = upsertHistoryEntry(nextHistory, archivedEntry);
     }
-
-    nextMeals = todayMeals;
-    nextActivities = todayActs;
-  } else if (last === today) {
-    const recovery = recoverStaleActivities({
-      history: nextHistory,
-      activities: nextActivities,
-      weight: user?.weight,
-      todayKey: today,
-    });
-
-    if (recovery.changed) {
-      nextHistory = recovery.history;
-      nextActivities = recovery.activities;
-    }
-  }
-
-  if (!hasDailyLogs(nextMeals, nextActivities)) {
-    const hydrated = hydrateTodayFromHistory(nextHistory, today);
-    if (hydrated) {
-      nextMeals = hydrated.dailyMeals;
-      nextActivities = hydrated.activities;
-    }
-  }
+  });
 
   return {
     user,
-    dailyMeals: nextMeals,
+    dailyMeals: todayMeals,
     historyData: nextHistory,
-    activities: nextActivities,
+    activities: todayActs,
     lastDate: today,
+    rolledOver: buckets.size > 0,
   };
 }

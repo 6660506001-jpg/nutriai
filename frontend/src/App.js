@@ -102,6 +102,7 @@ export default function App() {
   const cloudSyncTimerRef = useRef(null);
   const cloudPullingRef = useRef(false);
   const autoPushTriedRef = useRef(false);
+  const rolledOverRef = useRef(false);
 
   useEffect(() => {
     if (!isLoggedIn || !user?.username) return;
@@ -110,48 +111,6 @@ export default function App() {
       return cleaned.length === prev.length ? prev : cleaned;
     });
   }, [isLoggedIn, user?.username]);
-
-  useEffect(() => {
-    if (!isLoggedIn || !user?.username) return;
-    saveUserSession(user.username, {
-      user,
-      dailyMeals,
-      historyData,
-      activities,
-      lastDate: getTodayKey(),
-    });
-  }, [isLoggedIn, user, dailyMeals, activities, historyData]);
-
-  useEffect(() => {
-    if (!isLoggedIn || !user?.username) return undefined;
-
-    const rollToToday = () => {
-      const archived = applyDailyArchive({
-        lastDate: loadUserSession(user.username).lastDate,
-        user,
-        dailyMeals,
-        historyData,
-        activities,
-      });
-      const mealsChanged = JSON.stringify(archived.dailyMeals) !== JSON.stringify(dailyMeals);
-      const actsChanged = JSON.stringify(archived.activities) !== JSON.stringify(activities);
-      if (!mealsChanged && !actsChanged) return;
-      setDailyMeals(archived.dailyMeals);
-      setActivities(archived.activities);
-      setHistoryData(archived.historyData);
-      saveUserSession(user.username, archived);
-    };
-
-    rollToToday();
-    const intervalId = window.setInterval(rollToToday, 30000);
-    window.addEventListener("focus", rollToToday);
-    document.addEventListener("visibilitychange", rollToToday);
-    return () => {
-      window.clearInterval(intervalId);
-      window.removeEventListener("focus", rollToToday);
-      document.removeEventListener("visibilitychange", rollToToday);
-    };
-  }, [isLoggedIn, user, dailyMeals, activities, historyData]);
 
   const applyResolvedCloudSession = (resolved, fallbackUser) => {
     const archived = applyDailyArchive({
@@ -165,6 +124,7 @@ export default function App() {
       historyData: stripSimulatedHistory(resolved.historyData),
       activities: resolved.activities,
     });
+    if (archived.rolledOver) rolledOverRef.current = true;
     setUser(archived.user);
     setDailyMeals(archived.dailyMeals);
     setHistoryData(archived.historyData);
@@ -172,6 +132,62 @@ export default function App() {
     saveUserSession(archived.user.username, archived);
     return archived;
   };
+
+  const pushCloudIfNeeded = (username, password, archived) => {
+    if (!username || !password || !archived) return Promise.resolve();
+    if (!sessionHasDailyLogs(archived) && !archived.rolledOver && !rolledOverRef.current) {
+      return Promise.resolve();
+    }
+    return saveUserDataToCloud(
+      username,
+      password,
+      packCloudPayload({
+        dailyMeals: archived.dailyMeals,
+        activities: archived.activities,
+        historyData: archived.historyData,
+        lastDate: archived.lastDate,
+        user: archived.user,
+        rolledOver: archived.rolledOver || rolledOverRef.current,
+      }),
+    );
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn || !user?.username) return undefined;
+
+    const rollToToday = () => {
+      const archived = applyDailyArchive({
+        lastDate: loadUserSession(user.username).lastDate,
+        user,
+        dailyMeals,
+        historyData,
+        activities,
+      });
+      if (archived.rolledOver) rolledOverRef.current = true;
+      saveUserSession(user.username, archived);
+      const mealsChanged = JSON.stringify(archived.dailyMeals) !== JSON.stringify(dailyMeals);
+      const actsChanged = JSON.stringify(archived.activities) !== JSON.stringify(activities);
+      const historyChanged = JSON.stringify(archived.historyData) !== JSON.stringify(historyData);
+      if (mealsChanged || actsChanged || historyChanged) {
+        setDailyMeals(archived.dailyMeals);
+        setActivities(archived.activities);
+        setHistoryData(archived.historyData);
+      }
+      return archived;
+    };
+
+    rollToToday();
+    const intervalId = window.setInterval(rollToToday, 30000);
+    window.addEventListener("focus", rollToToday);
+    window.addEventListener("pageshow", rollToToday);
+    document.addEventListener("visibilitychange", rollToToday);
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", rollToToday);
+      window.removeEventListener("pageshow", rollToToday);
+      document.removeEventListener("visibilitychange", rollToToday);
+    };
+  }, [isLoggedIn, user, dailyMeals, activities, historyData]);
 
   const pullCloudSession = async (username, password, snapshotUser, snapshotLogs) => {
     const cloud = await loadUserDataFromCloud(username, password);
@@ -205,7 +221,10 @@ export default function App() {
         const localHasDaily = sessionHasDailyLogs({ dailyMeals, activities });
         const resolvedHasDaily = sessionHasDailyLogs(resolved);
         if (resolvedHasDaily || (!localHasDaily && sessionHasLogData(resolved))) {
-          applyResolvedCloudSession(resolved, user);
+          const archived = applyResolvedCloudSession(resolved, user);
+          if (archived?.rolledOver) {
+            return pushCloudIfNeeded(user.username, password, archived);
+          }
         } else if (uploadLocal && localHasDaily) {
           const { lastDate } = loadUserSession(user.username);
           return saveUserDataToCloud(
@@ -248,7 +267,10 @@ export default function App() {
           if (!resolved) return;
           const localHasDaily = sessionHasDailyLogs({ dailyMeals, activities });
           if (sessionHasDailyLogs(resolved) || (!localHasDaily && sessionHasLogData(resolved))) {
-            applyResolvedCloudSession(resolved, user);
+            const archived = applyResolvedCloudSession(resolved, user);
+            if (archived?.rolledOver) {
+              return pushCloudIfNeeded(user.username, password, archived);
+            }
           }
         })
         .catch(() => {})
@@ -268,19 +290,27 @@ export default function App() {
   }, [isLoggedIn, user, dailyMeals, activities, historyData, cloudReady]);
 
   useEffect(() => {
-    if (!isLoggedIn || !user?.username) return undefined;
+    if (!isLoggedIn || !user?.username || !cloudReady) return undefined;
     const password = getSyncPassword(user.username);
     if (!password) return undefined;
-    if (!sessionHasDailyLogs({ dailyMeals, activities })) return undefined;
+    if (!sessionHasDailyLogs({ dailyMeals, activities }) && !rolledOverRef.current) return undefined;
 
     if (cloudSyncTimerRef.current) {
       clearTimeout(cloudSyncTimerRef.current);
     }
     cloudSyncTimerRef.current = setTimeout(() => {
+      const stored = loadUserSession(user.username);
       saveUserDataToCloud(
         user.username,
         password,
-        packCloudPayload({ dailyMeals, activities, historyData, lastDate: getTodayKey(), user }),
+        packCloudPayload({
+          dailyMeals,
+          activities,
+          historyData,
+          lastDate: stored.lastDate || getTodayKey(),
+          user,
+          rolledOver: rolledOverRef.current,
+        }),
       ).catch(() => {});
     }, 800);
 
@@ -364,7 +394,10 @@ export default function App() {
       const resolvedHasDaily = resolved && sessionHasDailyLogs(resolved);
       const resolvedHasAny = resolved && sessionHasLogData(resolved);
       if (resolvedHasDaily) {
-        applyResolvedCloudSession(resolved, user);
+        const archived = applyResolvedCloudSession(resolved, user);
+        if (archived?.rolledOver) {
+          await pushCloudIfNeeded(user.username, clean, archived);
+        }
         setCloudPushVerified(true);
         setSyncUnlockOpen(false);
         setCloudReady(true);
@@ -374,8 +407,9 @@ export default function App() {
           dailyMeals,
           activities,
           historyData,
-          lastDate: getTodayKey(),
+          lastDate: loadUserSession(user.username).lastDate || getTodayKey(),
           user,
+          rolledOver: rolledOverRef.current,
         });
         await saveUserDataToCloud(user.username, clean, payload);
         const check = await loadUserDataFromCloud(user.username, clean);
@@ -470,11 +504,12 @@ export default function App() {
     setDailyMeals(archived.dailyMeals);
     setHistoryData(stripSimulatedHistory(archived.historyData));
     setActivities(archived.activities);
+    if (archived.rolledOver) rolledOverRef.current = true;
     saveUserSession(username, {
       ...archived,
       historyData: stripSimulatedHistory(archived.historyData),
     });
-    if (password && sessionHasDailyLogs(archived)) {
+    if (password && (sessionHasDailyLogs(archived) || archived.rolledOver)) {
       saveUserDataToCloud(
         username,
         password,
@@ -484,6 +519,7 @@ export default function App() {
           historyData: archived.historyData,
           lastDate: archived.lastDate,
           user: archived.user,
+          rolledOver: archived.rolledOver,
         }),
       ).catch(() => {});
     }

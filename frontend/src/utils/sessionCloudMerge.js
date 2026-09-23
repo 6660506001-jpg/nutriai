@@ -17,12 +17,13 @@ export function sessionHasLogData({ dailyMeals, activities, historyData }) {
   return sessionHasDailyLogs({ dailyMeals, activities }) || hasHistory;
 }
 
-export function packCloudPayload({ dailyMeals, activities, historyData, lastDate, user }) {
+export function packCloudPayload({ dailyMeals, activities, historyData, lastDate, user, rolledOver }) {
   return {
     dailyMeals: dailyMeals || { ...EMPTY_MEALS },
     activities: activities || [],
     historyData: historyData || [],
     lastDate: lastDate || null,
+    rolledOver: Boolean(rolledOver),
     userExtras: user
       ? {
           foodPreferences: user.foodPreferences,
@@ -40,6 +41,7 @@ export function applyCloudPayload(payload, serverUser) {
     activities: payload.activities || [],
     historyData: payload.historyData || [],
     lastDate: payload.lastDate || null,
+    rolledOver: Boolean(payload.rolledOver),
     user: {
       ...serverUser,
       ...(extras.foodPreferences ? { foodPreferences: extras.foodPreferences } : {}),

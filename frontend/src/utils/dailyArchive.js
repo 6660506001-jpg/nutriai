@@ -1,5 +1,25 @@
-/** Gregorian YYYY-MM-DD — do not use toLocaleDateString (Thai devices may return พ.ศ.). */
+const APP_TIME_ZONE = "Asia/Bangkok";
+
+/** Gregorian YYYY-MM-DD in Thailand — do not use toLocaleDateString (Thai devices may return พ.ศ.). */
 export const toDateKey = (date = new Date()) => {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: APP_TIME_ZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(date);
+    const pick = (type) => parts.find((part) => part.type === type)?.value;
+    let year = Number(pick("year"));
+    const month = pick("month");
+    const day = pick("day");
+    if (year && month && day) {
+      if (year >= 2400) year -= 543;
+      return `${year}-${month}-${day}`;
+    }
+  } catch {
+    /* fall through */
+  }
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -29,11 +49,14 @@ export const formatThaiArchiveDate = (isoDate) =>
     year: "numeric",
   });
 
+export const itemCalorieValue = (item) =>
+  Number(item?.calories ?? item?.cal ?? item?.kcal ?? 0) || 0;
+
 export const buildArchiveEntry = ({ dateKey, weight, dailyMeals, activities }) => {
   const mealItems = Object.entries(dailyMeals || {}).flatMap(([type, list]) =>
     (list || []).map((item) => ({
       name: item.name,
-      cal: item.calories,
+      cal: itemCalorieValue(item),
       type,
       itemType: "food",
       loggedAt: item.loggedAt,
@@ -43,8 +66,8 @@ export const buildArchiveEntry = ({ dateKey, weight, dailyMeals, activities }) =
 
   const activityItems = (activities || []).map((item) => ({
     name: item.name,
-    cal: item.calories,
-    type: item.mealPeriod || "กิจกรรม",
+    cal: itemCalorieValue(item),
+    type: item.mealPeriod || item.type || "กิจกรรม",
     itemType: "activity",
     durationMinutes: item.durationMinutes,
     intensityLabel: item.intensityLabel,
@@ -52,7 +75,7 @@ export const buildArchiveEntry = ({ dateKey, weight, dailyMeals, activities }) =
     loggedTime: item.loggedAt ? new Date(item.loggedAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) : null,
   }));
 
-  const meals = [...mealItems, ...activityItems];
+  const meals = [...mealItems, ...activityItems].filter((item) => item.name);
   if (!meals.length) return null;
 
   const foodCals = mealItems.reduce((sum, item) => sum + (Number(item.cal) || 0), 0);
@@ -60,8 +83,8 @@ export const buildArchiveEntry = ({ dateKey, weight, dailyMeals, activities }) =
 
   return {
     id: dateKey,
-    date: formatThaiArchiveDate(dateKey),
-    dateKey,
+    date: formatThaiArchiveDate(normalizeDateKey(dateKey) || dateKey),
+    dateKey: normalizeDateKey(dateKey) || dateKey,
     weight: `${weight} kg`,
     meals,
     foodCals,
@@ -70,11 +93,32 @@ export const buildArchiveEntry = ({ dateKey, weight, dailyMeals, activities }) =
   };
 };
 
+function archiveItemKey(item) {
+  return [
+    item?.itemType || "food",
+    item?.name || "",
+    item?.loggedAt || item?.loggedTime || "",
+    item?.cal ?? "",
+    item?.type || "",
+    item?.durationMinutes ?? "",
+  ].join("|");
+}
+
 export const mergeArchiveEntry = (existing, incoming) => {
   if (!existing) return incoming;
   if (!incoming) return existing;
 
-  const mergedMeals = [...(existing.meals || []), ...(incoming.meals || [])];
+  const seen = new Set();
+  const mergedMeals = [];
+  [...(existing.meals || []), ...(incoming.meals || [])].forEach((item) => {
+    const key = archiveItemKey(item);
+    if (seen.has(key)) return;
+    seen.add(key);
+    mergedMeals.push({
+      ...item,
+      cal: itemCalorieValue(item),
+    });
+  });
   const foodCals = mergedMeals
     .filter((item) => item.itemType !== "activity")
     .reduce((sum, item) => sum + (Number(item.cal) || 0), 0);
@@ -84,6 +128,7 @@ export const mergeArchiveEntry = (existing, incoming) => {
 
   return {
     ...existing,
+    ...incoming,
     meals: mergedMeals,
     foodCals,
     activityCals,
@@ -155,6 +200,14 @@ export const normalizeHistoryDay = (day) => {
     meals = flattenDailyMealsObject(day.dailyMeals);
   }
 
+  const seenMeals = new Set();
+  meals = meals.filter((item) => {
+    const key = archiveItemKey(item);
+    if (seenMeals.has(key)) return false;
+    seenMeals.add(key);
+    return true;
+  });
+
   const foodCalsFromMeals = meals
     .filter((item) => item.itemType !== "activity")
     .reduce((sum, item) => sum + (Number(item.cal) || 0), 0);
@@ -222,11 +275,28 @@ export const mergeTodayIntoHistory = ({ history, dailyMeals, activities, weight 
     (day) => normalizeDateKey(day.dateKey) !== todayKey && day.date !== formatThaiArchiveDate(todayKey),
   );
 
+  const isTodayItem = (item) => {
+    if (item?.loggedAt) {
+      const parsed = new Date(item.loggedAt);
+      if (!Number.isNaN(parsed.getTime())) return toDateKey(parsed) === todayKey;
+    }
+    if (item?.loggedDate) return normalizeDateKey(item.loggedDate) === todayKey;
+    return true;
+  };
+
+  const todayMeals = Object.fromEntries(
+    Object.entries(dailyMeals || {}).map(([meal, items]) => [
+      meal,
+      (items || []).filter(isTodayItem),
+    ]),
+  );
+  const todayActs = (activities || []).filter(isTodayItem);
+
   const todayEntry = buildArchiveEntry({
     dateKey: todayKey,
     weight,
-    dailyMeals,
-    activities,
+    dailyMeals: todayMeals,
+    activities: todayActs,
   });
 
   if (!todayEntry) return normalizeHistoryList(withoutToday);

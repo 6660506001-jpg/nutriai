@@ -127,6 +127,8 @@ def merge_sync_payload(existing, incoming):
     if not existing:
         return incoming
     same_day = existing.get("lastDate") and incoming.get("lastDate") and existing.get("lastDate") == incoming.get("lastDate")
+    if incoming.get("rolledOver"):
+        return incoming
     if same_day and payload_has_daily_logs(existing) and not payload_has_daily_logs(incoming):
         merged = dict(incoming)
         merged["dailyMeals"] = existing.get("dailyMeals", incoming.get("dailyMeals"))
