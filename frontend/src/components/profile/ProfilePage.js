@@ -37,18 +37,13 @@ export default function ProfilePage({
   const {
     data: chartData,
     isFallback: isWeightChartFallback,
-    isSimulated: isWeightChartSimulated,
     insight: weightTrendInsight,
-    loggedDayCount,
   } = useMemo(
     () => buildWeightTrendView({
       historyData,
       currentWeight: currentData.weight,
-      tdee: liveTDEE,
-      dailyMeals,
-      activities,
     }),
-    [historyData, currentData.weight, liveTDEE, dailyMeals, activities],
+    [historyData, currentData.weight],
   );
 
   useEffect(() => {
@@ -245,14 +240,7 @@ export default function ProfilePage({
           <div style={{...styles.cardTitle, marginBottom: '20px'}}><HiOutlineTrendingUp color={Colors.primary}/> แนวโน้มน้ำหนัก (7 วันล่าสุด)</div>
           {isWeightChartFallback && (
             <p className="profile-weight-chart-note">
-              ยังไม่มีประวัติหลายวัน — แสดงเฉพาะน้ำหนักวันนี้ {currentData.weight} kg (จุดขวาสุด) ใช้แอปต่อเนื่องเพื่อเห็นแนวโน้ม
-            </p>
-          )}
-          {isWeightChartSimulated && (
-            <p className="profile-weight-chart-note profile-weight-chart-note--sim">
-              {loggedDayCount > 0
-                ? `ประมาณจากแคลที่กิน-เผา ${loggedDayCount} วัน (7,700 kcal ≈ 1 kg)`
-                : "ประมาณจากน้ำหนักปัจจุบันและแนวโน้มรายวัน"}
+              ยังไม่มีประวัติหลายวัน — แสดงเฉพาะน้ำหนักวันนี้ {currentData.weight} kg ใช้แอปต่อเนื่องเพื่อเห็นแนวโน้ม
             </p>
           )}
           <div className="profile-weight-chart-wrap" style={{ width: '100%', height: 320, marginTop: '12px' }}>

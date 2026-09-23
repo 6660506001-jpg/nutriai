@@ -240,46 +240,37 @@ export function simulateWeightTrendFromCalories({
 export function buildWeightTrendView({
   historyData,
   currentWeight,
-  tdee,
-  dailyMeals,
-  activities,
 }) {
   const actual = buildWeightChartData(historyData, currentWeight);
   const actualData = actual.data.map((point) => ({ ...point, simulated: false }));
 
-  if (!actual.isFallback && !isFlatWeightSeries(actualData)) {
-    const start = actualData[0]?.weight;
-    const end = actualData[actualData.length - 1]?.weight;
-    const change = start != null && end != null ? roundWeight(end - start) : 0;
-
-    let insight = "รักษาวินัยนี้ไว้ได้ดีมากค่ะ!";
-    if (Math.abs(change) >= 0.1) {
-      insight = change < 0
-        ? `7 วันล่าสุดลด ~${Math.abs(change)} kg — แนวโน้มดีมาก`
-        : `7 วันล่าสุดเพิ่ม ~${change} kg — ลองดูแคลและกิจกรรมเพิ่ม`;
-    }
-
+  if (actual.isFallback) {
+    const todayWeight = actualData.find((point) => point.weight != null)?.weight;
     return {
       data: actualData,
-      isFallback: false,
+      isFallback: true,
       isSimulated: false,
-      insight,
+      insight: todayWeight != null
+        ? `ยังไม่มีประวัติน้ำหนักหลายวัน — แสดงเฉพาะน้ำหนักวันนี้ ${todayWeight} kg`
+        : "ยังไม่มีประวัติน้ำหนัก",
     };
   }
 
-  const simulated = simulateWeightTrendFromCalories({
-    historyData,
-    currentWeight,
-    tdee,
-    dailyMeals,
-    activities,
-  });
+  const start = actualData[0]?.weight;
+  const end = actualData[actualData.length - 1]?.weight;
+  const change = start != null && end != null ? roundWeight(end - start) : 0;
+
+  let insight = "น้ำหนักในช่วงนี้ค่อนข้างคงที่";
+  if (Math.abs(change) >= 0.1) {
+    insight = change < 0
+      ? `ช่วงที่บันทึกไว้ลด ~${Math.abs(change)} kg`
+      : `ช่วงที่บันทึกไว้เพิ่ม ~${change} kg`;
+  }
 
   return {
-    data: simulated.data,
+    data: actualData,
     isFallback: false,
-    isSimulated: true,
-    insight: simulated.insight,
-    loggedDayCount: simulated.loggedDayCount,
+    isSimulated: false,
+    insight,
   };
 }
