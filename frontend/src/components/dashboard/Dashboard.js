@@ -5,6 +5,7 @@ import { calculateHealthData, calculateMacros } from "../../utils/healthCalculat
 import { analyzeThreeMealsSummary } from "../../utils/mealRecommendations";
 import { getProfessionalPrediction, buildHomeDietAdviceBrief } from "../../utils/aiPrediction";
 import { generateMenuRecommendations, VENUE_MODES } from "../../utils/menuRecommendations";
+import { scoreMenusWithMl } from "../../utils/mlMealScore";
 import { buildAdaptiveActivitySuggestion } from "../../utils/adaptiveActivitySuggester";
 import { getMealShort, getTodayKey, mealTotalsFromDaily } from "../../utils/logDisplay";
 import { summarizeDailyRewards } from "../../utils/mealRewards";
@@ -168,19 +169,21 @@ export default function Dashboard({
         },
         venueMode,
       );
+      const remainingCal = Number(targets.remainingCal) || 0;
+      const rankedMenus = await scoreMenusWithMl(menus, remainingCal);
       if (options.requestId != null && requestId !== homeMenuFetchRef.current) {
-        return menus;
+        return rankedMenus;
       }
       if (options.bestOnly) {
         setMenuRecommendations((prev) => {
-          if (menus.length === 0) return [];
-          const rest = prev.filter((item) => item.name !== menus[0].name).slice(0, 2);
-          return [menus[0], ...rest];
+          if (rankedMenus.length === 0) return [];
+          const rest = prev.filter((item) => item.name !== rankedMenus[0].name).slice(0, 2);
+          return [rankedMenus[0], ...rest];
         });
       } else {
-        setMenuRecommendations(menus);
+        setMenuRecommendations(rankedMenus);
       }
-      return menus;
+      return rankedMenus;
     } catch (err) {
       console.error("Menu recommendation error:", err);
       if (!options.keepPrevious) {

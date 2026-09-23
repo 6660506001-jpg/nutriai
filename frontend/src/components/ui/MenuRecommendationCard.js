@@ -2,6 +2,9 @@ import React, { useState } from "react";
 
 const getMenuBadges = (menu) => {
   const badges = [];
+  if (menu.mlSuitable) {
+    badges.push({ label: "RF · SVM · GB", tone: "fit" });
+  }
   if (menu.category === "lean-protein" || (menu.protein || 0) >= 22) {
     badges.push({ label: "โปรตีนสูง", tone: "protein" });
   }

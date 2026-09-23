@@ -8,8 +8,13 @@ from db_config import get_cors_origins, get_db_settings
 from food_estimator import estimate_food_from_name
 from thai_food_matcher import search_thai_foods
 from activity_catalog import search_activities_local
+from ml_engine import analyze_meal, load_models, score_menus
 
 app = FastAPI()
+
+@app.on_event("startup")
+def warmup_ml_models():
+    get_loaded_models()
 
 # --- CORS (ตั้ง FRONTEND_URL บน production เช่น https://nutriai.vercel.app) ---
 app.add_middleware(
@@ -21,43 +26,12 @@ app.add_middleware(
 )
 
 # --- 🧠 Load Machine Learning Models (lazy — ไม่บล็อก login/register) ---
-loaded_models = None
-_models_load_attempted = False
-
 def get_loaded_models():
-    global loaded_models, _models_load_attempted
-    if _models_load_attempted:
-        return loaded_models or {}
-
-    _models_load_attempted = True
-    loaded_models = {}
-    model_names = {
-        "rf": "random_forest_model.pkl",
-        "svm": "svm_model.pkl",
-        "gb": "gradient_boosting_model.pkl",
-    }
-
-    if not os.path.exists("models"):
-        os.makedirs("models")
-
     try:
-        import joblib
-    except Exception as e:
-        print(f"⚠️ ML libraries unavailable: {e}")
-        return loaded_models
-
-    for key, filename in model_names.items():
-        path = f"models/{filename}"
-        if os.path.exists(path):
-            try:
-                loaded_models[key] = joblib.load(path)
-                print(f"✅ Model {key.upper()} Loaded")
-            except Exception as e:
-                print(f"❌ Error loading {filename}: {e}")
-        else:
-            print(f"⚠️ Warning: {filename} not found")
-
-    return loaded_models
+        return load_models(train_if_missing=True)
+    except Exception as error:
+        print(f"⚠️ ML models unavailable: {error}")
+        return {}
 
 # --- Database Connection ---
 def get_db_connection():
@@ -363,46 +337,79 @@ async def login(data: dict):
         cursor.close()
         conn.close()
 
-# --- 4. AI Analysis System ---
+# --- 4. AI Analysis System (Random Forest + SVM + Gradient Boosting) ---
+@app.get("/api/ml/models")
+async def ml_models_status():
+    models = get_loaded_models()
+    return {
+        "ready": all(key in models for key in ("rf", "svm", "gb")),
+        "models": {
+            "rf": "Random Forest" if "rf" in models else None,
+            "svm": "Support Vector Machines" if "svm" in models else None,
+            "gb": "Gradient Boosting" if "gb" in models else None,
+        },
+    }
+
+
+@app.post("/api/ml/analyze-meal")
+async def ml_analyze_meal(data: dict):
+    models = get_loaded_models()
+    if not models:
+        raise HTTPException(status_code=503, detail="ML models unavailable")
+    return analyze_meal(data, models)
+
+
+@app.post("/api/ml/score-menus")
+async def ml_score_menus(data: dict):
+    menus = data.get("menus") or []
+    if not isinstance(menus, list) or not menus:
+        return {"items": []}
+    models = get_loaded_models()
+    if not models:
+        return {"items": []}
+    remaining = float(data.get("remainingCal") or 0)
+    return {"items": score_menus(menus, remaining, models)}
+
+
 @app.post("/analyze-meal")
-async def analyze_meal(data: dict):
-    food = data.get('food') 
+async def analyze_meal_endpoint(data: dict):
+    food = data.get("food") or data
     if not food:
         raise HTTPException(status_code=400, detail="No food data")
 
-    # ดึงค่าสารอาหารจากข้อมูลที่เลือก
-    calories = float(food.get('calories', 0))
-    carbs = float(food.get('carbs', 0)) # คอลัมน์ carbs (มี s)
-    
-    # 🤖 AI Prediction (Random Forest)
-    model = get_loaded_models().get("rf")
-    prediction_status = "Suitable"
-    
-    if model:
-        try:
-            import pandas as pd
-            # สมมติค่า GI Index เพื่อใช้กับ Model
-            input_df = pd.DataFrame([[calories, carbs, 50]], 
-                                    columns=['calories', 'carbs', 'gi_index'])
-            pred = model.predict(input_df)[0]
-            prediction_status = "Suitable" if pred == 1 else "Unsuitable"
-        except Exception:
-            prediction_status = "Analyzed by Logic"
+    calories = float(food.get("calories", 0) or 0)
+    carbs = float(food.get("carbs", 0) or 0)
+    protein = float(food.get("protein", 0) or 0)
+    fat = float(food.get("fat", 0) or 0)
+    remaining = float(data.get("remainingCal") or food.get("remainingCal") or 0)
 
-    # 💡 คำแนะนำ AI เชิงรุก
+    models = get_loaded_models()
+    ml = analyze_meal(
+        {
+            "calories": calories,
+            "protein": protein,
+            "carbs": carbs,
+            "fat": fat,
+            "remainingCal": remaining,
+        },
+        models,
+    ) if models else None
+
+    prediction_status = (ml or {}).get("ensemble", {}).get("label") or "วิเคราะห์ด้วยเกณฑ์โภชนาการ"
+
     recommendations = []
     if carbs > 60:
-        recommendations.append("🍚 คาร์โบไฮเดรตสูง: แนะนำให้ลดปริมาณแป้งในมื้อนี้ลง")
+        recommendations.append("คาร์โบไฮเดรตสูง: ลดปริมาณแป้งในมื้อนี้ลงได้")
     if calories > 500:
-        recommendations.append("🔥 พลังงานมื้อเดียวค่อนข้างสูง: แนะนำให้เพิ่มการเดินย่อย")
-    
+        recommendations.append("พลังงานมื้อเดียวค่อนข้างสูง: เพิ่มการเดินย่อยได้")
     if not recommendations:
-        recommendations.append("✅ เมนูนี้มีโภชนาการที่เหมาะสม")
+        recommendations.append("เมนูนี้มีโภชนาการที่เหมาะสม")
 
     return {
         "status": prediction_status,
         "ai_advice": recommendations,
-        "details": food
+        "details": food,
+        "ml": ml,
     }
 
 # --- 🔍 ค้นหากิจกรรมจาก MySQL ---

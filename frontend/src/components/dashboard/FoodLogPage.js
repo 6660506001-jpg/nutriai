@@ -21,6 +21,7 @@ import { useIsMobile } from "../../hooks/useIsMobile";
 import { analyzeThreeMealsSummary, buildActiveMealAdviceView } from "../../utils/mealRecommendations";
 import { getProfessionalPrediction } from "../../utils/aiPrediction";
 import { generateMenuRecommendations } from "../../utils/menuRecommendations";
+import { scoreMenusWithMl } from "../../utils/mlMealScore";
 import { calculateMacros } from "../../utils/healthCalculations";
 import { getMatchingAvoidanceKeywords } from "../../utils/foodPreferences";
 import { scoreMealReward, summarizeDailyRewards } from "../../utils/mealRewards";
@@ -378,12 +379,16 @@ export default function FoodLogPage({
         },
         "home",
       );
+      const rankedMenus = await scoreMenusWithMl(
+        menus,
+        Number(analysis.recommendationTargets.remainingCal) || 0,
+      );
       setMealSuggestions({
         loading: false,
         headline: analysis.subline || analysis.headline,
         focusDetail: analysis.focusTitle ? `${analysis.focusTitle} — ${analysis.focusDetail}` : analysis.focusDetail,
         calRange: `${analysis.recommendationTargets.calMin}–${analysis.recommendationTargets.calMax}`,
-        menus: menus.slice(0, 3),
+        menus: rankedMenus.slice(0, 3),
       });
     } catch (error) {
       console.error("Post-save menu suggestions:", error);
