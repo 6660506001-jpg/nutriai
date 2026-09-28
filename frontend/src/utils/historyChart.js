@@ -53,6 +53,17 @@ export const startOfWeekMonday = (date) => {
   return d;
 };
 
+const formatWeekAxisLabel = (weekStart) => {
+  const end = new Date(weekStart);
+  end.setDate(weekStart.getDate() + 6);
+  const endLabel = end.toLocaleDateString("th-TH", { day: "numeric", month: "short" });
+  if (weekStart.getMonth() === end.getMonth() && weekStart.getFullYear() === end.getFullYear()) {
+    return `${weekStart.getDate()}–${endLabel}`;
+  }
+  const startLabel = weekStart.toLocaleDateString("th-TH", { day: "numeric", month: "short" });
+  return `${startLabel}–${endLabel}`;
+};
+
 const getMetricValue = (day, metric) => {
   if (metric === "activity") return Number(day.activityCals) || 0;
   if (metric === "net") {
@@ -118,8 +129,8 @@ const buildWeeklyMetricChart = (rows, metric) => {
 
     points.push({
       key,
-      label: weekStart.toLocaleDateString("th-TH", { day: "numeric", month: "short" }),
-      subLabel: `สัปดาห์ ${weekStart.toLocaleDateString("th-TH", { day: "numeric", month: "short" })}`,
+      label: formatWeekAxisLabel(weekStart),
+      subLabel: `สัปดาห์ ${formatWeekAxisLabel(weekStart)}`,
       calories: value,
       average: recordedDays ? Math.round(value / recordedDays) : 0,
       days: recordedDays,
