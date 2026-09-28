@@ -3839,15 +3839,14 @@ export default function AppVisualEffects() {
         gap: 8px;
       }
       .profile-avatar-file {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
+        position: absolute !important;
+        width: 0 !important;
+        height: 0 !important;
+        opacity: 0 !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        pointer-events: none;
+        appearance: none;
       }
       .profile-avatar-pick-btn {
         display: inline-flex;

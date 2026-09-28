@@ -108,6 +108,9 @@ export default function ProfilePage({
       type="file"
       accept="image/*,image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif"
       onChange={handleAvatarUpload}
+      aria-hidden="true"
+      tabIndex={-1}
+      style={{ position: "absolute", width: 0, height: 0, opacity: 0, overflow: "hidden" }}
     />
   );
 
@@ -165,7 +168,6 @@ export default function ProfilePage({
               <div style={styles.profileAvatarEditBadge}><MdEdit size={14} /></div>
             </label>
           )}
-          {user.profileImage ? renderAvatarFileInput("profile-avatar-file") : null}
           {user.profileImage ? (
             <p className="profile-avatar-hint" style={styles.profileAvatarHint}>
               {isUploadingAvatar ? "กำลังปรับขนาดรูป..." : "แตะรูปเพื่อดูขนาดเต็ม"}
@@ -175,6 +177,7 @@ export default function ProfilePage({
               {isUploadingAvatar ? "กำลังปรับขนาดรูป..." : "เลือกรูปโปรไฟล์"}
             </label>
           )}
+          {user.profileImage ? renderAvatarFileInput("profile-avatar-file") : null}
         </div>
         <div>
           <h1 className="profile-hero-name" style={{ margin: 0 }}>{user.username}</h1>
