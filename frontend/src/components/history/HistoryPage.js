@@ -359,12 +359,12 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
           <>
             <div className="history-chart-tooltip-row history-chart-tooltip-row--food">
               <span className="history-chart-tooltip-dot" aria-hidden="true" />
-              <span>แคลอรี่</span>
+              <span>พลังงานที่ได้รับ</span>
               <b>{point.foodCalories.toLocaleString()} kcal</b>
             </div>
             <div className="history-chart-tooltip-row history-chart-tooltip-row--activity">
               <span className="history-chart-tooltip-dot" aria-hidden="true" />
-              <span>กิจกรรม</span>
+              <span>พลังงานที่เผาผลาญ</span>
               <b>{point.activityCalories.toLocaleString()} kcal</b>
             </div>
             {(point.foodCalories > 0 || point.activityCalories > 0) && (
@@ -454,7 +454,7 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
             yAxisId="food"
             type="monotone"
             dataKey="foodCalories"
-            name="แคลอรี่"
+            name="พลังงานที่ได้รับ"
             stroke="none"
             fill="url(#historyFoodFill)"
             fillOpacity={1}
@@ -466,7 +466,7 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
             yAxisId="food"
             type="monotone"
             dataKey="foodCalories"
-            name="แคลอรี่"
+            name="พลังงานที่ได้รับ"
             stroke={chartColors.primary}
             strokeWidth={2.5}
             dot={chartDotProps(chartColors.primary)}
@@ -481,7 +481,7 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
             yAxisId="activity"
             type="monotone"
             dataKey="activityCalories"
-            name="กิจกรรม"
+            name="พลังงานที่เผาผลาญ"
             stroke="none"
             fill="url(#historyActivityFill)"
             fillOpacity={1}
@@ -493,7 +493,7 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
             yAxisId="activity"
             type="monotone"
             dataKey="activityCalories"
-            name="กิจกรรม"
+            name="พลังงานที่เผาผลาญ"
             stroke={chartColors.success}
             strokeWidth={2.5}
             dot={chartDotProps(chartColors.success)}
@@ -521,19 +521,19 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
             <div>{totalDays} วัน</div>
           </div>
           <div className="history-kpi-box" style={styles.historyKpiBox}>
-            <small>แคลอรี่เฉลี่ยต่อวัน</small>
+            <small>พลังงานที่ได้รับเฉลี่ยต่อวัน</small>
             <div>{averageCalories} kcal</div>
           </div>
           <div className="history-kpi-box" style={styles.historyKpiBox}>
-            <small>เผาเฉลี่ยต่อวัน</small>
+            <small>พลังงานที่เผาผลาญเฉลี่ยต่อวัน</small>
             <div>{averageActivityBurn} kcal</div>
           </div>
         </div>
         <div className="history-hero-subtext history-hero-subtext--compact" style={styles.historyHeroSubtext}>
           {totalDays > 0 ? (
             <>
-              กินสูงสุด <b>{bestDay.totalCal} kcal</b>
-              {hasActivityHistory && <> · เผาสูงสุด <b>{bestActivityDay.activityCals} kcal</b></>}
+              พลังงานที่ได้รับสูงสุด <b>{bestDay.totalCal} กิโลแคลอรี</b>
+              {hasActivityHistory && <> · พลังงานที่เผาผลาญสูงสุด <b>{bestActivityDay.activityCals} กิโลแคลอรี</b></>}
             </>
           ) : (
             <>ยังไม่มีประวัติ — บันทึกอาหาร/กิจกรรมแล้วข้อมูลจะเก็บแยกตามบัญชีของคุณ</>
@@ -543,8 +543,8 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
 
       <DashCollapsible
         className="dash-collapse-history-chart"
-        title="กราฟกิน vs เผา"
-        preview={`${chartRangeLabel} · กิน ${chartAverage} · เผา ${activityChartAverage} kcal`}
+        title="กราฟพลังงานที่ได้รับและที่เผาผลาญ"
+        preview={`${chartRangeLabel} · ได้รับ ${chartAverage} · เผาผลาญ ${activityChartAverage} กิโลแคลอรี`}
         open={chartOpen}
         onOpenChange={setChartOpen}
         collapseOnMobile={false}
@@ -552,7 +552,7 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
       <div style={{...styles.card, marginTop: 0}} className="hover-lift-card responsive-card history-combined-chart-card">
         <div className="history-chart-card-head" style={{...styles.cardTitle, marginBottom: '16px'}}>
           <span className="history-chart-card-title">
-            <HiFire color={Colors.primary}/> สรุปแคลอรี่และกิจกรรม{chartRangeLabel}
+            <HiFire color={Colors.primary}/> สรุปพลังงานที่ได้รับและที่เผาผลาญ · {chartRangeLabel}
             <InfoTip tooltip={FEATURE_TOOLTIPS.history} label="กราปประวัติ" idPrefix="history-chart" size={15} />
           </span>
           <button
@@ -567,8 +567,8 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
         </div>
         <div className="history-chart-print-banner">
           <strong>NutriAI</strong>
-          <span>กราฟกิน vs เผา · {chartPeriodText}</span>
-          <span>{chartAverageLabel}: กิน {chartAverage} · เผา {activityChartAverage} kcal</span>
+          <span>กราฟพลังงานที่ได้รับและที่เผาผลาญ · {chartPeriodText}</span>
+          <span>{chartAverageLabel}: ได้รับ {chartAverage} · เผาผลาญ {activityChartAverage} กิโลแคลอรี</span>
         </div>
         <div className="history-chart-toggle" style={styles.historyChartToggle}>
           <button
