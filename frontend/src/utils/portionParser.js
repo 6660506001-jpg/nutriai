@@ -202,6 +202,10 @@ export const STEAK_PORTION_TYPES = [
   { id: "gram", label: "กรัม (g)", hint: "ระบุน้ำหนัก" },
 ];
 
+export const PLATE_ONLY_PORTION_TYPES = [
+  { id: "plate", label: "จาน", hint: "เลือกขนาดจาน" },
+];
+
 export const PASTA_PORTION_TYPES = PLATE_ONLY_PORTION_TYPES;
 
 export const isRiceDishFood = (food) => {
