@@ -653,6 +653,8 @@ export default function FoodLogPage({
         </div>
       )}
 
+      {renderSearchPanel()}
+
       {(mealSuggestions?.loading || (mealSuggestions?.menus?.length > 0)) && (
         <div className="log-page-block log-page-block-suggestions" ref={suggestionsRef}>
           <PostSaveMenuSuggestions
@@ -667,8 +669,6 @@ export default function FoodLogPage({
           />
         </div>
       )}
-
-      {renderSearchPanel()}
 
       {foodCals === 0 && !isMobile && (
         <div className="log-page-block log-page-block-hints">

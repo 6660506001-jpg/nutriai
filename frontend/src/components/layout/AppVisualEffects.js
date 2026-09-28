@@ -5790,8 +5790,8 @@ export default function AppVisualEffects() {
         .log-page-block-summary { order: 1; }
         .log-page-block-tabs { order: 2; }
         .log-page-block-records { order: 3; }
-        .log-page-block-suggestions { order: 4; }
-        .log-page-block-search { order: 5; }
+        .log-page-food .log-page-block-search { order: 4; }
+        .log-page-block-suggestions { order: 5; }
         .log-page-block-hints { order: 6; }
         .log-page-block-notice { order: 7; }
         .log-page-block-advice { order: 8; }
