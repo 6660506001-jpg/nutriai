@@ -7718,10 +7718,24 @@ export default function AppVisualEffects() {
       @media print {
         @page {
           size: A4 landscape;
-          margin: 10mm;
+          margin: 8mm;
+        }
+        html, body, #root {
+          background: #fff !important;
+          height: auto !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+        }
+        body.is-printing-history,
+        body.is-printing-history #root > div {
+          min-height: 0 !important;
+          height: auto !important;
+          overflow: hidden !important;
+          background: #fff !important;
         }
         .app-sidebar,
         .app-header,
+        .app-page-hint,
         .history-hero-card,
         .dash-collapse-history-days,
         .history-chart-print-btn,
@@ -7731,15 +7745,18 @@ export default function AppVisualEffects() {
         .stat-info-btn {
           display: none !important;
         }
-        body {
-          background: #fff !important;
-        }
         .app-main,
         .app-scroll {
-          overflow: visible !important;
+          overflow: hidden !important;
           height: auto !important;
+          min-height: 0 !important;
+          max-width: none !important;
           padding: 0 !important;
           margin: 0 !important;
+          background: #fff !important;
+        }
+        .app-main {
+          margin-left: 0 !important;
         }
         .dash-collapse-history-chart .dash-collapse-body,
         .history-combined-chart-card {
@@ -7749,22 +7766,29 @@ export default function AppVisualEffects() {
           box-shadow: none !important;
           border: none !important;
           background: #fff !important;
+          break-inside: avoid;
+          page-break-inside: avoid;
+          overflow: hidden !important;
         }
         .history-chart-print-banner {
           display: flex;
           flex-direction: column;
           gap: 4px;
-          margin-bottom: 12px;
+          margin: 0 0 8px;
           color: #0f172a;
         }
         .history-chart-print-banner strong {
           font-size: 18px;
         }
         .history-combined-chart-wrap {
-          height: 420px !important;
-          min-height: 420px !important;
+          height: 340px !important;
+          min-height: 340px !important;
+          max-height: 340px !important;
+          overflow: hidden !important;
           background: #fff !important;
           border: 1px solid #e2e8f0 !important;
+          break-inside: avoid;
+          page-break-inside: avoid;
           print-color-adjust: exact;
           -webkit-print-color-adjust: exact;
         }
