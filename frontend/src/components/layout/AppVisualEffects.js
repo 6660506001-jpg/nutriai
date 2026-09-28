@@ -3832,6 +3832,49 @@ export default function AppVisualEffects() {
         gap: 25px;
         flex-wrap: wrap;
       }
+      .profile-avatar-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .profile-avatar-file {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      .profile-avatar-pick-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.16);
+        color: inherit;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      :is(html[data-theme="glass-default"], html[data-theme="unselected"]) .profile-avatar-pick-btn {
+        border-color: #e2e8f0;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      .avatar-modal-actions label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-sizing: border-box;
+      }
       .profile-mobile-actions {
         display: flex;
         flex-direction: column;

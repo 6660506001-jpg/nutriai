@@ -97,15 +97,19 @@ export default function ProfilePage({
   const handleAvatarClick = () => {
     if (user.profileImage) {
       setShowAvatarModal(true);
-      return;
     }
-    fileInputRef.current?.click();
   };
 
-  const handleChangeAvatar = () => {
-    setShowAvatarModal(false);
-    fileInputRef.current?.click();
-  };
+  const renderAvatarFileInput = (id) => (
+    <input
+      id={id}
+      ref={id === "profile-avatar-file" ? fileInputRef : undefined}
+      className="profile-avatar-file"
+      type="file"
+      accept="image/*,image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif"
+      onChange={handleAvatarUpload}
+    />
+  );
 
   useEffect(() => {
     if (!showAvatarModal) return undefined;
@@ -137,33 +141,40 @@ export default function ProfilePage({
         <div style={{position:'absolute', top:'20px', right:'20px'}}>
             {isEditing ? <button onClick={handleSave} style={styles.btnSave}>บันทึก</button> : <button onClick={() => setIsEditing(true)} style={styles.btnEditCircle}><MdEdit /></button>}
         </div>
-        <div>
-          <div
-            style={styles.profileAvatarWrap}
-            onClick={handleAvatarClick}
-            title={user.profileImage ? "คลิกเพื่อดูรูปโปรไฟล์" : "คลิกเพื่อเพิ่มรูปโปรไฟล์"}
-          >
-            {user.profileImage ? (
+        <div className="profile-avatar-block">
+          {user.profileImage ? (
+            <button
+              type="button"
+              className="profile-avatar-wrap"
+              style={styles.profileAvatarWrap}
+              onClick={handleAvatarClick}
+              title="แตะเพื่อดูรูปโปรไฟล์"
+            >
               <img src={user.profileImage} alt="รูปโปรไฟล์" style={styles.profileAvatarImage} />
-            ) : (
+              <div style={styles.profileAvatarEditBadge}><MdEdit size={14} /></div>
+            </button>
+          ) : (
+            <label
+              className="profile-avatar-wrap"
+              style={styles.profileAvatarWrap}
+              htmlFor="profile-avatar-file"
+              title="แตะเพื่อเพิ่มรูปโปรไฟล์"
+            >
+              {renderAvatarFileInput("profile-avatar-file")}
               <HiOutlineUserCircle size={60} color="rgba(255,255,255,0.9)" />
-            )}
-            <div style={styles.profileAvatarEditBadge}><MdEdit size={14} /></div>
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={handleAvatarUpload}
-          />
-          <p className="profile-avatar-hint" style={styles.profileAvatarHint}>
-            {isUploadingAvatar
-              ? "กำลังปรับขนาดรูป..."
-              : user.profileImage
-                ? "คลิกรูปเพื่อดูขนาดเต็ม"
-                : "คลิกเพื่อเพิ่มรูปโปรไฟล์ (รองรับรูปจากกล้องมือถือ)"}
-          </p>
+              <div style={styles.profileAvatarEditBadge}><MdEdit size={14} /></div>
+            </label>
+          )}
+          {user.profileImage ? renderAvatarFileInput("profile-avatar-file") : null}
+          {user.profileImage ? (
+            <p className="profile-avatar-hint" style={styles.profileAvatarHint}>
+              {isUploadingAvatar ? "กำลังปรับขนาดรูป..." : "แตะรูปเพื่อดูขนาดเต็ม"}
+            </p>
+          ) : (
+            <label htmlFor="profile-avatar-file" className="profile-avatar-pick-btn">
+              {isUploadingAvatar ? "กำลังปรับขนาดรูป..." : "เลือกรูปโปรไฟล์"}
+            </label>
+          )}
         </div>
         <div>
           <h1 className="profile-hero-name" style={{ margin: 0 }}>{user.username}</h1>
@@ -181,7 +192,9 @@ export default function ProfilePage({
             </button>
             <img src={user.profileImage} alt="รูปโปรไฟล์ขนาดเต็ม" style={styles.avatarModalImage} />
             <div className="avatar-modal-actions" style={styles.avatarModalActions}>
-              <button type="button" style={styles.avatarModalChangeBtn} onClick={handleChangeAvatar}>เปลี่ยนรูป</button>
+              <label htmlFor="profile-avatar-file" style={styles.avatarModalChangeBtn}>
+                เปลี่ยนรูป
+              </label>
               <button type="button" style={styles.avatarModalDeleteBtn} onClick={handleRemoveAvatar}>ลบรูป</button>
             </div>
           </div>

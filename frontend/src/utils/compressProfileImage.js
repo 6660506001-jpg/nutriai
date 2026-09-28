@@ -3,20 +3,28 @@ const estimateDataUrlBytes = (dataUrl) => {
   return Math.ceil(base64.length * 0.75);
 };
 
+const looksLikeImageFile = (file) => {
+  const type = String(file?.type || "").toLowerCase();
+  const name = String(file?.name || "").toLowerCase();
+  if (!type) return true;
+  if (type.startsWith("image/")) return true;
+  return /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(name);
+};
+
 export function compressProfileImage(
   file,
   { maxDimension = 800, maxBytes = 512 * 1024, mimeType = "image/jpeg", quality = 0.85 } = {},
 ) {
   return new Promise((resolve, reject) => {
-    if (!file?.type?.startsWith("image/")) {
+    if (!file || !looksLikeImageFile(file)) {
       reject(new Error("กรุณาเลือกไฟล์รูปภาพเท่านั้น"));
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      try {
         let width = img.width;
         let height = img.height;
         const scale = Math.min(1, maxDimension / Math.max(width, height));
@@ -51,11 +59,16 @@ export function compressProfileImage(
         }
 
         resolve(dataUrl);
-      };
-      img.onerror = () => reject(new Error("ไม่สามารถอ่านรูปภาพได้"));
-      img.src = reader.result;
+      } catch (error) {
+        reject(new Error("ไม่สามารถประมวลผลรูปภาพได้"));
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
     };
-    reader.onerror = () => reject(new Error("ไม่สามารถอ่านไฟล์ได้"));
-    reader.readAsDataURL(file);
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("อ่านรูปนี้บนมือถือไม่ได้ ลองถ่ายใหม่หรือเลือกรูป JPEG/PNG"));
+    };
+    img.src = objectUrl;
   });
 }
