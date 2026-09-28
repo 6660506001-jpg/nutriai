@@ -11,6 +11,7 @@ import {
   isNoodleBowlFood,
   isPlateOnlyFood,
   isRiceDishFood,
+  isSteakFood,
   resolveServingMeta,
   stripPortionSuffix,
 } from "../../utils/portionParser";
@@ -49,6 +50,12 @@ export default function FoodPortionModal({
       return;
     }
     const meta = resolveServingMeta(food);
+    if (isSteakFood(food) || meta?.unit === "ชิ้น") {
+      setPortionType("piece");
+      setAmount("1");
+      setPlateSize(DEFAULT_SELECTION.plateSize);
+      return;
+    }
     if (isRiceDishFood(food) || isPlateOnlyFood(food)) {
       setPortionType("plate");
       setAmount("1");

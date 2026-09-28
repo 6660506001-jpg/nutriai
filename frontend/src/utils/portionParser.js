@@ -72,6 +72,8 @@ const NOODLE_BOWL_GRAMS = 400;
 const RICE_DISH_NAME = /^ข้าว(?!โพด|เกรียบ|ตัง|พอง|เม่า)/;
 const NOODLE_BOWL_NAME = /ก๋วยเตี๋ยว|ก๋วยเตี่ยว|ก๋วยจั๊บ|ก๋วยจ๊บ|บะหมี่|เย็นตาโฟ|เกาเหลา/;
 const PLATE_ONLY_NAME = /สปาเก็ต|พาสต้า|spaghetti|pasta|มะกะโรนี|เพนเน่|ลาซานญ่า|คาโบนาร่า|ส้มตำ/;
+const STEAK_NAME = /สเต็ก|steak/i;
+const STEAK_PIECE_GRAMS = 180;
 
 export const isNoodleBowlFood = (food) => {
   const name = stripPortionSuffix(food?.baseName || food?.name || "");
@@ -85,6 +87,12 @@ export const isPlateOnlyFood = (food) => {
   const name = stripPortionSuffix(`${food?.baseName || ""} ${food?.name || ""}`);
   if (!name.trim()) return false;
   return PLATE_ONLY_NAME.test(name);
+};
+
+export const isSteakFood = (food) => {
+  const name = stripPortionSuffix(`${food?.baseName || ""} ${food?.name || ""}`);
+  if (!name.trim()) return false;
+  return STEAK_NAME.test(name);
 };
 
 export const isPastaPlateFood = isPlateOnlyFood;
@@ -159,6 +167,18 @@ export const resolveServingMeta = (food) => {
       hint: `1 ฟอง ≈ ${gramsPerUnit}g`,
     };
   }
+  if (isSteakFood({ ...food, baseName: cleanName, name: cleanName })) {
+    const gramsPerUnit = totalGrams || STEAK_PIECE_GRAMS;
+    return {
+      type: "piece",
+      unit: "ชิ้น",
+      unitLabel: "ชิ้น",
+      baseCount: 1,
+      gramsPerUnit,
+      referenceLabel: `1 ชิ้น (~${gramsPerUnit}g)`,
+      hint: `1 ชิ้น ≈ ${gramsPerUnit}g · เนื้อสเต็ก 1 แผ่น`,
+    };
+  }
 
   return null;
 };
@@ -177,8 +197,9 @@ export const NOODLE_PORTION_TYPES = [
   { id: "cup", label: "ถ้วย", hint: "ระบุจำนวนถ้วย" },
 ];
 
-export const PLATE_ONLY_PORTION_TYPES = [
-  { id: "plate", label: "จาน", hint: "เลือกขนาดจาน" },
+export const STEAK_PORTION_TYPES = [
+  { id: "piece", label: "ชิ้น", hint: "1 ชิ้น = เนื้อสเต็ก 1 แผ่น" },
+  { id: "gram", label: "กรัม (g)", hint: "ระบุน้ำหนัก" },
 ];
 
 export const PASTA_PORTION_TYPES = PLATE_ONLY_PORTION_TYPES;
@@ -192,6 +213,7 @@ export const isRiceDishFood = (food) => {
 
 export const getPortionTypesForFood = (food) => {
   if (isDrinkFood(food)) return DRINK_PORTION_TYPES;
+  if (isSteakFood(food)) return STEAK_PORTION_TYPES;
   if (isRiceDishFood(food)) return RICE_PORTION_TYPES;
   if (isPlateOnlyFood(food)) return PLATE_ONLY_PORTION_TYPES;
   if (isNoodleBowlFood(food)) return NOODLE_PORTION_TYPES;
