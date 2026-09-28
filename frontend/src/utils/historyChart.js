@@ -53,17 +53,6 @@ export const startOfWeekMonday = (date) => {
   return d;
 };
 
-const formatWeekAxisLabel = (weekStart) => {
-  const end = new Date(weekStart);
-  end.setDate(weekStart.getDate() + 6);
-  const endLabel = end.toLocaleDateString("th-TH", { day: "numeric", month: "short" });
-  if (weekStart.getMonth() === end.getMonth() && weekStart.getFullYear() === end.getFullYear()) {
-    return `${weekStart.getDate()}–${endLabel}`;
-  }
-  const startLabel = weekStart.toLocaleDateString("th-TH", { day: "numeric", month: "short" });
-  return `${startLabel}–${endLabel}`;
-};
-
 const getMetricValue = (day, metric) => {
   if (metric === "activity") return Number(day.activityCals) || 0;
   if (metric === "net") {
@@ -106,34 +95,43 @@ const buildDailyMetricChart = (rows, metric) => {
 };
 
 const buildWeeklyMetricChart = (rows, metric) => {
-  const bucketData = {};
+  const valueByKey = {};
   rows.forEach((day) => {
-    const weekStart = startOfWeekMonday(day.parsedDate);
-    const key = toDateKey(weekStart);
-    if (!bucketData[key]) bucketData[key] = { total: 0, recordedDays: 0 };
-    bucketData[key].total += getMetricValue(day, metric);
-    bucketData[key].recordedDays += 1;
+    valueByKey[toDateKey(day.parsedDate)] = getMetricValue(day, metric);
   });
 
-  const currentWeekStart = startOfWeekMonday(new Date());
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const currentWeekStart = startOfWeekMonday(today);
+  const rangeStart = new Date(currentWeekStart);
+  rangeStart.setDate(currentWeekStart.getDate() - (WEEKLY_CHART_WEEKS - 1) * 7);
+
+  const totalDays = WEEKLY_CHART_WEEKS * 7;
   const points = [];
 
-  for (let i = WEEKLY_CHART_WEEKS - 1; i >= 0; i -= 1) {
-    const weekStart = new Date(currentWeekStart);
-    weekStart.setDate(currentWeekStart.getDate() - i * 7);
-    const key = toDateKey(weekStart);
-    const bucket = bucketData[key];
-    const value = bucket?.total ?? 0;
-    const recordedDays = bucket?.recordedDays ?? 0;
-    const hasData = metric === "activity" ? value > 0 : recordedDays > 0;
+  for (let i = 0; i < totalDays; i += 1) {
+    const d = new Date(rangeStart);
+    d.setDate(rangeStart.getDate() + i);
+    if (d > today) break;
+
+    const key = toDateKey(d);
+    const recorded = Object.prototype.hasOwnProperty.call(valueByKey, key);
+    const value = recorded ? valueByKey[key] : 0;
+    const hasData = metric === "activity"
+      ? value > 0
+      : recorded && value > 0;
 
     points.push({
       key,
-      label: formatWeekAxisLabel(weekStart),
-      subLabel: `สัปดาห์ ${formatWeekAxisLabel(weekStart)}`,
+      label: d.toLocaleDateString("th-TH", { day: "numeric", month: "short" }),
+      subLabel: d.toLocaleDateString("th-TH", {
+        weekday: "long",
+        day: "numeric",
+        month: "short",
+      }),
       calories: value,
-      average: recordedDays ? Math.round(value / recordedDays) : 0,
-      days: recordedDays,
+      average: value,
+      days: 1,
       hasData,
     });
   }
@@ -197,7 +195,7 @@ export const buildHistoryMetricChart = (history, range, metric = "food") => {
 
 export const HISTORY_CHART_PERIODS = {
   day: "อาทิตย์ – เสาร์",
-  week: `${WEEKLY_CHART_WEEKS} สัปดาห์ล่าสุด`,
+  week: `รายวันในช่วง ${WEEKLY_CHART_WEEKS} สัปดาห์ล่าสุด`,
   month: `${MONTHLY_CHART_MONTHS} เดือนล่าสุด`,
 };
 
