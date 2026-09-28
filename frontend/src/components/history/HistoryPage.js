@@ -302,11 +302,7 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
     : 0;
 
   const chartRangeLabel = chartRange === "day" ? "รายวัน" : chartRange === "week" ? "รายสัปดาห์" : "รายเดือน";
-  const chartAverageLabel = chartRange === "day"
-    ? "เฉลี่ยสัปดาห์นี้"
-    : chartRange === "week"
-      ? "เฉลี่ยต่อวันที่บันทึก"
-      : "เฉลี่ยต่อช่วงที่มีข้อมูล";
+  const chartAverageLabel = chartRange === "day" ? "เฉลี่ยสัปดาห์นี้" : "เฉลี่ยต่อช่วงที่มีข้อมูล";
   const chartPeriodText = HISTORY_CHART_PERIODS[chartRange];
 
   const handlePrintChart = () => {
@@ -333,26 +329,13 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
     return String(n);
   };
 
-  const showChartDots = chartData.length <= 7;
-  const chartDotProps = (color, hasKey) => {
-    if (chartRange === "week") {
-      return (props) => {
-        const { cx, cy, payload } = props;
-        if (cx == null || cy == null) return null;
-        const hasPoint = hasKey === "activity" ? payload?.hasActivityData : payload?.hasFoodData;
-        if (!hasPoint) return null;
-        return (
-          <circle cx={cx} cy={cy} r={3.5} fill={color} stroke="#fff" strokeWidth={1.5} />
-        );
-      };
-    }
-    return {
-      r: showChartDots ? 4 : 0,
-      fill: color,
-      stroke: "#fff",
-      strokeWidth: 2,
-    };
-  };
+  const showChartDots = chartData.length <= 8;
+  const chartDotProps = (color) => ({
+    r: showChartDots ? 4 : 0,
+    fill: color,
+    stroke: "#fff",
+    strokeWidth: 2,
+  });
   const chartActiveDotProps = (color, lightColor) => ({
     r: 6,
     fill: lightColor || color,
@@ -391,7 +374,7 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
             )}
             {point.days > 1 && (
               <p className="history-chart-tooltip-meta">
-                เฉลี่ย พลังงานที่ได้รับ {point.foodAverage.toLocaleString()} · ที่เผาผลาญ {point.activityAverage.toLocaleString()} กิโลแคลอรี/วัน ({point.days} วัน)
+                เฉลี่ยต่อวันที่บันทึก · {point.days} วันในสัปดาห์นี้
               </p>
             )}
           </>
@@ -431,13 +414,12 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
             dataKey="label"
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: isCompactChart || chartRange === "week" ? 9 : (chartRange === "day" ? 10 : 11), fill: chartColors.textGray, fontWeight: 600 }}
+            tick={{ fontSize: isCompactChart ? 9 : (chartRange === "day" ? 10 : 11), fill: chartColors.textGray, fontWeight: 600 }}
             dy={8}
-            interval={chartRange === "week" ? 6 : (isCompactChart ? "preserveStartEnd" : 0)}
-            minTickGap={chartRange === "week" ? 10 : 5}
-            angle={chartRange === "week" || (isCompactChart && chartRange === "day") ? -35 : 0}
-            textAnchor={chartRange === "week" || (isCompactChart && chartRange === "day") ? "end" : "middle"}
-            height={chartRange === "week" || (isCompactChart && chartRange === "day") ? 52 : 30}
+            interval={isCompactChart ? "preserveStartEnd" : 0}
+            angle={isCompactChart && chartRange === "day" ? -35 : 0}
+            textAnchor={isCompactChart && chartRange === "day" ? "end" : "middle"}
+            height={isCompactChart && chartRange === "day" ? 50 : 30}
           />
           <YAxis
             yAxisId="food"
@@ -487,7 +469,7 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
             name="พลังงานที่ได้รับ"
             stroke={chartColors.primary}
             strokeWidth={2.5}
-            dot={chartDotProps(chartColors.primary, "food")}
+            dot={chartDotProps(chartColors.primary)}
             activeDot={chartActiveDotProps(chartColors.primary, chartColors.primaryLight)}
             hide={false}
             legendType="none"
@@ -514,7 +496,7 @@ export default function HistoryPage({ historyData, dailyMeals, activities, userW
             name="พลังงานที่เผาผลาญ"
             stroke={chartColors.success}
             strokeWidth={2.5}
-            dot={chartDotProps(chartColors.success, "activity")}
+            dot={chartDotProps(chartColors.success)}
             activeDot={chartActiveDotProps(chartColors.success, chartColors.successLight)}
             legendType="none"
             isAnimationActive={!isPrintingChart}
