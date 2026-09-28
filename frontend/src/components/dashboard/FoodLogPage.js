@@ -641,6 +641,8 @@ export default function FoodLogPage({
         </div>
       </div>
 
+      {renderSearchPanel()}
+
       {foodCals > 0 && (
         <div className="log-page-block log-page-block-records" ref={recordsRef}>
           <section className="log-panel log-panel-records log-panel-records--top" style={styles.card}>
@@ -652,8 +654,6 @@ export default function FoodLogPage({
           </section>
         </div>
       )}
-
-      {renderSearchPanel()}
 
       {(mealSuggestions?.loading || (mealSuggestions?.menus?.length > 0)) && (
         <div className="log-page-block log-page-block-suggestions" ref={suggestionsRef}>

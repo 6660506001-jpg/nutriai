@@ -5789,8 +5789,8 @@ export default function AppVisualEffects() {
       @media (min-width: 901px) {
         .log-page-block-summary { order: 1; }
         .log-page-block-tabs { order: 2; }
-        .log-page-block-records { order: 3; }
-        .log-page-food .log-page-block-search { order: 4; }
+        .log-page-food .log-page-block-search { order: 3; }
+        .log-page-block-records { order: 4; }
         .log-page-block-suggestions { order: 5; }
         .log-page-block-hints { order: 6; }
         .log-page-block-notice { order: 7; }
