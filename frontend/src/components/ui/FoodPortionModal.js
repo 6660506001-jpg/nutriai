@@ -235,7 +235,6 @@ export default function FoodPortionModal({
                   แก้ว
                 </button>
               </div>
-              <p style={styles.portionTypeHint}>เลือกขนาดแก้วด้านล่าง</p>
             </div>
           ) : (
           <div style={styles.customFoodField}>
