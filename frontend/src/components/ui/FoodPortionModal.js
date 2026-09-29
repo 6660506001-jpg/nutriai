@@ -285,9 +285,9 @@ export default function FoodPortionModal({
                       prefer="below"
                       maxWidth={240}
                       tooltip={{
-                        title: `แก้ว${option.label}`,
+                        title: option.label,
                         body: option.meaning,
-                        note: `ประมาณ ${option.grams} ml · เทียบแก้วร้านทั่วไป`,
+                        note: `ประมาณ ${option.grams} ml`,
                       }}
                     >
                       <button

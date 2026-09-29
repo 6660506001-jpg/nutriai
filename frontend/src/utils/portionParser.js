@@ -57,19 +57,19 @@ const buildGlassSizeOptions = (normalGrams) => {
       id: "small",
       label: "เล็ก",
       grams: Math.round(normal * 0.67),
-      meaning: "แก้วเล็ก หรืองานที่ไม่เต็มแก้วร้าน",
+      meaning: "แก้วเล็ก",
     },
     {
       id: "normal",
       label: "ปกติ",
       grams: normal,
-      meaning: "แก้วมาตรฐานร้านทั่วไป",
+      meaning: "แก้วธรรมดา",
     },
     {
       id: "large",
       label: "พิเศษ",
       grams: Math.round(normal * 1.45),
-      meaning: "แก้วใหญ่ หรือขนาดพิเศษ",
+      meaning: "แก้วใหญ่",
     },
   ];
 };
