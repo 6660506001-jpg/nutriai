@@ -275,30 +275,33 @@ export default function FoodPortionModal({
           {(isDrink || portionType === "glass") && (
             <div style={styles.customFoodField}>
               <label style={styles.customFoodLabel}>ขนาดแก้ว</label>
-              <div className="meal-tab-row">
-                {glassSizeOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => setPlateSize(option.id)}
-                    style={{
-                      flex: 1,
-                      padding: "8px",
-                      borderRadius: "10px",
-                      border: "none",
-                      background: plateSize === option.id ? Colors.primary : Colors.bgSoft,
-                      color: plateSize === option.id ? "white" : Colors.textDark,
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+              <div className="food-plate-size-grid" role="group" aria-label="ขนาดแก้ว">
+                {glassSizeOptions.map((option) => {
+                  const active = plateSize === option.id;
+                  return (
+                    <PressTip
+                      key={option.id}
+                      label={option.label}
+                      prefer="below"
+                      maxWidth={240}
+                      tooltip={{
+                        title: `แก้ว${option.label}`,
+                        body: option.meaning,
+                        note: `ประมาณ ${option.grams} ml · เทียบแก้วร้านทั่วไป`,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setPlateSize(option.id)}
+                        className={`food-plate-size-card${active ? " is-active" : ""}`}
+                        aria-pressed={active}
+                      >
+                        {option.label}
+                      </button>
+                    </PressTip>
+                  );
+                })}
               </div>
-              <p style={styles.portionTypeHint}>
-                {glassSizeOptions.map((option) => `${option.label} ~${option.grams}ml`).join(" · ")}
-              </p>
             </div>
           )}
 

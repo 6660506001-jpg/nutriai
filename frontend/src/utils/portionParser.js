@@ -53,9 +53,24 @@ export const DRINK_PORTION_TYPES = [
 const buildGlassSizeOptions = (normalGrams) => {
   const normal = Math.max(1, Number(normalGrams) || 300);
   return [
-    { id: "small", label: "เล็ก", grams: Math.round(normal * 0.67) },
-    { id: "normal", label: "ปกติ", grams: normal },
-    { id: "large", label: "พิเศษ", grams: Math.round(normal * 1.45) },
+    {
+      id: "small",
+      label: "เล็ก",
+      grams: Math.round(normal * 0.67),
+      meaning: "แก้วเล็ก หรืองานที่ไม่เต็มแก้วร้าน",
+    },
+    {
+      id: "normal",
+      label: "ปกติ",
+      grams: normal,
+      meaning: "แก้วมาตรฐานร้านทั่วไป",
+    },
+    {
+      id: "large",
+      label: "พิเศษ",
+      grams: Math.round(normal * 1.45),
+      meaning: "แก้วใหญ่ หรือขนาดพิเศษ",
+    },
   ];
 };
 
