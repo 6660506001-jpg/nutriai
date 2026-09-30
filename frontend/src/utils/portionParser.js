@@ -20,8 +20,6 @@ const THAI_NUMBER_WORDS = {
 
 export const FOOD_PORTION_TYPES = [
   { id: "plate", label: "จาน", hint: "เลือกขนาดจาน" },
-  { id: "piece", label: "ลูก", hint: "ระบุจำนวน" },
-  { id: "tbsp", label: "ทัพพี", hint: "1 ทัพพี ≈ 80g" },
   { id: "gram", label: "กรัม (g)", hint: "ระบุน้ำหนัก" },
 ];
 
@@ -86,8 +84,8 @@ export const stripPortionSuffix = (name) =>
 const NOODLE_BOWL_GRAMS = 400;
 const RICE_DISH_NAME = /^ข้าว(?!โพด|เกรียบ|ตัง|พอง|เม่า)/;
 const NOODLE_BOWL_NAME = /ก๋วยเตี๋ยว|ก๋วยเตี่ยว|ก๋วยจั๊บ|ก๋วยจ๊บ|บะหมี่|เย็นตาโฟ|เกาเหลา/;
-const PLATE_ONLY_NAME = /สปาเก็ต|พาสต้า|spaghetti|pasta|มะกะโรนี|เพนเน่|ลาซานญ่า|คาโบนาร่า|ส้มตำ/;
-const STEAK_NAME = /สเต็ก|steak/i;
+const PLATE_ONLY_NAME = /สปาเก็ต|พาสต้า|spaghetti|pasta|มะกะโรนี|เพนเน่|ลาซานญ่า|คาโบนาร่า|ส้มตำ|ผัด/;
+const STEAK_NAME = /สเต็ก|สเต๊ก|สต็ก|steak/i;
 const STEAK_PIECE_GRAMS = 180;
 
 export const isNoodleBowlFood = (food) => {
@@ -191,7 +189,7 @@ export const resolveServingMeta = (food) => {
       baseCount: 1,
       gramsPerUnit,
       referenceLabel: `1 ชิ้น (~${gramsPerUnit}g)`,
-      hint: `1 ชิ้น ≈ ${gramsPerUnit}g · เนื้อสเต็ก 1 แผ่น`,
+      hint: `1 ชิ้น ≈ ${gramsPerUnit}g · สเต็ก 1 แผ่น`,
     };
   }
 
@@ -213,12 +211,17 @@ export const NOODLE_PORTION_TYPES = [
 ];
 
 export const STEAK_PORTION_TYPES = [
-  { id: "piece", label: "ชิ้น", hint: "1 ชิ้น = เนื้อสเต็ก 1 แผ่น" },
+  { id: "piece", label: "ชิ้น", hint: "1 ชิ้น = เนื้อหรือไก่สเต็ก 1 แผ่น" },
   { id: "gram", label: "กรัม (g)", hint: "ระบุน้ำหนัก" },
 ];
 
 export const PLATE_ONLY_PORTION_TYPES = [
   { id: "plate", label: "จาน", hint: "เลือกขนาดจาน" },
+];
+
+export const SET_PLATE_PORTION_TYPES = [
+  { id: "plate", label: "จาน", hint: "เลือกขนาดจานหรือชุด" },
+  { id: "gram", label: "กรัม (g)", hint: "ระบุน้ำหนัก" },
 ];
 
 export const PASTA_PORTION_TYPES = PLATE_ONLY_PORTION_TYPES;
@@ -230,11 +233,22 @@ export const isRiceDishFood = (food) => {
   return /\brice\b/i.test(name) && !/popcorn|corn/i.test(name);
 };
 
+export const isSetPlateMeal = (food) => {
+  if (isDrinkFood(food) || isSteakFood(food) || isRiceDishFood(food) || isNoodleBowlFood(food) || isPlateOnlyFood(food)) {
+    return false;
+  }
+  const category = String(food?.category || "");
+  if (["lean-protein", "salad", "soup", "light"].includes(category)) return true;
+  const name = stripPortionSuffix(`${food?.baseName || ""} ${food?.name || ""}`);
+  return /ปลาเผา|ปลานึ่ง|อกไก่|ไก่ย่าง|ผักนึ่ง|สลัด|ต้มยำ|แกงจืด|ลาบ|ไข่ต้ม|โจ๊ก|บรอกโคลี/.test(name);
+};
+
 export const getPortionTypesForFood = (food) => {
   if (isDrinkFood(food)) return DRINK_PORTION_TYPES;
   if (isSteakFood(food)) return STEAK_PORTION_TYPES;
-  if (isRiceDishFood(food)) return RICE_PORTION_TYPES;
   if (isPlateOnlyFood(food)) return PLATE_ONLY_PORTION_TYPES;
+  if (isSetPlateMeal(food)) return SET_PLATE_PORTION_TYPES;
+  if (isRiceDishFood(food)) return RICE_PORTION_TYPES;
   if (isNoodleBowlFood(food)) return NOODLE_PORTION_TYPES;
 
   const meta = resolveServingMeta(food);

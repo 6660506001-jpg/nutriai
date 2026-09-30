@@ -20,7 +20,7 @@ import {
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { analyzeThreeMealsSummary, buildActiveMealAdviceView } from "../../utils/mealRecommendations";
 import { getProfessionalPrediction } from "../../utils/aiPrediction";
-import { generateMenuRecommendations } from "../../utils/menuRecommendations";
+import { generateMenuRecommendations, toRecommendFoodEntry } from "../../utils/menuRecommendations";
 import { scoreMenusWithMl } from "../../utils/mlMealScore";
 import { calculateMacros } from "../../utils/healthCalculations";
 import { getMatchingAvoidanceKeywords } from "../../utils/foodPreferences";
@@ -492,13 +492,7 @@ export default function FoodLogPage({
   };
 
   const handleSelectSuggestedMenu = (menu) => {
-    setPendingFood({
-      name: menu.name,
-      calories: menu.calories,
-      protein: menu.protein,
-      carbs: menu.carbs,
-      fat: menu.fat,
-    });
+    setPendingFood(toRecommendFoodEntry(menu));
   };
 
   const handleAddCustomFromSearch = async () => {

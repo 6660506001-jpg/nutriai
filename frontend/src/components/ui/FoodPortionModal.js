@@ -4,13 +4,13 @@ import { HiX } from "react-icons/hi";
 import { Colors } from "../../constants/colors";
 import {
   PLATE_SIZE_OPTIONS,
-  PLATE_ONLY_PORTION_TYPES,
   buildFoodLogEntry,
   getGlassSizeOptions,
   getPortionTypesForFood,
   isNoodleBowlFood,
   isPlateOnlyFood,
   isRiceDishFood,
+  isSetPlateMeal,
   isSteakFood,
   resolveServingMeta,
   stripPortionSuffix,
@@ -56,7 +56,7 @@ export default function FoodPortionModal({
       setPlateSize(DEFAULT_SELECTION.plateSize);
       return;
     }
-    if (isRiceDishFood(food) || isPlateOnlyFood(food)) {
+    if (isPlateOnlyFood(food) || isRiceDishFood(food) || isSetPlateMeal(food)) {
       setPortionType("plate");
       setAmount("1");
       setPlateSize(DEFAULT_SELECTION.plateSize);
@@ -121,11 +121,9 @@ export default function FoodPortionModal({
   if (!food) return null;
 
   const servingMeta = resolveServingMeta(food);
-  const portionTypes = isPlateOnlyFood(food)
-    ? PLATE_ONLY_PORTION_TYPES
-    : getPortionTypesForFood(food);
+  const portionTypes = getPortionTypesForFood(food);
   const nutritionUnverified = isUnverifiedFoodEntry(food);
-  const canSave = canSaveFoodEntry(food);
+  const canSave = canSaveFoodEntry(food) || Number(food?.calories) > 0;
   const showSweetness = supportsDrinkSweetness(food);
   const isDrink = isDrinkFood(food);
   const glassSizeOptions = isDrink ? getGlassSizeOptions(food) : [];
@@ -170,8 +168,8 @@ export default function FoodPortionModal({
       }
     }
 
-    const entry = buildFoodLogEntry(food, selection);
-    if (!canSaveFoodEntry(entry)) {
+  const entry = buildFoodLogEntry(food, selection);
+    if (!(canSaveFoodEntry(entry) || Number(entry.calories) > 0)) {
       alert("ไม่สามารถคำนวนเมนูอาหารนี้ได้");
       return;
     }

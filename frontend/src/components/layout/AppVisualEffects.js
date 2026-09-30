@@ -549,6 +549,62 @@ export default function AppVisualEffects() {
         color: #334155;
       }
 
+      .dash-home-advice-kicker {
+        margin: 0 0 4px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--nutri-primary, #2563eb);
+      }
+      .dash-home-advice-desc {
+        margin: 0 0 10px;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.45;
+        color: var(--nutri-text-muted, #64748b);
+      }
+      .dash-home-advice-inputs {
+        list-style: none;
+        margin: 0 0 12px;
+        padding: 0;
+        display: grid;
+        gap: 6px;
+      }
+      .dash-home-advice-inputs li {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: baseline;
+        padding: 8px 10px;
+        border-radius: 12px;
+        background: var(--nutri-bg-soft, #f8fafc);
+        border: 1px solid var(--nutri-border, #e2e8f0);
+      }
+      .dash-home-advice-inputs span {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        flex-shrink: 0;
+      }
+      .dash-home-advice-inputs strong {
+        font-size: 12px;
+        font-weight: 800;
+        color: #0f172a;
+        text-align: right;
+      }
+      .dash-home-advice-cta {
+        margin-top: 12px;
+        width: 100%;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #fff;
+        background: var(--nutri-primary, #2563eb);
+        cursor: pointer;
+      }
       .dash-home-advice-lead {
         margin: 0 0 8px;
         font-size: 14px;
@@ -1649,6 +1705,48 @@ export default function AppVisualEffects() {
         min-width: 0;
         min-height: 320px;
       }
+      .profile-weight-chart-kicker {
+        margin: -8px 0 10px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--nutri-text-muted, #64748b);
+      }
+      .profile-ai-insight {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 6px 8px;
+        margin: 14px 0 0;
+        padding: 0;
+        background: none;
+        border: none;
+        text-align: center;
+        line-height: 1.45;
+      }
+      .profile-ai-insight-icon {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        color: var(--nutri-primary, #2563eb);
+      }
+      .profile-ai-insight-label {
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--nutri-primary, #2563eb);
+      }
+      .profile-ai-insight-sep {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: #94a3b8;
+      }
+      .profile-ai-insight-text {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+      }
       .profile-weight-chart-note {
         margin: 0 0 4px;
         font-size: 12px;
@@ -1769,6 +1867,9 @@ export default function AppVisualEffects() {
         border-top: 1px solid color-mix(in srgb, var(--nutri-border, #e2e8f0) 80%, transparent);
         background: color-mix(in srgb, var(--nutri-bg-soft, #f8fafc) 60%, #fff);
       }
+      .history-combined-chart-block {
+        width: 100%;
+      }
       .history-combined-chart-wrap {
         width: 100%;
         height: 340px;
@@ -1777,6 +1878,10 @@ export default function AppVisualEffects() {
         border-radius: 16px;
         background: linear-gradient(180deg, color-mix(in srgb, var(--nutri-primary) 4%, #fff) 0%, #fff 42%, color-mix(in srgb, var(--nutri-success) 3%, #fff) 100%);
         border: 1px solid color-mix(in srgb, var(--nutri-border) 70%, transparent);
+      }
+      .history-combined-chart-wrap .recharts-legend-wrapper,
+      .history-combined-chart-block .recharts-legend-wrapper {
+        display: none !important;
       }
       .history-chart-tooltip {
         min-width: 168px;
@@ -1826,10 +1931,10 @@ export default function AppVisualEffects() {
         box-shadow: 0 0 0 2px #fff;
       }
       .history-chart-tooltip-row--food .history-chart-tooltip-dot {
-        background: var(--nutri-primary, #f472b6);
+        background: var(--nutri-primary-dark, #be185d);
       }
       .history-chart-tooltip-row--activity .history-chart-tooltip-dot {
-        background: var(--nutri-success, #059669);
+        background: #047857;
       }
       .history-chart-tooltip-net {
         margin: 8px 0 0;
@@ -1847,11 +1952,55 @@ export default function AppVisualEffects() {
         line-height: 1.45;
         color: var(--nutri-text-muted, #64748b);
       }
+      .history-chart-legend {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 16px 22px;
+        padding: 12px 8px 2px;
+      }
       .history-chart-legend-item {
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--nutri-text-muted, #64748b);
-        padding: 0 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #0f172a !important;
+        -webkit-text-fill-color: #0f172a;
+        padding: 0;
+        opacity: 1 !important;
+      }
+      .history-chart-legend-swatch {
+        display: block !important;
+        width: 16px !important;
+        height: 16px !important;
+        flex-shrink: 0;
+        overflow: visible;
+      }
+      .history-chart-legend-swatch circle {
+        fill-opacity: 1 !important;
+        stroke: none;
+      }
+      .history-chart-legend-item:first-child .history-chart-legend-swatch circle {
+        fill: #047857 !important;
+      }
+      .history-chart-legend-item:last-child .history-chart-legend-swatch circle {
+        fill: #9d174d !important;
+      }
+      .recharts-default-legend .recharts-legend-item-text {
+        color: #0f172a !important;
+      }
+      .recharts-default-legend .recharts-legend-item:nth-child(odd) .recharts-legend-icon,
+      .recharts-default-legend .recharts-legend-item:nth-child(odd) path {
+        fill: #047857 !important;
+        fill-opacity: 1 !important;
+        stroke: #047857 !important;
+      }
+      .recharts-default-legend .recharts-legend-item:nth-child(even) .recharts-legend-icon,
+      .recharts-default-legend .recharts-legend-item:nth-child(even) path {
+        fill: #9d174d !important;
+        fill-opacity: 1 !important;
+        stroke: #9d174d !important;
       }
       :is(html[data-theme="glass-default"], html[data-theme="unselected"]) .profile-weight-chart-note {
         color: #475569 !important;
@@ -3646,6 +3795,20 @@ export default function AppVisualEffects() {
         border: 1px solid var(--nutri-border);
         box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
       }
+      @media (max-width: 900px) {
+        .activity-modal-backdrop {
+          align-items: flex-end;
+          padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+        }
+        .activity-modal-card {
+          width: 100%;
+          max-height: min(88dvh, 740px);
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          padding: 16px;
+          border-radius: 20px 20px 16px 16px;
+        }
+      }
       .activity-modal-head {
         display: flex;
         justify-content: space-between;
@@ -3838,34 +4001,49 @@ export default function AppVisualEffects() {
         align-items: flex-start;
         gap: 8px;
       }
-      .profile-avatar-file {
-        position: absolute !important;
-        width: 0 !important;
-        height: 0 !important;
-        opacity: 0 !important;
-        overflow: hidden !important;
-        clip: rect(0, 0, 0, 0) !important;
-        pointer-events: none;
-        appearance: none;
+      .profile-avatar-wrap {
+        position: relative;
+        overflow: hidden;
       }
-      .profile-avatar-pick-btn {
+      .avatar-modal-overlay {
+        z-index: 5000;
+      }
+      .profile-avatar-picker.profile-avatar-wrap {
+        display: flex;
+        border: none;
+        padding: 0;
+        background: transparent;
+        border-radius: 50%;
+        overflow: visible;
+      }
+      .profile-avatar-picker {
+        position: relative;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 44px;
-        padding: 8px 14px;
-        border-radius: 999px;
-        border: 1px solid rgba(255, 255, 255, 0.35);
-        background: rgba(255, 255, 255, 0.16);
-        color: inherit;
-        font-size: 13px;
-        font-weight: 800;
         cursor: pointer;
       }
-      :is(html[data-theme="glass-default"], html[data-theme="unselected"]) .profile-avatar-pick-btn {
-        border-color: #e2e8f0;
+      .profile-avatar-picker-label {
+        pointer-events: none;
+      }
+      .profile-avatar-hidden-input {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .profile-avatar-modal-change {
+        width: 100%;
+        min-height: 44px;
+        border-radius: 12px;
         background: #f8fafc;
-        color: #0f172a;
+        color: #334155;
+        border: 1px solid #e2e8f0;
+        font-size: 14px;
+        font-weight: 800;
       }
       .avatar-modal-actions label {
         display: flex;
@@ -5828,6 +6006,27 @@ export default function AppVisualEffects() {
         gap: 10px;
         padding-bottom: 8px;
       }
+      @media (max-width: 768px) {
+        .log-page {
+          padding-bottom: calc(88px + env(safe-area-inset-bottom));
+        }
+        .log-entry-row--activity,
+        .log-list-header--activity {
+          grid-template-columns: 48px minmax(0, 1fr) auto;
+        }
+        .log-entry-row--activity .log-entry-meal,
+        .log-entry-row--activity .log-entry-meta,
+        .log-list-header--activity span:nth-child(2),
+        .log-list-header--activity span:nth-child(4) {
+          display: none;
+        }
+        .log-entry-row--food {
+          grid-template-columns: minmax(0, 1fr) auto;
+        }
+        .log-entry-row--food .log-entry-time {
+          display: none;
+        }
+      }
       @media (min-width: 901px) {
         .log-page-block-summary { order: 1; }
         .log-page-block-tabs { order: 2; }
@@ -6740,10 +6939,10 @@ export default function AppVisualEffects() {
         color: #94a3b8;
       }
       .log-list-header--food {
-        grid-template-columns: 52px 1fr 72px 32px;
+        grid-template-columns: 52px 1fr auto;
       }
       .log-list-header--activity {
-        grid-template-columns: 52px 44px 1fr 40px 52px 32px;
+        grid-template-columns: 52px 44px 1fr 40px auto;
       }
 
       .meal-log-section {
@@ -6784,10 +6983,10 @@ export default function AppVisualEffects() {
         border-bottom: 1px solid rgba(148, 163, 184, 0.15);
       }
       .log-entry-row--food {
-        grid-template-columns: 52px 1fr 72px 32px;
+        grid-template-columns: 52px 1fr auto;
       }
       .log-entry-row--activity {
-        grid-template-columns: 52px 44px 1fr 40px 52px 32px;
+        grid-template-columns: 52px 44px 1fr 40px auto;
       }
       .log-entry-row:last-child {
         border-bottom: none;
@@ -6832,8 +7031,30 @@ export default function AppVisualEffects() {
       .log-entry-kcal--burn {
         color: var(--nutri-success, #16a34a);
       }
+      .log-entry-end {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .log-entry-end .log-entry-kcal {
+        white-space: nowrap;
+      }
       .log-entry-delete {
-        justify-self: end;
+        box-sizing: border-box;
+        flex: 0 0 32px;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid #fecaca;
+        background: #fef2f2;
+        color: #dc2626;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
       }
 
       .log-day-footer {
@@ -7629,8 +7850,8 @@ export default function AppVisualEffects() {
           display: none;
         }
         .log-entry-row--food {
-          grid-template-columns: minmax(0, 1fr) auto 44px;
-          align-items: start;
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: center;
           padding: 12px 10px;
         }
         .log-entry-row--food .log-entry-time {
@@ -7642,14 +7863,22 @@ export default function AppVisualEffects() {
           text-overflow: unset;
           line-height: 1.35;
         }
+        .log-entry-end {
+          gap: 10px;
+        }
         .log-entry-delete {
-          width: 44px !important;
-          height: 44px !important;
-          border-radius: 12px !important;
+          flex: 0 0 36px !important;
+          width: 36px !important;
+          height: 36px !important;
+          border-radius: 10px !important;
         }
         .log-entry-kcal {
           font-size: 13px;
-          padding-top: 2px;
+          padding-top: 0;
+        }
+        .log-list-header--activity,
+        .log-entry-row--activity {
+          grid-template-columns: 48px minmax(0, 1fr) auto;
         }
         .history-chart-meta {
           flex-direction: column;
@@ -7657,12 +7886,11 @@ export default function AppVisualEffects() {
           gap: 6px !important;
         }
         .history-combined-chart-wrap {
-          height: 280px !important;
-          min-height: 280px;
+          height: 260px !important;
+          min-height: 260px;
         }
-        .log-list-header--activity,
-        .log-entry-row--activity {
-          grid-template-columns: 48px 1fr 56px 28px;
+        .history-chart-legend-item {
+          color: #0f172a !important;
         }
         .log-list-header--activity span:nth-child(2),
         .log-list-header--activity span:nth-child(4),

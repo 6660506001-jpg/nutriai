@@ -4,7 +4,7 @@ import DashCollapsible from "../ui/DashCollapsible";
 import { calculateHealthData, calculateMacros } from "../../utils/healthCalculations";
 import { analyzeThreeMealsSummary } from "../../utils/mealRecommendations";
 import { getProfessionalPrediction, buildHomeDietAdviceBrief } from "../../utils/aiPrediction";
-import { generateMenuRecommendations, VENUE_MODES } from "../../utils/menuRecommendations";
+import { generateMenuRecommendations, toRecommendFoodEntry, VENUE_MODES } from "../../utils/menuRecommendations";
 import { scoreMenusWithMl } from "../../utils/mlMealScore";
 import { buildAdaptiveActivitySuggestion } from "../../utils/adaptiveActivitySuggester";
 import { getMealShort, getTodayKey, mealTotalsFromDaily } from "../../utils/logDisplay";
@@ -304,13 +304,7 @@ export default function Dashboard({
   };
 
   const handleAddRecommendedMenu = (menu) => {
-    setPendingFood({
-      name: menu.name,
-      calories: menu.calories,
-      protein: menu.protein,
-      carbs: menu.carbs,
-      fat: menu.fat,
-    });
+    setPendingFood(toRecommendFoodEntry(menu));
   };
 
   const handleWhatIfSelectFood = (food) => {
@@ -344,11 +338,16 @@ export default function Dashboard({
       remainingCarbs: analysis.recommendationTargets?.remainingCarbs,
       remainingFat: analysis.recommendationTargets?.remainingFat,
       remainingCal: (Number(user.tdee) || 0) - netCals,
+      foodCals,
+      proteinEaten: totalEaten.p,
+      carbsEaten: totalEaten.c,
+      fatEaten: totalEaten.f,
+      mealCount: Object.values(dailyMeals).flat().length,
       focusTitle: analysis.focusTitle,
       focusDetail: analysis.focusDetail,
       headline: analysis.headline,
     });
-  }, [analysis, user.tdee, netCals]);
+  }, [analysis, user.tdee, netCals, foodCals, totalEaten, dailyMeals]);
 
   return (
     <div style={styles.pageLayout} className={`dashboard-overview dashboard-home-simple dashboard-view-${viewMode}`}>
@@ -429,7 +428,7 @@ export default function Dashboard({
             onMore={handleOpenAllAiMenus}
             onRefresh={handleRefreshHomeAiMenu}
           />
-          <DashboardHomeAdvice brief={homeAdviceBrief} />
+          <DashboardHomeAdvice brief={homeAdviceBrief} onPlanNextMeal={onNavigateToMeals} />
           {hasRecordsLogged ? (
             <DashCollapsible
               className="dash-collapse-summary dash-home-meals-block"

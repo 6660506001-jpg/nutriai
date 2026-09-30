@@ -294,12 +294,13 @@ export const isGenericFoodEstimate = (estimate) => {
 export const canSaveFoodEntry = (food) => {
   if (!food) return false;
   if (food.id != null) return true;
+  if (food.nutritionVerified === true && Number(food.calories) > 0) return true;
   const name = food.baseName || stripPortionSuffix(food.name) || food.name || "";
   if (looksLikeInvalidFoodName(name)) return false;
   if (isGenericFoodEstimate(food)) {
     return food.nutritionUnverified === true && Number(food.calories) > 0;
   }
-  return isVerifiedFoodEntry(food);
+  return isVerifiedFoodEntry(food) || Number(food.calories) > 0;
 };
 
 export const canEstimateCustomFood = (estimate, name) => {
@@ -328,7 +329,7 @@ export const prepareCustomFoodEstimate = (estimate, name) => {
   return entry;
 };
 
-const INVALID_FOOD_NAME_CHARS = /[(){}[\]<>@#$%^&*+=|\\;:"/?!~`]/;
+const INVALID_FOOD_NAME_CHARS = /[(){}[\]<>@#$%^&*=|\\;:"/?!~`]/;
 
 const FOOD_HINT_RE = /ข้าว|ก๋วย|เตี๋ยว|เส้น|ผัด|ทอด|ต้ม|ตุ๋น|แกง|ยำ|ลาบ|ส้มตำ|โจ๊ก|เกาเหลา|เย็นตาโฟ|ไข่|ไก่|หมู|เนื้อ|กุ้ง|ปลา|เป็ด|หมึก|ปู|เต้าหู้|นม|กาแฟ|ชา|โกโก้|น้ำ|ขนม|เค้ก|ปัง|พิซซ่า|pizza|burger|sandwich|rice|chicken|salad|soup|noodle|yogurt|steak|sushi|pasta|สปาเก็ต|พาสต้า|บราวนี่|ช็อก|สเต็ก|ซูชิ|แซนด์|สลัด|ผลไม้|กล้วย|ส้ม|แอปเปิ้ล|มะม่วง|มะละกอ|องุ่น|แตงโม|ทุเรียน|มังคุด|ลำไย|ลิ้นจี่|ฝรั่ง|โอเลี้ยง|ไมโล|นมสด|น้ำผลไม้|ไอศกรีม|ไอติม|ลูกชิ้น|ไส้กรอก|แฮม|เบคอน|มันฝรั่ง|เฟรนช์|แฮมเบอร์เกอร์/i;
 
@@ -342,7 +343,10 @@ export const looksLikeFoodQuery = (name) => {
 };
 
 export const looksLikeInvalidFoodName = (name) => {
-  const text = String(name || "").trim();
+  const text = String(name || "")
+    .replace(/[+\-·×/&]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   if (text.length < 2) return true;
   if (INVALID_FOOD_NAME_CHARS.test(text)) return true;
 

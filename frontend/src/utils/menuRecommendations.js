@@ -11,6 +11,21 @@ import { getOutOfHomeCatalog } from "./outOfHomeMenus";
 
 export { VENUE_MODES } from "./outOfHomeMenus";
 
+export function toRecommendFoodEntry(menu) {
+  if (!menu) return null;
+  return {
+    name: menu.name,
+    calories: menu.calories,
+    protein: menu.protein,
+    carbs: menu.carbs,
+    fat: menu.fat,
+    category: menu.category,
+    id: menu.id || `ai-menu:${menu.name}`,
+    nutritionVerified: true,
+    estimateSource: "ai_menu",
+  };
+}
+
 const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
 
 /** เมนูคลีน/โปรตีนสูงที่คัดไว้ — ใช้เมื่อต้องการแนะนำเจาะจง */
