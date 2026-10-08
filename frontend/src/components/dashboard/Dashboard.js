@@ -9,7 +9,7 @@ import { buildMlScoreContext, scoreMenusWithMl } from "../../utils/mlMealScore";
 import NutrientRebalancePanel from "../ui/NutrientRebalancePanel";
 import MlModelCompare from "../ui/MlModelCompare";
 import { buildAdaptiveActivitySuggestion } from "../../utils/adaptiveActivitySuggester";
-import { getMealShort, getTodayKey, mealTotalsFromDaily } from "../../utils/logDisplay";
+import { getMealShort, getTodayKey } from "../../utils/logDisplay";
 import { summarizeDailyRewards } from "../../utils/mealRewards";
 import { styles } from "../../styles/appStyles";
 import DashboardStatusHero from "../ui/DashboardStatusHero";
@@ -71,7 +71,6 @@ export default function Dashboard({
   };
 
   const foodCals = Object.values(dailyMeals).flat().reduce((sum, f) => sum + (Number(f.calories) || 0), 0);
-  const mealTotals = mealTotalsFromDaily(dailyMeals);
   const activityCals = activities.reduce((sum, a) => sum + (Number(a.calories) || 0), 0);
   const netCals = foodCals - activityCals;
   const macros = calculateMacros(user.tdee);
