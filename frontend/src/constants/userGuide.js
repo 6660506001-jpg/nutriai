@@ -1,6 +1,6 @@
 export const USER_GUIDE_TITLE = "ใช้งาน NutriAI";
 
-export const USER_GUIDE_INTRO = "เริ่มต้นได้ใน 4 ขั้นสั้นๆ";
+export const USER_GUIDE_INTRO = "บันทึกอาหาร → บันทึกกิจกรรม → ดูสรุปที่หน้าหลัก";
 
 export const USER_GUIDE_STEPS = [
   {
@@ -16,7 +16,7 @@ export const USER_GUIDE_STEPS = [
   {
     id: "meals",
     title: "ดูเมนูแนะนำ",
-    text: "แท็บเมนู AI → ดูเมนูที่เหมาะกับแคลที่เหลือ",
+    text: "หน้าหลักมีคำแนะนำโภชนาการจากข้อมูลที่บันทึก · แท็บเมนู AI ช่วยวางแผนมื้อถัดไป",
   },
   {
     id: "history",

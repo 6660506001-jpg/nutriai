@@ -18,10 +18,10 @@ import {
   sumCalories,
 } from "../../utils/logDisplay";
 import { useIsMobile } from "../../hooks/useIsMobile";
-import { analyzeThreeMealsSummary, buildActiveMealAdviceView } from "../../utils/mealRecommendations";
+import { analyzeThreeMealsSummary } from "../../utils/mealRecommendations";
 import { getProfessionalPrediction } from "../../utils/aiPrediction";
 import { generateMenuRecommendations, toRecommendFoodEntry } from "../../utils/menuRecommendations";
-import { scoreMenusWithMl } from "../../utils/mlMealScore";
+import { buildMlScoreContext, scoreMenusWithMl } from "../../utils/mlMealScore";
 import { calculateMacros } from "../../utils/healthCalculations";
 import { getMatchingAvoidanceKeywords } from "../../utils/foodPreferences";
 import { scoreMealReward, summarizeDailyRewards } from "../../utils/mealRewards";
@@ -35,7 +35,6 @@ import PostSaveMenuSuggestions from "../ui/PostSaveMenuSuggestions";
 import FoodFilterSheet, { applyFoodFilters } from "../ui/FoodFilterSheet";
 import PressTip from "../ui/PressTip";
 import {
-  ActiveMealAdvicePanel,
   EmptyLogHint,
   FoodLogRow,
   IncompleteMealsNotice,
@@ -106,14 +105,6 @@ export default function FoodLogPage({
     const analysis = mealsAnalysis.perMeal[mealType];
     return analysis ? scoreMealReward(analysis) : null;
   };
-
-  const activeMealAdvice = buildActiveMealAdviceView(
-    activeMealTab,
-    mealsAnalysis.perMeal[activeMealTab],
-    getMealReward(activeMealTab),
-    mealsAnalysis.overall,
-    tdee,
-  );
 
   const recordsPreview = foodCals === 0
     ? "ยังไม่มีรายการ"
@@ -321,12 +312,6 @@ export default function FoodLogPage({
     </section>
   );
 
-  const scrollToRecords = () => {
-    window.requestAnimationFrame(() => {
-      recordsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  };
-
   const loadMealSuggestions = React.useCallback(async (meals) => {
     const nextFoodCals = sumCalories(Object.values(meals).flat());
     const nextActivityCals = (activities || []).reduce(
@@ -354,9 +339,7 @@ export default function FoodLogPage({
     if (!analysis.recommendationTargets?.canRecommend) {
       setMealSuggestions({
         loading: false,
-        headline: analysis.headline,
-        focusDetail: analysis.focusDetail,
-        calRange: "",
+        headline: "เพิ่มอาหารต่อ หรือกลับหน้าหลักดูสรุปวันนี้",
         menus: [],
       });
       return;
@@ -364,9 +347,7 @@ export default function FoodLogPage({
 
     setMealSuggestions({
       loading: true,
-      headline: analysis.subline || analysis.headline,
-      focusDetail: analysis.focusDetail,
-      calRange: `${analysis.recommendationTargets.calMin}–${analysis.recommendationTargets.calMax}`,
+      headline: "เลือกเมนูแนะนำมื้อถัดไป หรือเพิ่มอาหารต่อ",
       menus: [],
     });
 
@@ -382,25 +363,23 @@ export default function FoodLogPage({
       const rankedMenus = await scoreMenusWithMl(
         menus,
         Number(analysis.recommendationTargets.remainingCal) || 0,
+        buildMlScoreContext(user, analysis.recommendationTargets),
       );
       setMealSuggestions({
         loading: false,
-        headline: analysis.subline || analysis.headline,
-        focusDetail: analysis.focusTitle ? `${analysis.focusTitle} — ${analysis.focusDetail}` : analysis.focusDetail,
-        calRange: `${analysis.recommendationTargets.calMin}–${analysis.recommendationTargets.calMax}`,
+        headline: "เลือกเมนูแนะนำมื้อถัดไป หรือเพิ่มอาหารต่อ",
         menus: rankedMenus.slice(0, 3),
       });
     } catch (error) {
       console.error("Post-save menu suggestions:", error);
       setMealSuggestions({
         loading: false,
-        headline: analysis.headline,
-        focusDetail: analysis.focusDetail,
+        headline: "เพิ่มอาหารต่อ หรือกลับหน้าหลักดูสรุปวันนี้",
         calRange: "",
         menus: [],
       });
     }
-  }, [activities, tdee, user?.foodPreferences]);
+  }, [activities, tdee, user]);
 
   React.useEffect(() => {
     const requestId = ++searchRequestRef.current;
@@ -488,7 +467,6 @@ export default function FoodLogPage({
       calories: foodEntry.calories,
     });
     void loadMealSuggestions(nextMeals);
-    window.requestAnimationFrame(() => scrollToRecords());
   };
 
   const handleSelectSuggestedMenu = (menu) => {
@@ -653,35 +631,36 @@ export default function FoodLogPage({
         <div className="log-page-block log-page-block-suggestions" ref={suggestionsRef}>
           <PostSaveMenuSuggestions
             headline={mealSuggestions.headline}
-            focusDetail={mealSuggestions.focusDetail}
-            calRange={mealSuggestions.calRange}
             menus={mealSuggestions.menus}
             loading={mealSuggestions.loading}
             onSelectMenu={handleSelectSuggestedMenu}
             onDismiss={() => setMealSuggestions(null)}
             onViewAllMeals={onNavigateToMeals}
+            onAddMore={() => {
+              setSaveNotice(null);
+              focusSearch();
+            }}
           />
         </div>
       )}
 
-      {foodCals === 0 && !isMobile && (
+      {foodCals === 0 && (
         <div className="log-page-block log-page-block-hints">
           <QuickStartSteps
-            title="วิธีบันทึกอาหาร"
+            title="บันทึกอาหาร 3 ขั้น"
             steps={FOOD_LOG_QUICK_STEPS}
             primaryLabel="เริ่มค้นหาเมนู"
             onPrimaryAction={focusSearch}
+            compact={isMobile}
           />
         </div>
       )}
 
-      <div className="log-page-block log-page-block-notice">
-        <IncompleteMealsNotice overall={mealsAnalysis.overall} />
-      </div>
-
-      <div className="log-page-block log-page-block-advice">
-        <ActiveMealAdvicePanel view={activeMealAdvice} mealType={activeMealTab} />
-      </div>
+      {foodCals > 0 && !(mealSuggestions?.menus?.length > 0) && (
+        <div className="log-page-block log-page-block-notice">
+          <IncompleteMealsNotice overall={mealsAnalysis.overall} />
+        </div>
+      )}
 
       <button type="button" className="log-add-food-fab" onClick={focusSearch} aria-label="เพิ่มอาหาร">
         + เพิ่มอาหาร
@@ -697,7 +676,19 @@ export default function FoodLogPage({
       <LogSavedBar
         notice={saveNotice}
         onDismiss={() => setSaveNotice(null)}
-        onViewRecords={scrollToRecords}
+        onAddMore={() => {
+          setSaveNotice(null);
+          focusSearch();
+        }}
+        onViewNext={() => {
+          setSaveNotice(null);
+          window.requestAnimationFrame(() => {
+            (suggestionsRef.current || recordsRef.current)?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          });
+        }}
         onGoHome={() => {
           setSaveNotice(null);
           onNavigateToDashboard?.();

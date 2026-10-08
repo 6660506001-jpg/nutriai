@@ -5,7 +5,9 @@ import { calculateHealthData, calculateMacros } from "../../utils/healthCalculat
 import { analyzeThreeMealsSummary } from "../../utils/mealRecommendations";
 import { getProfessionalPrediction, buildHomeDietAdviceBrief } from "../../utils/aiPrediction";
 import { generateMenuRecommendations, toRecommendFoodEntry, VENUE_MODES } from "../../utils/menuRecommendations";
-import { scoreMenusWithMl } from "../../utils/mlMealScore";
+import { buildMlScoreContext, scoreMenusWithMl } from "../../utils/mlMealScore";
+import NutrientRebalancePanel from "../ui/NutrientRebalancePanel";
+import MlModelCompare from "../ui/MlModelCompare";
 import { buildAdaptiveActivitySuggestion } from "../../utils/adaptiveActivitySuggester";
 import { getMealShort, getTodayKey, mealTotalsFromDaily } from "../../utils/logDisplay";
 import { summarizeDailyRewards } from "../../utils/mealRewards";
@@ -116,6 +118,10 @@ export default function Dashboard({
       t.focusKey,
       t.remainingCal,
       t.lightMode ? 1 : 0,
+      user?.age,
+      user?.weight,
+      user?.height,
+      user?.gender,
     ].join("|");
   }, [
     analysis.recommendationTargets,
@@ -128,6 +134,10 @@ export default function Dashboard({
     totalEaten.cal,
     menuVenueMode,
     foodPreferencesKey,
+    user?.age,
+    user?.weight,
+    user?.height,
+    user?.gender,
   ]);
 
   const activitySuggestion = useMemo(() => {
@@ -170,7 +180,11 @@ export default function Dashboard({
         venueMode,
       );
       const remainingCal = Number(targets.remainingCal) || 0;
-      const rankedMenus = await scoreMenusWithMl(menus, remainingCal);
+      const rankedMenus = await scoreMenusWithMl(
+        menus,
+        remainingCal,
+        buildMlScoreContext(user, targets),
+      );
       if (options.requestId != null && requestId !== homeMenuFetchRef.current) {
         return rankedMenus;
       }
@@ -195,7 +209,7 @@ export default function Dashboard({
         setMenuLoading(false);
       }
     }
-  }, [menuVenueMode, user?.foodPreferences]);
+  }, [menuVenueMode, user]);
 
   const bestAiMenu = menuRecommendations[0] ?? null;
 
@@ -353,8 +367,8 @@ export default function Dashboard({
     <div style={styles.pageLayout} className={`dashboard-overview dashboard-home-simple dashboard-view-${viewMode}`}>
       {viewMode === "meals" && (
         <section className="dash-meals-intro" aria-label="คำอธิบายเมนูแนะนำ">
-          <strong>เมนูแนะนำจาก AI</strong>
-          <p>ระบบคัดเมนูตามแคลที่เหลือและอาหารที่คุณหลีกเลี่ยง — กด「เลือกเมนู」เพื่อบันทึก</p>
+          <strong>เมนูแนะนำ</strong>
+          <p>เลือกเมนูที่เหมาะกับพลังงานที่เหลือวันนี้ แล้วกดเพิ่มเข้ามื้อปัจจุบัน</p>
         </section>
       )}
 
@@ -402,6 +416,7 @@ export default function Dashboard({
 
       {viewMode === "home" && isMobile && (
         <DashboardQuickFab
+          key="quick-fab-food-activity-only"
           onLogFood={onNavigateToFood}
           onLogActivity={() => onNavigateToActivity()}
         />
@@ -417,6 +432,7 @@ export default function Dashboard({
             foodCals={foodCals}
             activityCals={activityCals}
             netCals={netCals}
+            compact={isMobile}
           />
           <DashboardHomeMenuPick
             menu={bestAiMenu}
@@ -428,14 +444,16 @@ export default function Dashboard({
             onMore={handleOpenAllAiMenus}
             onRefresh={handleRefreshHomeAiMenu}
           />
-          <DashboardHomeAdvice brief={homeAdviceBrief} onPlanNextMeal={onNavigateToMeals} />
+          {isMobile ? null : (
+            <DashboardHomeAdvice brief={homeAdviceBrief} onPlanNextMeal={onNavigateToMeals} />
+          )}
           {hasRecordsLogged ? (
             <DashCollapsible
               className="dash-collapse-summary dash-home-meals-block"
               title="สรุปแต่ละมื้อวันนี้"
               preview={`${foodCals.toLocaleString("th-TH")} กิโลแคลอรี`}
-              defaultOpen
-              collapseOnMobile={false}
+              defaultOpen={false}
+              collapseOnMobile
             >
               <DashboardDaySummary
                 foodCals={foodCals}
@@ -479,7 +497,6 @@ export default function Dashboard({
       >
         <div className="dash-ai-hero">
           <p className="dash-ai-hero-headline">{analysis.headline}</p>
-          {analysis.subline ? <p className="dash-ai-hero-subline">{analysis.subline}</p> : null}
         </div>
 
         {(analysis.chips || []).length > 0 && (
@@ -503,6 +520,9 @@ export default function Dashboard({
             <AiMacroMeters rows={analysis.macroProgress} />
           </div>
         )}
+
+        <NutrientRebalancePanel plan={analysis.nutrientRebalance} />
+        <MlModelCompare />
 
         {analysis.recommendationTargets?.canRecommend && (
           <div className="dash-ai-menu-actions">

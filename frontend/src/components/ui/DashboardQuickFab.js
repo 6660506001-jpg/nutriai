@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { MdCoffee, MdDinnerDining, MdDirectionsRun, MdLunchDining } from "react-icons/md";
+import { MdDinnerDining, MdDirectionsRun } from "react-icons/md";
 import { HiPlus } from "react-icons/hi";
-import { MEAL_ORDER, getMealPeriodByTime, getMealShort } from "../../utils/logDisplay";
-
-const MEAL_ICONS = {
-  "มื้อเช้า": MdCoffee,
-  "มื้อกลางวัน": MdLunchDining,
-  "มื้อเย็น": MdDinnerDining,
-};
+import { getMealPeriodByTime } from "../../utils/logDisplay";
 
 export default function DashboardQuickFab({ onLogFood, onLogActivity }) {
   const [open, setOpen] = useState(false);
-  const suggestedMeal = getMealPeriodByTime();
 
   useEffect(() => {
     if (!open) return undefined;
@@ -47,42 +40,28 @@ export default function DashboardQuickFab({ onLogFood, onLogActivity }) {
                 }}
               >
                 <MdDirectionsRun size={18} aria-hidden />
-                <span>กิจกรรม</span>
+                <span>บันทึกกิจกรรม</span>
               </button>
             ) : null}
-            {onLogFood
-              ? [
-                  ...MEAL_ORDER.filter((meal) => meal !== suggestedMeal),
-                  suggestedMeal,
-                ].map((meal) => {
-                  const Icon = MEAL_ICONS[meal] || MdLunchDining;
-                  const isSuggested = meal === suggestedMeal;
-                  return (
-                    <button
-                      key={meal}
-                      type="button"
-                      className={`dash-quick-fab-option dash-quick-fab-option--meal${isSuggested ? " is-suggested" : ""}`}
-                      aria-label={`บันทึก${meal}`}
-                      onClick={() => {
-                        onLogFood(meal);
-                        close();
-                      }}
-                    >
-                      <Icon size={18} aria-hidden />
-                      <span>
-                        {getMealShort(meal)}
-                        {isSuggested ? <small>ตอนนี้</small> : null}
-                      </span>
-                    </button>
-                  );
-                })
-              : null}
+            {onLogFood ? (
+              <button
+                type="button"
+                className="dash-quick-fab-option dash-quick-fab-option--food"
+                onClick={() => {
+                  onLogFood(getMealPeriodByTime());
+                  close();
+                }}
+              >
+                <MdDinnerDining size={18} aria-hidden />
+                <span>บันทึกอาหาร</span>
+              </button>
+            ) : null}
           </>
         ) : null}
         <button
           type="button"
           className="dash-quick-fab-main"
-          aria-label={open ? "ปิดเมนูบันทึก" : "บันทึกมื้ออาหารหรือกิจกรรม"}
+          aria-label={open ? "ปิดเมนูบันทึก" : "บันทึกอาหารหรือกิจกรรม"}
           aria-expanded={open}
           onClick={() => setOpen((prev) => !prev)}
         >

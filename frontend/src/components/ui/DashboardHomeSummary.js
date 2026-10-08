@@ -2,15 +2,10 @@ import React from "react";
 import MetricCard from "./MetricCard";
 import { STAT_TOOLTIPS } from "../../constants/statTooltips";
 
-function useHomeSummaryMetrics({
-  foodCals = 0,
-  activityCals = 0,
-  netCals = 0,
-}) {
-  const intakeNote =
-    activityCals > 0
-      ? `พลังงานที่ได้รับ ${foodCals.toLocaleString("th-TH")} · พลังงานที่เผาผลาญ ${activityCals.toLocaleString("th-TH")} · พลังงานสุทธิ ${netCals.toLocaleString("th-TH")}`
-      : null;
+function useHomeSummaryMetrics({ foodCals = 0, activityCals = 0 }) {
+  const intakeNote = activityCals > 0
+    ? `กิน ${foodCals.toLocaleString("th-TH")} · เผา ${activityCals.toLocaleString("th-TH")}`
+    : null;
   return { intakeNote };
 }
 
@@ -22,23 +17,19 @@ export function DashboardHomeStats({
   foodCals = 0,
   activityCals = 0,
   netCals = 0,
+  compact = false,
 }) {
-  const { intakeNote } = useHomeSummaryMetrics({
-    foodCals,
-    activityCals,
-    netCals,
-  });
+  const { intakeNote } = useHomeSummaryMetrics({ foodCals, activityCals });
   const remaining = (Number(tdee) || 0) - netCals;
   const over = remaining < 0;
 
   return (
-    <section className="dash-home-summary dash-home-stats-block" aria-label="ข้อมูลสรุป">
+    <section className={`dash-home-summary dash-home-stats-block${compact ? " is-compact" : ""}`} aria-label="ร่างกาย">
       <header className="dash-home-summary-head">
-        <h2 className="dash-home-summary-title">ข้อมูลสรุป</h2>
-        <p className="dash-home-summary-desc">น้ำหนัก · ดัชนีมวลกาย · เป้าหมายพลังงาน · พลังงานคงเหลือ</p>
+        <h2 className="dash-home-summary-title">{compact ? "ร่างกาย" : "ข้อมูลสรุป"}</h2>
       </header>
 
-      <div className="dash-home-summary-grid">
+      <div className={`dash-home-summary-grid${compact ? " dash-home-summary-grid--two" : ""}`}>
         <MetricCard
           label="น้ำหนัก"
           value={weight ?? "—"}
@@ -53,50 +44,46 @@ export function DashboardHomeStats({
           tooltip={STAT_TOOLTIPS.bmi}
           compact
         />
-        <MetricCard
-          label="เป้าหมายพลังงาน"
-          value={tdee || "—"}
-          unit={tdee ? "กิโลแคลอรี/วัน" : ""}
-          tooltip={STAT_TOOLTIPS.tdee}
-          compact
-        />
-        <MetricCard
-          label={over ? "เกินเป้าหมาย" : "พลังงานคงเหลือ"}
-          value={Math.abs(Math.round(remaining)).toLocaleString("th-TH")}
-          unit="กิโลแคลอรี"
-          tooltip={STAT_TOOLTIPS.remainingCal}
-          variant={over ? "warn" : "success"}
-          compact
-        />
+        {compact ? null : (
+          <>
+            <MetricCard
+              label="เป้าหมายพลังงาน"
+              value={tdee || "—"}
+              unit={tdee ? "กิโลแคลอรี/วัน" : ""}
+              tooltip={STAT_TOOLTIPS.tdee}
+              compact
+            />
+            <MetricCard
+              label={over ? "เกินเป้าหมาย" : "พลังงานคงเหลือ"}
+              value={Math.abs(Math.round(remaining)).toLocaleString("th-TH")}
+              unit="กิโลแคลอรี"
+              tooltip={STAT_TOOLTIPS.remainingCal}
+              variant={over ? "warn" : "success"}
+              compact
+            />
+          </>
+        )}
       </div>
 
-      {intakeNote ? <p className="dash-home-summary-net">{intakeNote}</p> : null}
+      {!compact && intakeNote ? <p className="dash-home-summary-net">{intakeNote}</p> : null}
     </section>
   );
 }
 
-export function DashboardHomeAdvice({ brief }) {
-  const hasBrief = brief?.lead || (brief?.tips?.length > 0);
+export function DashboardHomeAdvice({ brief, onPlanNextMeal }) {
+  const adviceText = brief?.lead || brief?.rebalance || "";
 
   return (
-    <article className="dash-home-summary-advice dash-home-advice-block" aria-label="คำแนะนำการบริโภคอาหาร">
-      <h3 className="dash-home-summary-advice-title">คำแนะนำการบริโภคอาหาร</h3>
-      {hasBrief ? (
-        <div className="dash-home-summary-advice-body">
-          {brief.lead ? <p className="dash-home-advice-lead">{brief.lead}</p> : null}
-          {brief.tips?.length > 0 ? (
-            <ul className="dash-home-advice-tips">
-              {brief.tips.map((tip) => (
-                <li key={tip}>{tip}</li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-      ) : (
-        <p className="dash-home-summary-advice-body dash-home-summary-advice-body--muted">
-          บันทึกมื้อวันนี้เพื่อรับคำแนะนำสั้นๆ ตามแคลและมาโครของคุณ
-        </p>
-      )}
+    <article className="dash-home-summary-advice dash-home-advice-block" aria-label="คำแนะนำวันนี้">
+      <h3 className="dash-home-summary-advice-title">คำแนะนำวันนี้</h3>
+      <p className="dash-home-advice-lead">
+        {adviceText || "บันทึกอาหารแล้วจะมีคำแนะนำมื้อถัดไปที่นี่"}
+      </p>
+      {onPlanNextMeal ? (
+        <button type="button" className="dash-home-advice-cta" onClick={onPlanNextMeal}>
+          ดูเมนูแนะนำ
+        </button>
+      ) : null}
     </article>
   );
 }

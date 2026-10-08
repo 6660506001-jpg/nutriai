@@ -3,27 +3,26 @@ import { HiSparkles, HiX } from "react-icons/hi";
 
 export default function PostSaveMenuSuggestions({
   headline,
-  focusDetail,
-  calRange,
   menus = [],
   loading = false,
   onSelectMenu,
   onDismiss,
   onViewAllMeals,
+  onAddMore,
 }) {
   if (!loading && menus.length === 0) return null;
 
   return (
-    <section className="post-save-menus" aria-live="polite" aria-label="เมนูแนะนำมื้อถัดไป">
+    <section className="post-save-menus" aria-live="polite" aria-label="ขั้นถัดไป">
       <header className="post-save-menus-head">
         <div className="post-save-menus-head-copy">
           <p className="post-save-menus-kicker">
             <HiSparkles aria-hidden />
-            เมนูแนะนำมื้อถัดไป
+            ขั้นถัดไป
           </p>
-          {headline ? <p className="post-save-menus-headline">{headline}</p> : null}
-          {focusDetail ? <p className="post-save-menus-focus">{focusDetail}</p> : null}
-          {calRange ? <p className="post-save-menus-range">ช่วงแนะนำ ~{calRange} kcal</p> : null}
+          <p className="post-save-menus-headline">
+            {headline || "เพิ่มอาหารต่อ หรือเลือกเมนูแนะนำ"}
+          </p>
         </div>
         {onDismiss ? (
           <button type="button" className="post-save-menus-dismiss" onClick={onDismiss} aria-label="ปิด">
@@ -33,7 +32,7 @@ export default function PostSaveMenuSuggestions({
       </header>
 
       {loading ? (
-        <p className="post-save-menus-loading">กำลังคัดเมนูที่เหมาะกับคุณ...</p>
+        <p className="post-save-menus-loading">กำลังคัดเมนู...</p>
       ) : (
         <ul className="post-save-menus-list">
           {menus.map((menu, index) => (
@@ -46,11 +45,7 @@ export default function PostSaveMenuSuggestions({
                 <span className="post-save-menu-index">{index + 1}</span>
                 <span className="post-save-menu-copy">
                   <strong>{menu.name}</strong>
-                  <small>
-                    {menu.calories} kcal
-                    {menu.protein ? ` · โปรตีน ${menu.protein}g` : ""}
-                    {menu.matchNote ? ` · ${menu.matchNote}` : ""}
-                  </small>
+                  <small>{menu.calories} kcal{menu.protein ? ` · โปรตีน ${menu.protein}g` : ""}</small>
                 </span>
                 <span className="post-save-menu-cta">เลือก</span>
               </button>
@@ -59,10 +54,19 @@ export default function PostSaveMenuSuggestions({
         </ul>
       )}
 
-      {onViewAllMeals && !loading ? (
-        <button type="button" className="post-save-menus-more" onClick={onViewAllMeals}>
-          ดูเมนูแนะนำเพิ่ม →
-        </button>
+      {!loading ? (
+        <div className="post-save-menus-footer">
+          {onAddMore ? (
+            <button type="button" className="post-save-menus-more" onClick={onAddMore}>
+              เพิ่มอาหารอีก
+            </button>
+          ) : null}
+          {onViewAllMeals ? (
+            <button type="button" className="post-save-menus-more" onClick={onViewAllMeals}>
+              ดูเมนูเพิ่ม
+            </button>
+          ) : null}
+        </div>
       ) : null}
     </section>
   );

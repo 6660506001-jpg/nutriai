@@ -315,7 +315,16 @@ export default function ActivityLogPage({
       <LogSavedBar
         notice={saveNotice}
         onDismiss={() => setSaveNotice(null)}
-        onViewRecords={scrollToRecords}
+        addLabel="เพิ่มอีก"
+        nextLabel="ดูรายการ"
+        onAddMore={() => {
+          setSaveNotice(null);
+          focusSearch();
+        }}
+        onViewNext={() => {
+          setSaveNotice(null);
+          scrollToRecords();
+        }}
         onGoHome={() => {
           setSaveNotice(null);
           onNavigateToDashboard?.();

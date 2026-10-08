@@ -71,15 +71,6 @@ export default function LogPageSummary({
         </div>
       )}
 
-      {mode === "food" && rewards?.dayPraise && rewards.mealCount > 0 && (
-        <p className="log-page-summary-praise">{rewards.dayPraise}</p>
-      )}
-
-      {mode === "food" && foodCals > 0 && (
-        <p className="log-page-summary-hint">
-          บันทึกแล้ว — ดูรายการด้านล่าง หรือไปแผนมื้อดูเมนูแนะนำ
-        </p>
-      )}
     </div>
   );
 }

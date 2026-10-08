@@ -1,6 +1,5 @@
 import React from "react";
 import { MdDeleteOutline } from "react-icons/md";
-import { styles } from "../../styles/appStyles";
 import { FEATURE_TOOLTIPS } from "../../constants/featureTooltips";
 import InfoTip from "./InfoTip";
 import {
@@ -87,7 +86,6 @@ export function MealRewardBanner({ reward }) {
         </div>
       )}
       <p className="meal-reward-praise">{reward.praise}</p>
-      {reward.tip ? <p className="meal-reward-tip">{reward.tip}</p> : null}
     </div>
   );
 }
@@ -96,25 +94,14 @@ export function IncompleteMealsNotice({ overall }) {
   if (!overall || overall.loggedCount >= 3 || overall.loggedCount === 0) return null;
 
   const missing = (overall.emptyMeals || []).join(", ");
+  if (!missing) return null;
 
   return (
-    <div className="incomplete-meals-notice" aria-live="polite">
-      <div className="incomplete-meals-notice-head">
-        <span className="incomplete-meals-notice-badge">{overall.loggedCount}/3 มื้อ</span>
-        <span className="incomplete-meals-notice-status">{overall.status}</span>
-      </div>
-      <p className="incomplete-meals-notice-headline">{overall.headline}</p>
-      {missing && (
-        <p className="incomplete-meals-notice-missing">
-          ยังไม่บันทึก: <strong>{missing}</strong>
-        </p>
-      )}
-      {overall.advice && (
-        <p className="incomplete-meals-notice-advice">{overall.advice}</p>
-      )}
-      {overall.nextStep && (
-        <p className="incomplete-meals-notice-next">แนะนำ: {overall.nextStep}</p>
-      )}
+    <div className="incomplete-meals-notice incomplete-meals-notice--compact" aria-live="polite">
+      <p className="incomplete-meals-notice-missing">
+        ยังขาด: <strong>{missing}</strong>
+        <span> — กดแท็บมื้อด้านบนแล้วบันทึกต่อ</span>
+      </p>
     </div>
   );
 }
@@ -288,9 +275,17 @@ export function FoodLogRow({ item, onRemove, avoidanceKeywords = [] }) {
   const unverified = isUnverifiedFoodEntry(item);
   const hasAvoidance = avoidanceKeywords.length > 0;
   return (
-    <div className={`log-entry-row log-entry-row--food${unverified ? " is-unverified" : ""}${hasAvoidance ? " has-avoidance" : ""}`}>
-      <span className="log-entry-time">{formatLogTime(item.loggedAt)}</span>
-      <span className="log-entry-name">
+    <div
+      className={`log-entry-row log-entry-row--food${unverified ? " is-unverified" : ""}${hasAvoidance ? " has-avoidance" : ""}`}
+      style={{
+        display: "flex",
+        flexWrap: "nowrap",
+        alignItems: "center",
+        gap: 8,
+      }}
+    >
+      <span className="log-entry-time" style={{ flex: "0 0 auto" }}>{formatLogTime(item.loggedAt)}</span>
+      <span className="log-entry-name" title={item.name} style={{ flex: "1 1 auto", minWidth: 0 }}>
         {hasAvoidance ? <span className="log-entry-allergy-badge">แพ้</span> : null}
         {item.name}
         {unverified ? <small className="log-entry-estimate-tag"> · ประมาณ</small> : null}
@@ -298,29 +293,63 @@ export function FoodLogRow({ item, onRemove, avoidanceKeywords = [] }) {
           <small className="log-entry-allergy-note"> · มี{avoidanceKeywords.join(", ")}</small>
         ) : null}
       </span>
-      <span className="log-entry-kcal">{item.calories} kcal</span>
-      {onRemove && (
-        <button type="button" className="log-entry-delete" onClick={onRemove} style={styles.btnDelete} aria-label="ลบ">
-          <MdDeleteOutline size={18} />
-        </button>
-      )}
+      <span
+        className="log-entry-end"
+        style={{
+          display: "inline-flex",
+          flex: "0 0 auto",
+          flexWrap: "nowrap",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          gap: 8,
+          marginLeft: "auto",
+        }}
+      >
+        <span className="log-entry-kcal">{item.calories} kcal</span>
+        {onRemove ? (
+          <button type="button" className="log-entry-delete" onClick={onRemove} aria-label="ลบ">
+            <MdDeleteOutline size={18} />
+          </button>
+        ) : null}
+      </span>
     </div>
   );
 }
 
 export function ActivityLogRow({ item, onRemove }) {
   return (
-    <div className="log-entry-row log-entry-row--activity">
-      <span className="log-entry-time">{formatLogTime(item.loggedAt)}</span>
-      <span className="log-entry-meal">{getMealShort(item.mealPeriod)}</span>
-      <span className="log-entry-name">{item.name}</span>
-      <span className="log-entry-meta">{formatActivityDuration(item.durationMinutes)}</span>
-      <span className="log-entry-kcal log-entry-kcal--burn">−{item.calories}</span>
-      {onRemove && (
-        <button type="button" className="log-entry-delete" onClick={onRemove} style={styles.btnDelete} aria-label="ลบ">
-          <MdDeleteOutline size={18} />
-        </button>
-      )}
+    <div
+      className="log-entry-row log-entry-row--activity"
+      style={{
+        display: "flex",
+        flexWrap: "nowrap",
+        alignItems: "center",
+        gap: 8,
+      }}
+    >
+      <span className="log-entry-time" style={{ flex: "0 0 auto" }}>{formatLogTime(item.loggedAt)}</span>
+      <span className="log-entry-meal" style={{ flex: "0 0 auto" }}>{getMealShort(item.mealPeriod)}</span>
+      <span className="log-entry-name" title={item.name} style={{ flex: "1 1 auto", minWidth: 0 }}>{item.name}</span>
+      <span className="log-entry-meta" style={{ flex: "0 0 auto" }}>{formatActivityDuration(item.durationMinutes)}</span>
+      <span
+        className="log-entry-end"
+        style={{
+          display: "inline-flex",
+          flex: "0 0 auto",
+          flexWrap: "nowrap",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          gap: 8,
+          marginLeft: "auto",
+        }}
+      >
+        <span className="log-entry-kcal log-entry-kcal--burn">−{item.calories}</span>
+        {onRemove ? (
+          <button type="button" className="log-entry-delete" onClick={onRemove} aria-label="ลบ">
+            <MdDeleteOutline size={18} />
+          </button>
+        ) : null}
+      </span>
     </div>
   );
 }
@@ -334,7 +363,6 @@ export function LogListHeader({ variant = "food" }) {
         <span>กิจกรรม</span>
         <span>นาที</span>
         <span>kcal</span>
-        <span />
       </div>
     );
   }
@@ -344,7 +372,6 @@ export function LogListHeader({ variant = "food" }) {
       <span>เวลา</span>
       <span>รายการ</span>
       <span>kcal</span>
-      <span />
     </div>
   );
 }

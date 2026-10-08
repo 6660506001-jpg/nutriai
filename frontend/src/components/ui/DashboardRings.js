@@ -111,13 +111,13 @@ export default function DashboardRings({
             to="#059669"
           />
           <EnergyRing
-            tone="over"
-            label="เกินเป้าหมาย"
-            value={overflow}
-            pct={overflow / goal}
-            gradId={`dashEnergyOver-${uid}`}
-            from="#fb923c"
-            to="#ea580c"
+            tone={over ? "over" : "remain"}
+            label={over ? "เกินเป้าหมาย" : "คงเหลือวันนี้"}
+            value={over ? overflow : remaining}
+            pct={over ? overflow / goal : remaining / goal}
+            gradId={`dashEnergyRemain-${uid}`}
+            from={over ? "#fb923c" : "#38bdf8"}
+            to={over ? "#ea580c" : "#2563eb"}
           />
         </div>
 

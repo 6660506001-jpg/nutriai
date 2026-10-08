@@ -79,6 +79,7 @@ export default function MenuRecommendationCard({
           F {menu.fat}g
           {homePortion ? <span className="dash-home-ai-menu-card-portion">{homePortion}</span> : null}
         </p>
+        {menu.mlVotesNote && !isHome ? <p className="dash-home-ai-menu-card-ml">{menu.mlVotesNote}</p> : null}
         <div className="dash-home-ai-menu-card-foot">
           <button
             type="button"
@@ -143,6 +144,9 @@ export default function MenuRecommendationCard({
 
         {showPortion && menu.portionLabel ? (
           <p className="nutri-menu-card-detail">ขนาด: {menu.portionLabel}</p>
+        ) : null}
+        {menu.mlVotesNote ? (
+          <p className="nutri-menu-card-ml">{menu.mlVotesNote}</p>
         ) : null}
 
         <div className="nutri-menu-card-actions">

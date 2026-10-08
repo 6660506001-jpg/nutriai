@@ -448,23 +448,29 @@ export default function AppVisualEffects() {
         to { opacity: 1; transform: translateY(0); }
       }
 
+      .dash-quick-fab-option--meal {
+        display: none !important;
+      }
       .dash-quick-fab-option--food,
       .dash-quick-fab-option--meal {
         background: var(--nutri-food-accent, #2563eb);
       }
 
+      .dash-quick-fab-option--food span,
       .dash-quick-fab-option--meal span {
         display: inline-flex;
         align-items: baseline;
         gap: 6px;
       }
 
+      .dash-quick-fab-option--food small,
       .dash-quick-fab-option--meal small {
         font-size: 10px;
         font-weight: 800;
         opacity: 0.88;
       }
 
+      .dash-quick-fab-option--food.is-suggested,
       .dash-quick-fab-option--meal.is-suggested {
         box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28), 0 0 0 2px #fff, 0 0 0 4px var(--nutri-food-accent, #2563eb);
       }
@@ -699,16 +705,21 @@ export default function AppVisualEffects() {
         background: var(--nutri-bg-soft, #f8fafc);
       }
 
+      .dash-home-summary-grid--two {
+        grid-template-columns: 1fr 1fr;
+      }
       .dash-home-ai-menu-card {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
         width: 100%;
         box-sizing: border-box;
-        padding: 12px;
-        border-radius: 14px;
-        background: var(--nutri-bg-soft, #f8fafc);
-        border: 1px solid var(--nutri-border, #e2e8f0);
+        padding: 16px;
+        border-radius: 20px;
+        background:
+          linear-gradient(165deg, rgba(37, 99, 235, 0.08) 0%, rgba(255, 255, 255, 0.98) 42%);
+        border: 1px solid rgba(37, 99, 235, 0.16);
+        box-shadow: 0 16px 36px rgba(37, 99, 235, 0.1);
       }
 
       .dash-home-ai-menu-card-head {
@@ -721,8 +732,16 @@ export default function AppVisualEffects() {
 
       .dash-home-ai-menu-card-icon {
         flex: 0 0 auto;
-        font-size: 24px;
-        line-height: 1.2;
+        width: 48px;
+        height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        line-height: 1;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
       }
 
       .dash-home-ai-menu-card-copy {
@@ -1139,11 +1158,15 @@ export default function AppVisualEffects() {
       }
 
       .nutri-menu-card-detail,
-      .nutri-menu-card-meal-hint {
+      .nutri-menu-card-meal-hint,
+      .nutri-menu-card-ml {
         margin: 8px 0 0;
         font-size: var(--nutri-font-small);
         font-weight: 600;
         color: var(--nutri-text-muted, #64748b);
+      }
+      .nutri-menu-card-ml {
+        line-height: 1.45;
       }
 
       .log-search-hero-label {
@@ -5756,6 +5779,133 @@ export default function AppVisualEffects() {
       .dash-ai-macros {
         padding-top: 2px;
       }
+      .nutri-rebalance,
+      .ml-compare {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #fff;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+      }
+      .nutri-rebalance-kicker,
+      .ml-compare-kicker {
+        margin: 0;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--nutri-primary);
+      }
+      details.ml-compare > summary {
+        cursor: pointer;
+        list-style: none;
+      }
+      details.ml-compare > summary::-webkit-details-marker {
+        display: none;
+      }
+      .nutri-rebalance-title,
+      .ml-compare-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--nutri-text-dark, #0f172a);
+      }
+      .nutri-rebalance-lead,
+      .ml-compare-lead {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.45;
+        color: #475569;
+      }
+      .nutri-rebalance-gaps {
+        list-style: none;
+        margin: 4px 0 0;
+        padding: 0;
+        display: grid;
+        gap: 8px;
+      }
+      .nutri-rebalance-gap {
+        display: grid;
+        grid-template-columns: 88px 72px 1fr;
+        gap: 8px;
+        align-items: baseline;
+        font-size: 12px;
+      }
+      .nutri-rebalance-gap-label {
+        font-weight: 700;
+        color: #334155;
+      }
+      .nutri-rebalance-gap strong {
+        font-size: 12px;
+      }
+      .nutri-rebalance-gap--under strong { color: #d97706; }
+      .nutri-rebalance-gap--ok strong { color: #059669; }
+      .nutri-rebalance-gap--over strong { color: #dc2626; }
+      .nutri-rebalance-gap small {
+        color: #64748b;
+      }
+      .ml-compare-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .ml-compare-card {
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: #f8fafc;
+      }
+      .ml-compare-card.is-best {
+        border-color: color-mix(in srgb, var(--nutri-primary) 45%, transparent);
+        background: color-mix(in srgb, var(--nutri-primary) 10%, #fff);
+      }
+      .ml-compare-rank {
+        display: block;
+        font-size: 11px;
+        font-weight: 800;
+        color: #64748b;
+      }
+      .ml-compare-card strong {
+        display: block;
+        margin: 4px 0 6px;
+        font-size: 13px;
+      }
+      .ml-compare-card ul {
+        margin: 0;
+        padding-left: 16px;
+        font-size: 11px;
+        color: #475569;
+      }
+      .ml-compare-used {
+        margin: 8px 0 0;
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--nutri-primary);
+      }
+      .dash-home-advice-rebalance {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--nutri-text-dark, #0f172a);
+        line-height: 1.45;
+      }
+      .dash-home-ai-menu-card-ml {
+        margin: 6px 0 0;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #64748b;
+      }
+      @media (max-width: 720px) {
+        .ml-compare-grid {
+          grid-template-columns: 1fr;
+        }
+        .nutri-rebalance-gap {
+          grid-template-columns: 1fr;
+          gap: 2px;
+        }
+      }
       .dash-ai-menu-actions {
         display: flex;
         flex-direction: column;
@@ -6010,7 +6160,6 @@ export default function AppVisualEffects() {
         .log-page {
           padding-bottom: calc(88px + env(safe-area-inset-bottom));
         }
-        .log-entry-row--activity,
         .log-list-header--activity {
           grid-template-columns: 48px minmax(0, 1fr) auto;
         }
@@ -6020,11 +6169,17 @@ export default function AppVisualEffects() {
         .log-list-header--activity span:nth-child(4) {
           display: none;
         }
-        .log-entry-row--food {
-          grid-template-columns: minmax(0, 1fr) auto;
+        .log-list-header--food {
+          grid-template-columns: 52px minmax(0, 1fr) auto;
         }
-        .log-entry-row--food .log-entry-time {
-          display: none;
+        .log-entry-row--food .log-entry-name,
+        .log-entry-row--activity .log-entry-name {
+          white-space: normal;
+          overflow: visible;
+          text-overflow: unset;
+          line-height: 1.4;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
       }
       @media (min-width: 901px) {
@@ -6165,15 +6320,16 @@ export default function AppVisualEffects() {
         text-overflow: ellipsis;
       }
       .log-saved-bar-next {
-        display: none;
+        display: block;
         margin: 4px 0 0;
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--nutri-text-muted, #64748b);
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--nutri-text-dark, #0f172a);
       }
       .log-saved-bar-actions {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
         gap: 6px;
       }
       .log-saved-bar-btn {
@@ -6235,13 +6391,14 @@ export default function AppVisualEffects() {
         color: var(--nutri-text-dark, #0f172a);
         line-height: 1.45;
       }
+      .post-save-menus-footer {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+      }
       .post-save-menus-focus,
       .post-save-menus-range {
-        margin: 0;
-        font-size: 12px;
-        font-weight: 600;
-        line-height: 1.45;
-        color: #78716c;
+        display: none;
       }
       .post-save-menus-dismiss {
         border: none;
@@ -6784,6 +6941,18 @@ export default function AppVisualEffects() {
           justify-content: space-between;
           align-items: center;
         }
+        .log-entry-row--food,
+        .log-entry-row--activity {
+          align-items: start;
+        }
+        .log-entry-row--food .log-entry-name,
+        .log-entry-row--activity .log-entry-name {
+          white-space: normal;
+          overflow: visible;
+          text-overflow: unset;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+        }
       }
 
       @media (max-width: 640px) {
@@ -6939,10 +7108,10 @@ export default function AppVisualEffects() {
         color: #94a3b8;
       }
       .log-list-header--food {
-        grid-template-columns: 52px 1fr auto;
+        grid-template-columns: 52px minmax(0, 1fr) auto;
       }
       .log-list-header--activity {
-        grid-template-columns: 52px 44px 1fr 40px auto;
+        grid-template-columns: 52px 44px minmax(0, 1fr) 40px auto;
       }
 
       .meal-log-section {
@@ -6976,17 +7145,16 @@ export default function AppVisualEffects() {
       }
 
       .log-entry-row {
-        display: grid;
+        display: flex !important;
+        flex-wrap: nowrap !important;
         align-items: center;
         gap: 8px;
         padding: 10px;
         border-bottom: 1px solid rgba(148, 163, 184, 0.15);
       }
-      .log-entry-row--food {
-        grid-template-columns: 52px 1fr auto;
-      }
+      .log-entry-row--food,
       .log-entry-row--activity {
-        grid-template-columns: 52px 44px 1fr 40px auto;
+        grid-template-columns: none;
       }
       .log-entry-row:last-child {
         border-bottom: none;
@@ -7007,9 +7175,9 @@ export default function AppVisualEffects() {
         font-weight: 700;
         color: var(--nutri-text-dark, #0f172a);
         min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
       .log-entry-estimate-tag {
         font-weight: 600;
@@ -7027,31 +7195,36 @@ export default function AppVisualEffects() {
         color: var(--nutri-primary);
         text-align: right;
         font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        justify-self: end;
       }
       .log-entry-kcal--burn {
         color: var(--nutri-success, #16a34a);
       }
       .log-entry-end {
-        display: inline-flex;
+        display: inline-flex !important;
+        flex-wrap: nowrap !important;
         align-items: center;
         justify-content: flex-end;
         gap: 8px;
-        flex-shrink: 0;
+        flex: 0 0 auto !important;
+        margin-left: auto;
       }
       .log-entry-end .log-entry-kcal {
         white-space: nowrap;
       }
       .log-entry-delete {
         box-sizing: border-box;
-        flex: 0 0 32px;
-        width: 32px;
+        flex: 0 0 32px !important;
+        width: 32px !important;
+        min-width: 32px !important;
         height: 32px;
         border-radius: 8px;
         border: 1px solid #fecaca;
         background: #fef2f2;
         color: #dc2626;
         cursor: pointer;
-        display: inline-flex;
+        display: inline-flex !important;
         align-items: center;
         justify-content: center;
         padding: 0;
@@ -7850,25 +8023,22 @@ export default function AppVisualEffects() {
           display: none;
         }
         .log-entry-row--food {
-          grid-template-columns: minmax(0, 1fr) auto;
-          align-items: center;
           padding: 12px 10px;
         }
-        .log-entry-row--food .log-entry-time {
-          display: none;
+        .log-list-header--food {
+          grid-template-columns: 48px minmax(0, 1fr) auto;
         }
         .log-entry-name {
           white-space: normal;
           overflow: visible;
           text-overflow: unset;
-          line-height: 1.35;
-        }
-        .log-entry-end {
-          gap: 10px;
+          line-height: 1.4;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
         .log-entry-delete {
-          flex: 0 0 36px !important;
           width: 36px !important;
+          min-width: 36px !important;
           height: 36px !important;
           border-radius: 10px !important;
         }
@@ -7876,8 +8046,7 @@ export default function AppVisualEffects() {
           font-size: 13px;
           padding-top: 0;
         }
-        .log-list-header--activity,
-        .log-entry-row--activity {
+        .log-list-header--activity {
           grid-template-columns: 48px minmax(0, 1fr) auto;
         }
         .history-chart-meta {

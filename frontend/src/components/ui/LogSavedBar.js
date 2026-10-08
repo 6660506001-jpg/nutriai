@@ -4,12 +4,15 @@ import { createPortal } from "react-dom";
 export default function LogSavedBar({
   notice,
   onDismiss,
-  onViewRecords,
+  onAddMore,
+  onViewNext,
   onGoHome,
+  addLabel = "เพิ่มอีก",
+  nextLabel = "ดูเมนูแนะนำ",
 }) {
   useEffect(() => {
     if (!notice) return undefined;
-    const timer = window.setTimeout(onDismiss, 8000);
+    const timer = window.setTimeout(onDismiss, 16000);
     return () => window.clearTimeout(timer);
   }, [notice, onDismiss]);
 
@@ -26,15 +29,24 @@ export default function LogSavedBar({
           {" · "}
           {detail}
         </span>
-        <p className="log-saved-bar-next">ถัดไป: ดูเมนูแนะนำด้านล่าง หรือเลือกจากรายการ</p>
+        <p className="log-saved-bar-next">ทำอะไรต่อ?</p>
       </div>
       <div className="log-saved-bar-actions">
-        <button type="button" className="log-saved-bar-btn log-saved-bar-btn--primary" onClick={onViewRecords}>
-          ดูรายการ
-        </button>
-        <button type="button" className="log-saved-bar-btn" onClick={onGoHome}>
-          หน้าหลัก
-        </button>
+        {onAddMore ? (
+          <button type="button" className="log-saved-bar-btn log-saved-bar-btn--primary" onClick={onAddMore}>
+            {addLabel}
+          </button>
+        ) : null}
+        {onViewNext ? (
+          <button type="button" className="log-saved-bar-btn" onClick={onViewNext}>
+            {nextLabel}
+          </button>
+        ) : null}
+        {onGoHome ? (
+          <button type="button" className="log-saved-bar-btn" onClick={onGoHome}>
+            หน้าหลัก
+          </button>
+        ) : null}
       </div>
       <button type="button" className="log-saved-bar-close" onClick={onDismiss} aria-label="ปิด">
         ×
