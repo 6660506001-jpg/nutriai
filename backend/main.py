@@ -22,7 +22,6 @@ def warmup_ml_models():
             print(f"⚠️ Could not create tables: {error}")
         finally:
             conn.close()
-    get_loaded_models()
 
 # --- CORS (ตั้ง FRONTEND_URL บน production เช่น https://nutriai.vercel.app) ---
 app.add_middleware(
@@ -36,7 +35,7 @@ app.add_middleware(
 # --- 🧠 Load Machine Learning Models (lazy — ไม่บล็อก login/register) ---
 def get_loaded_models():
     try:
-        return load_models(train_if_missing=True)
+        return load_models(train_if_missing=False)
     except Exception as error:
         print(f"⚠️ ML models unavailable: {error}")
         return {}
