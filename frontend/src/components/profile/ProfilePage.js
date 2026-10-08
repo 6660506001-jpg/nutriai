@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
-  HiOutlineUserCircle, HiFire, HiOutlineTrendingUp, HiOutlineIdentification, HiX, HiOutlineLogout,
+  HiOutlineUserCircle, HiFire, HiOutlineTrendingUp, HiOutlineIdentification, HiX, HiOutlineLogout, HiSparkles,
 } from "react-icons/hi";
 import { MdEdit } from "react-icons/md";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -13,6 +14,22 @@ import { compressProfileImage } from "../../utils/compressProfileImage";
 import ProfileMacroBar from "../ui/ProfileMacroBar";
 import FoodAvoidanceEditor from "../ui/FoodAvoidanceEditor";
 import { normalizeFoodPreferences } from "../../utils/foodPreferences";
+
+const WeightChartDateTick = ({ x, y, payload, fill }) => {
+  const point = payload?.payload;
+  const raw = String(payload?.value || "");
+  const line1 = point?.dateLine1 || raw.split(" ")[0] || "";
+  const line2 = point?.dateLine2 || raw.split(" ").slice(1).join(" ") || "";
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text textAnchor="middle" fill={fill || "#64748b"} fontSize={11} fontWeight={700}>
+        <tspan x="0" dy="12">{line1}</tspan>
+        {line2 ? <tspan x="0" dy="14">{line2}</tspan> : null}
+      </text>
+    </g>
+  );
+};
+
 export default function ProfilePage({
   user,
   setUser,
@@ -57,9 +74,16 @@ export default function ProfilePage({
     return () => observer.disconnect();
   }, []);
 
-  const handleSave = () => { 
-    setUser({ ...user, ...editForm }); 
-    setIsEditing(false); 
+  const handleSave = () => {
+    const next = { ...user, ...editForm };
+    const health = calculateHealthData(next);
+    setUser({
+      ...next,
+      tdee: health.tdee,
+      bmr: health.bmr,
+      profileUpdatedAt: Date.now(),
+    });
+    setIsEditing(false);
   };
 
   const handleInputChange = (field, value) => {
@@ -69,29 +93,32 @@ export default function ProfilePage({
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files?.[0];
-    e.target.value = "";
     if (!file) return;
 
     setIsUploadingAvatar(true);
     try {
       const dataUrl = await compressProfileImage(file);
-      setUser((prev) => ({ ...prev, profileImage: dataUrl }));
+      setUser((prev) => ({ ...prev, profileImage: dataUrl, profileUpdatedAt: Date.now() }));
       setShowAvatarModal(true);
     } catch (error) {
-      alert(error.message || "ไม่สามารถอัปโหลดรูปได้");
+      window.alert(error.message || "ไม่สามารถอัปโหลดรูปได้");
     } finally {
+      e.target.value = "";
       setIsUploadingAvatar(false);
     }
   };
 
   const handleRemoveAvatar = () => {
-    if (!window.confirm("ต้องการลบรูปโปรไฟล์ใช่หรือไม่?")) return;
-    setUser((prev) => {
-      const nextUser = { ...prev };
-      delete nextUser.profileImage;
-      return nextUser;
-    });
+    setUser((prev) => ({ ...prev, profileImage: null, profileUpdatedAt: Date.now() }));
     setShowAvatarModal(false);
+  };
+
+  const openFilePicker = (event) => {
+    event?.stopPropagation?.();
+    const input = fileInputRef.current;
+    if (!input) return;
+    input.value = "";
+    input.click();
   };
 
   const handleAvatarClick = () => {
@@ -99,20 +126,6 @@ export default function ProfilePage({
       setShowAvatarModal(true);
     }
   };
-
-  const renderAvatarFileInput = (id) => (
-    <input
-      id={id}
-      ref={id === "profile-avatar-file" ? fileInputRef : undefined}
-      className="profile-avatar-file"
-      type="file"
-      accept="image/*,image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif"
-      onChange={handleAvatarUpload}
-      aria-hidden="true"
-      tabIndex={-1}
-      style={{ position: "absolute", width: 0, height: 0, opacity: 0, overflow: "hidden" }}
-    />
-  );
 
   useEffect(() => {
     if (!showAvatarModal) return undefined;
@@ -153,31 +166,30 @@ export default function ProfilePage({
               onClick={handleAvatarClick}
               title="แตะเพื่อดูรูปโปรไฟล์"
             >
-              <img src={user.profileImage} alt="รูปโปรไฟล์" style={styles.profileAvatarImage} />
+              <img key={user.profileImage.slice(-48)} src={user.profileImage} alt="รูปโปรไฟล์" style={styles.profileAvatarImage} />
               <div style={styles.profileAvatarEditBadge}><MdEdit size={14} /></div>
             </button>
           ) : (
-            <label
+            <button
+              type="button"
               className="profile-avatar-wrap"
               style={styles.profileAvatarWrap}
-              htmlFor="profile-avatar-file"
+              onClick={openFilePicker}
               title="แตะเพื่อเพิ่มรูปโปรไฟล์"
             >
-              {renderAvatarFileInput("profile-avatar-file")}
               <HiOutlineUserCircle size={60} color="rgba(255,255,255,0.9)" />
               <div style={styles.profileAvatarEditBadge}><MdEdit size={14} /></div>
-            </label>
+            </button>
           )}
           {user.profileImage ? (
             <p className="profile-avatar-hint" style={styles.profileAvatarHint}>
-              {isUploadingAvatar ? "กำลังปรับขนาดรูป..." : "แตะรูปเพื่อดูขนาดเต็ม"}
+              แตะรูปเพื่อดูขนาดเต็ม
             </p>
           ) : (
-            <label htmlFor="profile-avatar-file" className="profile-avatar-pick-btn">
-              {isUploadingAvatar ? "กำลังปรับขนาดรูป..." : "เลือกรูปโปรไฟล์"}
-            </label>
+            <p className="profile-avatar-hint" style={styles.profileAvatarHint}>
+              {isUploadingAvatar ? "กำลังปรับขนาดรูป..." : "แตะรูปเพื่อเพิ่มรูปโปรไฟล์"}
+            </p>
           )}
-          {user.profileImage ? renderAvatarFileInput("profile-avatar-file") : null}
         </div>
         <div>
           <h1 className="profile-hero-name" style={{ margin: 0 }}>{user.username}</h1>
@@ -187,22 +199,30 @@ export default function ProfilePage({
         </div>
       </div>
 
-      {showAvatarModal && user.profileImage ? (
-        <div style={styles.avatarModalOverlay} onClick={() => setShowAvatarModal(false)}>
-          <div style={styles.avatarModalCard} onClick={(e) => e.stopPropagation()}>
-            <button type="button" style={styles.avatarModalCloseBtn} onClick={() => setShowAvatarModal(false)} aria-label="ปิด">
-              <HiX size={22} />
-            </button>
-            <img src={user.profileImage} alt="รูปโปรไฟล์ขนาดเต็ม" style={styles.avatarModalImage} />
-            <div className="avatar-modal-actions" style={styles.avatarModalActions}>
-              <label htmlFor="profile-avatar-file" style={styles.avatarModalChangeBtn}>
-                เปลี่ยนรูป
-              </label>
-              <button type="button" style={styles.avatarModalDeleteBtn} onClick={handleRemoveAvatar}>ลบรูป</button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {showAvatarModal && user.profileImage
+        ? createPortal(
+            <div className="avatar-modal-overlay" style={styles.avatarModalOverlay} onClick={() => setShowAvatarModal(false)}>
+              <div style={styles.avatarModalCard} onClick={(e) => e.stopPropagation()}>
+                <button type="button" style={styles.avatarModalCloseBtn} onClick={() => setShowAvatarModal(false)} aria-label="ปิด">
+                  <HiX size={22} />
+                </button>
+                <img key={user.profileImage.slice(-48)} src={user.profileImage} alt="รูปโปรไฟล์ขนาดเต็ม" style={styles.avatarModalImage} />
+                <div className="avatar-modal-actions" style={styles.avatarModalActions}>
+                  <button
+                    type="button"
+                    style={styles.avatarModalChangeBtn}
+                    onClick={openFilePicker}
+                    disabled={isUploadingAvatar}
+                  >
+                    {isUploadingAvatar ? "กำลังปรับขนาดรูป..." : "เปลี่ยนรูป"}
+                  </button>
+                  <button type="button" style={styles.avatarModalDeleteBtn} onClick={handleRemoveAvatar}>ลบรูป</button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
 
       <div className="main-grid-responsive" style={styles.mainGrid}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -244,6 +264,7 @@ export default function ProfilePage({
                     setUser((prev) => ({
                       ...prev,
                       foodPreferences: normalizeFoodPreferences(nextPreferences),
+                      profileUpdatedAt: Date.now(),
                     }));
                   }}
                   compact
@@ -253,7 +274,10 @@ export default function ProfilePage({
         </div>
 
         <div style={styles.card} className="hover-lift-card responsive-card profile-weight-chart-card">
-          <div style={{...styles.cardTitle, marginBottom: '20px'}}><HiOutlineTrendingUp color={Colors.primary}/> แนวโน้มน้ำหนัก (7 วันล่าสุด)</div>
+          <div style={{...styles.cardTitle, marginBottom: '12px'}}>
+            <HiOutlineTrendingUp color={Colors.primary}/> กราฟแสดงแนวโน้มน้ำหนัก
+          </div>
+          <p className="profile-weight-chart-kicker">7 วันล่าสุด</p>
           {isWeightChartFallback && (
             <p className="profile-weight-chart-note">
               ยังไม่มีประวัติหลายวัน — แสดงเฉพาะน้ำหนักวันนี้ {currentData.weight} kg ใช้แอปต่อเนื่องเพื่อเห็นแนวโน้ม
@@ -261,7 +285,7 @@ export default function ProfilePage({
           )}
           <div className="profile-weight-chart-wrap" style={{ width: '100%', height: 320, marginTop: '12px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 12, right: 12, left: 0, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 12, right: 12, left: 0, bottom: 8 }}>
                 <defs>
                   <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor={chartColors.primary} stopOpacity={0.35}/>
@@ -269,7 +293,15 @@ export default function ProfilePage({
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: chartColors.textGray}} dy={10} />
+                <XAxis
+                  dataKey="date"
+                  axisLine={false}
+                  tickLine={false}
+                  interval={0}
+                  minTickGap={0}
+                  height={48}
+                  tick={<WeightChartDateTick fill={chartColors.textGray} />}
+                />
                 <YAxis
                   domain={['dataMin - 1', 'dataMax + 1']}
                   axisLine={false}
@@ -279,6 +311,7 @@ export default function ProfilePage({
                 />
                 <Tooltip
                   formatter={(value) => [`${value} kg`, "น้ำหนัก"]}
+                  labelFormatter={(_, payload) => payload?.[0]?.payload?.dateFull || payload?.[0]?.payload?.date || ""}
                   contentStyle={{
                     borderRadius: '15px',
                     border: 'none',
@@ -301,13 +334,26 @@ export default function ProfilePage({
               </AreaChart>
             </ResponsiveContainer>
           </div>
-          <div style={{ marginTop: '20px', padding: '15px', background: Colors.bgSoft, borderRadius: '15px', fontSize: '13px', textAlign: 'center', color: Colors.textDark }}>
-              💡 <b>AI Insight:</b> {weightTrendInsight}
-          </div>
+          <p className="profile-ai-insight">
+            <HiSparkles className="profile-ai-insight-icon" aria-hidden />
+            <span className="profile-ai-insight-label">AI Insight</span>
+            <span className="profile-ai-insight-sep" aria-hidden />
+            <span className="profile-ai-insight-text">{weightTrendInsight}</span>
+          </p>
         </div>
       </div>
 
       {renderAccountActions()}
+      {createPortal(
+        <input
+          ref={fileInputRef}
+          className="profile-avatar-hidden-input"
+          type="file"
+          accept="image/*"
+          onChange={handleAvatarUpload}
+        />,
+        document.body,
+      )}
     </div>
   );
 }

@@ -159,16 +159,32 @@ def merge_sync_payload(existing, incoming):
     same_day = existing.get("lastDate") and incoming.get("lastDate") and existing.get("lastDate") == incoming.get("lastDate")
     if incoming.get("rolledOver"):
         return incoming
+    def _extras_time(payload):
+        extras = (payload or {}).get("userExtras") if isinstance(payload, dict) else None
+        try:
+            return float((extras or {}).get("profileUpdatedAt") or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    newer_extras = incoming.get("userExtras") if _extras_time(incoming) >= _extras_time(existing) else existing.get("userExtras")
+
     if same_day and payload_has_daily_logs(existing) and not payload_has_daily_logs(incoming):
         merged = dict(incoming)
         merged["dailyMeals"] = existing.get("dailyMeals", incoming.get("dailyMeals"))
         merged["activities"] = existing.get("activities", incoming.get("activities"))
+        if newer_extras:
+            merged["userExtras"] = newer_extras
         return merged
     if same_day and payload_has_daily_logs(existing) and payload_has_daily_logs(incoming):
         merged = dict(incoming)
         merged["dailyMeals"] = merge_meal_maps(existing.get("dailyMeals"), incoming.get("dailyMeals"))
         merged["activities"] = merge_item_lists(existing.get("activities"), incoming.get("activities"))
+        if newer_extras:
+            merged["userExtras"] = newer_extras
         return merged
+    if newer_extras:
+        incoming = dict(incoming)
+        incoming["userExtras"] = newer_extras
     return incoming
 
 
@@ -386,9 +402,23 @@ async def login(data: dict):
         query = "SELECT * FROM users WHERE username = %s AND password_hash = %s"
         cursor.execute(query, (data['username'], data['password']))
         user = cursor.fetchone()
-        if user:
-            return user
-        raise HTTPException(status_code=401, detail="Invalid Credentials")
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid Credentials")
+        try:
+            cursor.execute(
+                "SELECT payload FROM user_sync_data WHERE username = %s",
+                (user.get("username"),),
+            )
+            sync_row = cursor.fetchone()
+            payload = parse_sync_payload(sync_row["payload"] if sync_row else None)
+            extras = payload.get("userExtras") if isinstance(payload, dict) else None
+            if isinstance(extras, dict):
+                for key in ("age", "weight", "height", "tdee", "bmr", "gender", "profileImage", "foodPreferences", "profileUpdatedAt"):
+                    if extras.get(key) not in (None, ""):
+                        user[key] = extras[key]
+        except Exception:
+            pass
+        return user
     finally:
         cursor.close()
         conn.close()

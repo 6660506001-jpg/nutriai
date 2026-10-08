@@ -320,7 +320,7 @@ export default function App() {
           rolledOver: rolledOverRef.current,
         }),
       ).catch(() => {});
-    }, 800);
+    }, 250);
 
     return () => {
       if (cloudSyncTimerRef.current) {
@@ -370,14 +370,32 @@ export default function App() {
       ? incomingPrefs
       : (hasFoodAvoidanceConfigured(sessionPrefs) ? sessionPrefs : incomingPrefs);
 
-    const mergedUser = savedWins
+    const accountTime = Number(accountUser?.profileUpdatedAt) || 0;
+    const savedTime = Number(savedUser?.profileUpdatedAt) || 0;
+    const preferSaved = savedWins || savedTime >= accountTime;
+    const mergedUser = preferSaved
       ? { ...(accountUser || {}), ...(savedUser || {}), username, foodPreferences }
       : { ...(savedUser || {}), ...(accountUser || {}), username, foodPreferences };
+
+    ["age", "weight", "height", "tdee", "bmr", "gender", "profileImage"].forEach((key) => {
+      const savedVal = savedUser?.[key];
+      const accountVal = accountUser?.[key];
+      const savedHas = savedVal != null && savedVal !== "";
+      const accountHas = accountVal != null && accountVal !== "";
+      if (preferSaved && savedHas) mergedUser[key] = savedVal;
+      else if (!preferSaved && accountHas) mergedUser[key] = accountVal;
+      else if (savedHas) mergedUser[key] = savedVal;
+      else if (accountHas) mergedUser[key] = accountVal;
+    });
+    if (savedTime || accountTime) {
+      mergedUser.profileUpdatedAt = Math.max(savedTime, accountTime);
+    }
+
     if (
       accountUser
       && Object.prototype.hasOwnProperty.call(accountUser, "profileImage")
       && !accountUser.profileImage
-      && !savedWins
+      && !preferSaved
     ) {
       delete mergedUser.profileImage;
     }
@@ -561,28 +579,31 @@ export default function App() {
     setShowFoodPrefsModal(false);
   };
 
-  const handleLogout = () => {
-    if (window.confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
-      if (user?.username) {
-        const password = getSyncPassword(user.username);
-        saveUserSession(user.username, { user, dailyMeals, historyData, activities });
-        if (password) {
-          saveUserDataToCloud(
+  const handleLogout = async () => {
+    if (!window.confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) return;
+    if (user?.username) {
+      const password = getSyncPassword(user.username);
+      saveUserSession(user.username, { user, dailyMeals, historyData, activities });
+      if (password) {
+        try {
+          await saveUserDataToCloud(
             user.username,
             password,
             packCloudPayload({ dailyMeals, activities, historyData, user }),
-          ).catch(() => {});
+          );
+        } catch {
+          /* keep local copy even if cloud is down */
         }
         clearSyncPassword(user.username);
-        clearLastUsername();
       }
-      setIsLoggedIn(false);
-      setCurrentTab("dashboard");
-      setUser(null);
-      setDailyMeals({ ...EMPTY_MEALS });
-      setHistoryData([]);
-      setActivities([]);
+      clearLastUsername();
     }
+    setIsLoggedIn(false);
+    setCurrentTab("dashboard");
+    setUser(null);
+    setDailyMeals({ ...EMPTY_MEALS });
+    setHistoryData([]);
+    setActivities([]);
   };
 
   const tdee = user ? calculateHealthData(user).tdee : 0;

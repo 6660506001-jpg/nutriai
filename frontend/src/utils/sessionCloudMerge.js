@@ -17,6 +17,33 @@ export function sessionHasLogData({ dailyMeals, activities, historyData }) {
   return sessionHasDailyLogs({ dailyMeals, activities }) || hasHistory;
 }
 
+const BODY_EXTRA_KEYS = ["gender", "age", "weight", "height", "tdee", "bmr", "profileUpdatedAt"];
+
+export function packUserExtras(user) {
+  if (!user) return {};
+  const extras = {
+    foodPreferences: user.foodPreferences,
+    profileImage: user.profileImage || null,
+  };
+  BODY_EXTRA_KEYS.forEach((key) => {
+    if (user[key] != null && user[key] !== "") extras[key] = user[key];
+  });
+  return extras;
+}
+
+export function applyUserExtras(serverUser, extras) {
+  const next = { ...(serverUser || {}) };
+  const payload = extras || {};
+  if (payload.foodPreferences) next.foodPreferences = payload.foodPreferences;
+  if (Object.prototype.hasOwnProperty.call(payload, "profileImage")) {
+    next.profileImage = payload.profileImage || null;
+  }
+  BODY_EXTRA_KEYS.forEach((key) => {
+    if (payload[key] != null && payload[key] !== "") next[key] = payload[key];
+  });
+  return next;
+}
+
 export function packCloudPayload({ dailyMeals, activities, historyData, lastDate, user, rolledOver }) {
   return {
     dailyMeals: dailyMeals || { ...EMPTY_MEALS },
@@ -24,29 +51,19 @@ export function packCloudPayload({ dailyMeals, activities, historyData, lastDate
     historyData: historyData || [],
     lastDate: lastDate || null,
     rolledOver: Boolean(rolledOver),
-    userExtras: user
-      ? {
-          foodPreferences: user.foodPreferences,
-          profileImage: user.profileImage,
-        }
-      : {},
+    userExtras: packUserExtras(user),
   };
 }
 
 export function applyCloudPayload(payload, serverUser) {
   if (!payload) return null;
-  const extras = payload.userExtras || {};
   return {
     dailyMeals: payload.dailyMeals || { ...EMPTY_MEALS },
     activities: payload.activities || [],
     historyData: payload.historyData || [],
     lastDate: payload.lastDate || null,
     rolledOver: Boolean(payload.rolledOver),
-    user: {
-      ...serverUser,
-      ...(extras.foodPreferences ? { foodPreferences: extras.foodPreferences } : {}),
-      ...(extras.profileImage ? { profileImage: extras.profileImage } : {}),
-    },
+    user: applyUserExtras(serverUser, payload.userExtras),
   };
 }
 
@@ -95,6 +112,21 @@ function mergeHistoryLists(primary, secondary) {
   return out;
 }
 
+function mergeSessionUsers(localUser, cloudUser) {
+  const localTime = Number(localUser?.profileUpdatedAt) || 0;
+  const cloudTime = Number(cloudUser?.profileUpdatedAt) || 0;
+  if (cloudTime >= localTime) {
+    return {
+      ...(localUser || {}),
+      ...(cloudUser || {}),
+    };
+  }
+  return {
+    ...(cloudUser || {}),
+    ...(localUser || {}),
+  };
+}
+
 /** Prefer today's meals on cloud when this device has none. History alone must not win. */
 export function resolveSessionOnLogin(localSession, cloudResult, serverUser) {
   const cloudApplied = applyCloudPayload(cloudResult?.payload, serverUser);
@@ -104,12 +136,14 @@ export function resolveSessionOnLogin(localSession, cloudResult, serverUser) {
     cloudApplied?.historyData,
     localSession?.historyData,
   );
+  const mergedUser = mergeSessionUsers(localSession?.user, cloudApplied?.user);
 
   if (!cloudDaily && !localDaily) {
     return {
       session: {
         ...(localSession || {}),
         historyData: mergedHistory,
+        user: mergedUser,
       },
       uploadLocal: false,
     };
@@ -120,6 +154,7 @@ export function resolveSessionOnLogin(localSession, cloudResult, serverUser) {
       session: {
         ...cloudApplied,
         historyData: mergedHistory,
+        user: mergedUser,
       },
       uploadLocal: false,
     };
@@ -130,6 +165,7 @@ export function resolveSessionOnLogin(localSession, cloudResult, serverUser) {
       session: {
         ...localSession,
         historyData: mergedHistory,
+        user: mergedUser,
       },
       uploadLocal: true,
     };
@@ -142,10 +178,7 @@ export function resolveSessionOnLogin(localSession, cloudResult, serverUser) {
       activities: mergeItemList(cloudApplied.activities, localSession.activities),
       historyData: mergedHistory,
       lastDate: cloudApplied.lastDate || localSession.lastDate,
-      user: {
-        ...(localSession.user || {}),
-        ...(cloudApplied.user || {}),
-      },
+      user: mergedUser,
     },
     uploadLocal: true,
   };
