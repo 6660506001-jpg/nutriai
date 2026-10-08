@@ -1,1 +1,1 @@
-export const APP_BUILD_STAMP = "8 ต.ค. 21:30";
+export const APP_BUILD_STAMP = "8 ต.ค. 21:40";
