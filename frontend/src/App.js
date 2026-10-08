@@ -17,6 +17,7 @@ import FoodPreferencesModal from "./components/ui/FoodPreferencesModal";
 import DailyCompleteToast from "./components/ui/DailyCompleteToast";
 import { useDailyMealCompleteCelebration } from "./hooks/useDailyMealCompleteCelebration";
 import { PAGE_META } from "./constants/pageMeta";
+import { APP_BUILD_STAMP } from "./constants/buildStamp";
 import {
   EMPTY_MEALS,
   loadUserSession,
@@ -85,6 +86,8 @@ export default function App() {
   }, [themeId, appearanceMode, followDevice, customPrimary]);
 
   const [user, setUser] = useState(null);
+  const userRef = useRef(user);
+  userRef.current = user;
   const [dailyMeals, setDailyMeals] = useState(() => ({ ...EMPTY_MEALS }));
   const [historyData, setHistoryData] = useState([]);
   const [activities, setActivities] = useState([]);
@@ -112,13 +115,19 @@ export default function App() {
     });
   }, [isLoggedIn, user?.username]);
 
+  useEffect(() => {
+    if (!isLoggedIn || !user?.username) return;
+    saveUserSession(user.username, { user });
+  }, [isLoggedIn, user]);
+
   const applyResolvedCloudSession = (resolved, fallbackUser) => {
+    const liveUser = userRef.current || fallbackUser;
     const archived = applyDailyArchive({
       lastDate: resolved.lastDate,
       user: mergeUserProfile(
-        fallbackUser.username,
-        fallbackUser,
-        resolved.user || fallbackUser,
+        liveUser.username,
+        liveUser,
+        resolved.user || liveUser,
       ),
       dailyMeals: resolved.dailyMeals,
       historyData: stripSimulatedHistory(resolved.historyData),
@@ -293,7 +302,6 @@ export default function App() {
     if (!isLoggedIn || !user?.username || !cloudReady) return undefined;
     const password = getSyncPassword(user.username);
     if (!password) return undefined;
-    if (!sessionHasDailyLogs({ dailyMeals, activities }) && !rolledOverRef.current) return undefined;
 
     if (cloudSyncTimerRef.current) {
       clearTimeout(cloudSyncTimerRef.current);
@@ -355,19 +363,24 @@ export default function App() {
     setShowUserGuide(false);
   };
 
-  const mergeUserProfile = (username, userData, sessionUser) => {
-    const sessionPrefs = normalizeFoodPreferences(sessionUser?.foodPreferences);
-    const incomingPrefs = normalizeFoodPreferences(userData.foodPreferences);
+  const mergeUserProfile = (username, accountUser, savedUser, { savedWins = false } = {}) => {
+    const sessionPrefs = normalizeFoodPreferences(savedUser?.foodPreferences);
+    const incomingPrefs = normalizeFoodPreferences(accountUser?.foodPreferences);
     const foodPreferences = hasFoodAvoidanceConfigured(incomingPrefs)
       ? incomingPrefs
       : (hasFoodAvoidanceConfigured(sessionPrefs) ? sessionPrefs : incomingPrefs);
 
-    const mergedUser = {
-      ...(sessionUser || {}),
-      ...userData,
-      username,
-      foodPreferences,
-    };
+    const mergedUser = savedWins
+      ? { ...(accountUser || {}), ...(savedUser || {}), username, foodPreferences }
+      : { ...(savedUser || {}), ...(accountUser || {}), username, foodPreferences };
+    if (
+      accountUser
+      && Object.prototype.hasOwnProperty.call(accountUser, "profileImage")
+      && !accountUser.profileImage
+      && !savedWins
+    ) {
+      delete mergedUser.profileImage;
+    }
     delete mergedUser.foodPrefsConfiguredOnSignup;
     return mergedUser;
   };
@@ -451,7 +464,7 @@ export default function App() {
       activities: localSession.activities,
       historyData: localSession.historyData,
       lastDate: localSession.lastDate,
-      user: mergeUserProfile(username, userData, localSession.user),
+      user: mergeUserProfile(username, userData, localSession.user, { savedWins: true }),
     };
 
     if (password) {
@@ -468,7 +481,9 @@ export default function App() {
             activities: resolved.activities,
             historyData: resolved.historyData,
             lastDate: resolved.lastDate,
-            user: mergeUserProfile(username, userData, resolved.user || localSession.user),
+            user: mergeUserProfile(username, userData, resolved.user || localSession.user, {
+              savedWins: true,
+            }),
           };
         }
         if (uploadLocal) {
@@ -733,7 +748,10 @@ export default function App() {
             {showDashboardRings ? (
               <>
                 <div className="app-header-dash-top">
-                  <h1 className="app-header-page-title">{pageMeta.title}</h1>
+                  <div>
+                    <h1 className="app-header-page-title">{pageMeta.title}</h1>
+                    <p className="app-build-stamp">อัปเดต {APP_BUILD_STAMP}</p>
+                  </div>
                   <div className="app-header-dash-top-end">
                     <span className="app-header-avatar app-header-avatar--rings">
                       {user.profileImage ? (

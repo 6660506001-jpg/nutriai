@@ -322,6 +322,12 @@ export default function AppVisualEffects() {
         margin-bottom: 8px;
       }
 
+      .app-build-stamp {
+        margin: 2px 0 0;
+        font-size: 11px;
+        font-weight: 800;
+        color: #2563eb;
+      }
       .app-header-dash-top .app-header-page-title {
         margin: 0;
         font-size: 20px;
