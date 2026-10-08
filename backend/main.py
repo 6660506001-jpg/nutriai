@@ -8,21 +8,8 @@ from db_config import get_cors_origins, get_db_settings
 from food_estimator import estimate_food_from_name
 from thai_food_matcher import search_thai_foods
 from activity_catalog import search_activities_local
-from ml_engine import analyze_meal, load_metrics, load_models, score_menus
 
 app = FastAPI()
-
-@app.on_event("startup")
-def warmup_ml_models():
-    conn = get_db_connection()
-    if conn:
-        try:
-            ensure_app_tables(conn)
-        except Exception as error:
-            print(f"⚠️ Could not create tables: {error}")
-        finally:
-            conn.close()
-
 # --- CORS (ตั้ง FRONTEND_URL บน production เช่น https://nutriai.vercel.app) ---
 app.add_middleware(
     CORSMiddleware,
@@ -35,10 +22,16 @@ app.add_middleware(
 # --- 🧠 Load Machine Learning Models (lazy — ไม่บล็อก login/register) ---
 def get_loaded_models():
     try:
+        from ml_engine import load_models
         return load_models(train_if_missing=False)
     except Exception as error:
         print(f"⚠️ ML models unavailable: {error}")
         return {}
+
+
+def _ml():
+    import ml_engine
+    return ml_engine
 
 # --- Database Connection ---
 def get_db_connection():
@@ -50,6 +43,7 @@ def get_db_connection():
             user=settings["user"],
             password=settings["password"],
             database=settings["database"],
+            connection_timeout=8,
         )
     except Error as e:
         print(f"❌ Database Error: {e}")
@@ -200,11 +194,7 @@ def verify_user_credentials(username, password):
 # --- Health check ---
 @app.get("/health")
 async def health():
-    conn = get_db_connection()
-    if conn:
-        conn.close()
-        return {"status": "ok", "database": "connected"}
-    return {"status": "ok", "database": "unavailable"}
+    return {"status": "ok"}
 
 # --- 🔍 1. Search Endpoint (ส่วนที่ทำให้ปุ่มค้นหาทำงาน) ---
 @app.get("/api/foods/search")
@@ -407,7 +397,7 @@ async def login(data: dict):
 @app.get("/api/ml/models")
 async def ml_models_status():
     models = get_loaded_models()
-    metrics = load_metrics()
+    metrics = _ml().load_metrics()
     return {
         "ready": all(key in models for key in ("rf", "svm", "gb")),
         "models": {
@@ -425,7 +415,7 @@ async def ml_models_status():
 @app.get("/api/ml/metrics")
 async def ml_metrics():
     get_loaded_models()
-    return load_metrics()
+    return _ml().load_metrics()
 
 
 @app.post("/api/ml/analyze-meal")
@@ -433,7 +423,7 @@ async def ml_analyze_meal(data: dict):
     models = get_loaded_models()
     if not models:
         raise HTTPException(status_code=503, detail="ML models unavailable")
-    return analyze_meal(data, models)
+    return _ml().analyze_meal(data, models)
 
 
 @app.post("/api/ml/score-menus")
@@ -453,7 +443,7 @@ async def ml_score_menus(data: dict):
         "remainingCarbs": data.get("remainingCarbs", profile.get("remainingCarbs")),
         "remainingFat": data.get("remainingFat", profile.get("remainingFat")),
     }
-    return {"items": score_menus(menus, remaining, models, profile)}
+    return {"items": _ml().score_menus(menus, remaining, models, profile)}
 
 
 @app.post("/analyze-meal")
@@ -470,7 +460,7 @@ async def analyze_meal_endpoint(data: dict):
 
     models = get_loaded_models()
     profile = data.get("profile") if isinstance(data.get("profile"), dict) else {}
-    ml = analyze_meal(
+    ml = _ml().analyze_meal(
         {
             "calories": calories,
             "protein": protein,
