@@ -8,12 +8,20 @@ from db_config import get_cors_origins, get_db_settings
 from food_estimator import estimate_food_from_name
 from thai_food_matcher import search_thai_foods
 from activity_catalog import search_activities_local
-from ml_engine import analyze_meal, load_models, score_menus
+from ml_engine import analyze_meal, load_metrics, load_models, score_menus
 
 app = FastAPI()
 
 @app.on_event("startup")
 def warmup_ml_models():
+    conn = get_db_connection()
+    if conn:
+        try:
+            ensure_app_tables(conn)
+        except Exception as error:
+            print(f"⚠️ Could not create tables: {error}")
+        finally:
+            conn.close()
     get_loaded_models()
 
 # --- CORS (ตั้ง FRONTEND_URL บน production เช่น https://nutriai.vercel.app) ---
@@ -47,6 +55,35 @@ def get_db_connection():
     except Error as e:
         print(f"❌ Database Error: {e}")
         return None
+
+def ensure_users_table(conn):
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+              user_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+              username VARCHAR(64) NOT NULL UNIQUE,
+              password_hash VARCHAR(255) NOT NULL,
+              gender VARCHAR(16) DEFAULT 'Female',
+              age INT DEFAULT NULL,
+              weight FLOAT DEFAULT NULL,
+              height FLOAT DEFAULT NULL,
+              activity_level VARCHAR(32) DEFAULT 'Sedentary',
+              bmr FLOAT DEFAULT NULL,
+              tdee FLOAT DEFAULT NULL
+            )
+            """
+        )
+        conn.commit()
+    finally:
+        cursor.close()
+
+
+def ensure_app_tables(conn):
+    ensure_users_table(conn)
+    ensure_app_tables(conn)
+
 
 def ensure_sync_table(conn):
     cursor = conn.cursor()
@@ -227,6 +264,7 @@ async def register(data: dict):
     if not conn: raise HTTPException(status_code=500, detail="DB Connection Failed")
     cursor = conn.cursor()
     try:
+        ensure_app_tables(conn)
         w, h, a = float(data['weight']), float(data['height']), int(data['age'])
         gender = data['gender']
         
@@ -258,7 +296,7 @@ async def load_user_data(data: dict):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB Connection Failed")
-    ensure_sync_table(conn)
+    ensure_app_tables(conn)
     cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute(
@@ -294,7 +332,7 @@ async def save_user_data(data: dict):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="DB Connection Failed")
-    ensure_sync_table(conn)
+    ensure_app_tables(conn)
     cursor = conn.cursor()
     try:
         cursor.execute(
@@ -314,6 +352,33 @@ async def save_user_data(data: dict):
             """,
             (username, payload_json),
         )
+        extras = merged.get("userExtras") if isinstance(merged, dict) else None
+        if (
+            isinstance(extras, dict)
+            and extras.get("age") is not None
+            and extras.get("weight") is not None
+            and extras.get("height") is not None
+        ):
+            params = [
+                int(extras.get("age") or 0),
+                float(extras.get("weight") or 0),
+                float(extras.get("height") or 0),
+                extras.get("bmr"),
+                extras.get("tdee"),
+            ]
+            gender_sql = ""
+            if extras.get("gender"):
+                gender_sql = ", gender = %s"
+                params.append(extras.get("gender"))
+            params.append(username)
+            cursor.execute(
+                f"""
+                UPDATE users
+                SET age = %s, weight = %s, height = %s, bmr = %s, tdee = %s{gender_sql}
+                WHERE username = %s
+                """,
+                tuple(params),
+            )
         conn.commit()
         return {"status": "ok"}
     finally:
@@ -343,6 +408,7 @@ async def login(data: dict):
 @app.get("/api/ml/models")
 async def ml_models_status():
     models = get_loaded_models()
+    metrics = load_metrics()
     return {
         "ready": all(key in models for key in ("rf", "svm", "gb")),
         "models": {
@@ -350,7 +416,17 @@ async def ml_models_status():
             "svm": "Support Vector Machines" if "svm" in models else None,
             "gb": "Gradient Boosting" if "gb" in models else None,
         },
+        "metrics": metrics.get("metrics") or {},
+        "ranking": metrics.get("ranking") or [],
+        "bestModel": metrics.get("bestModel"),
+        "features": metrics.get("features") or [],
     }
+
+
+@app.get("/api/ml/metrics")
+async def ml_metrics():
+    get_loaded_models()
+    return load_metrics()
 
 
 @app.post("/api/ml/analyze-meal")
@@ -370,7 +446,15 @@ async def ml_score_menus(data: dict):
     if not models:
         return {"items": []}
     remaining = float(data.get("remainingCal") or 0)
-    return {"items": score_menus(menus, remaining, models)}
+    profile = data.get("profile") if isinstance(data.get("profile"), dict) else {}
+    profile = {
+        **profile,
+        "remainingCal": remaining if profile.get("remainingCal") is None else profile.get("remainingCal"),
+        "remainingProtein": data.get("remainingProtein", profile.get("remainingProtein")),
+        "remainingCarbs": data.get("remainingCarbs", profile.get("remainingCarbs")),
+        "remainingFat": data.get("remainingFat", profile.get("remainingFat")),
+    }
+    return {"items": score_menus(menus, remaining, models, profile)}
 
 
 @app.post("/analyze-meal")
@@ -386,6 +470,7 @@ async def analyze_meal_endpoint(data: dict):
     remaining = float(data.get("remainingCal") or food.get("remainingCal") or 0)
 
     models = get_loaded_models()
+    profile = data.get("profile") if isinstance(data.get("profile"), dict) else {}
     ml = analyze_meal(
         {
             "calories": calories,
@@ -393,6 +478,7 @@ async def analyze_meal_endpoint(data: dict):
             "carbs": carbs,
             "fat": fat,
             "remainingCal": remaining,
+            **profile,
         },
         models,
     ) if models else None
