@@ -1,5 +1,7 @@
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { playCelebrationSound } from "../../utils/celebrationSound";
+import SparkBurst from "./SparkBurst";
 
 export default function LogSavedBar({
   notice,
@@ -12,6 +14,7 @@ export default function LogSavedBar({
 }) {
   useEffect(() => {
     if (!notice) return undefined;
+    playCelebrationSound();
     const timer = window.setTimeout(onDismiss, 16000);
     return () => window.clearTimeout(timer);
   }, [notice, onDismiss]);
@@ -22,6 +25,7 @@ export default function LogSavedBar({
 
   return createPortal(
     <div className="log-saved-bar" role="status" aria-live="polite">
+      <SparkBurst playKey={notice.name + notice.calories} />
       <div className="log-saved-bar-main">
         <strong className="log-saved-bar-title">บันทึกแล้ว ✓</strong>
         <span className="log-saved-bar-detail">

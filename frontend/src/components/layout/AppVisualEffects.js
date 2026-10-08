@@ -420,6 +420,11 @@ export default function AppVisualEffects() {
         box-shadow: 0 12px 28px rgba(15, 23, 42, 0.32);
         cursor: pointer;
         transition: transform 0.2s ease, background 0.2s ease;
+        animation: dashFabHalo 2.2s ease-in-out infinite;
+      }
+      @keyframes dashFabHalo {
+        0%, 100% { box-shadow: 0 12px 28px rgba(15, 23, 42, 0.32), 0 0 0 0 rgba(37, 99, 235, 0.28); }
+        50% { box-shadow: 0 12px 28px rgba(15, 23, 42, 0.32), 0 0 0 12px rgba(37, 99, 235, 0); }
       }
 
       .dash-quick-fab.is-open .dash-quick-fab-main {
@@ -709,6 +714,8 @@ export default function AppVisualEffects() {
         grid-template-columns: 1fr 1fr;
       }
       .dash-home-ai-menu-card {
+        position: relative;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
         gap: 12px;
@@ -720,6 +727,41 @@ export default function AppVisualEffects() {
           linear-gradient(165deg, rgba(37, 99, 235, 0.08) 0%, rgba(255, 255, 255, 0.98) 42%);
         border: 1px solid rgba(37, 99, 235, 0.16);
         box-shadow: 0 16px 36px rgba(37, 99, 235, 0.1);
+      }
+      .dash-home-ai-menu-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.55) 48%, transparent 66%);
+        transform: translateX(-120%);
+        animation: dashMenuShine 3.6s ease-in-out 0.6s infinite;
+        pointer-events: none;
+      }
+      @keyframes dashMenuShine {
+        0%, 55% { transform: translateX(-120%); }
+        75% { transform: translateX(120%); }
+        100% { transform: translateX(120%); }
+      }
+      .spark-burst {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: visible;
+      }
+      .spark-burst-bit {
+        position: absolute;
+        left: 50%;
+        top: 30%;
+        font-size: 12px;
+        font-weight: 900;
+        animation: sparkFly 0.85s ease-out forwards;
+      }
+      @keyframes sparkFly {
+        0% { opacity: 1; transform: translate(-50%, -50%) scale(0.4) rotate(0deg); }
+        100% {
+          opacity: 0;
+          transform: translate(calc(-50% + var(--spark-x)), calc(-50% + var(--spark-y))) scale(1) rotate(var(--spark-rot));
+        }
       }
 
       .dash-home-ai-menu-card-head {
@@ -6290,6 +6332,7 @@ export default function AppVisualEffects() {
         right: 12px;
         bottom: calc(72px + env(safe-area-inset-bottom));
         z-index: 900;
+        overflow: visible;
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
         gap: 10px 12px;

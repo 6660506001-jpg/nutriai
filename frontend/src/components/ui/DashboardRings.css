@@ -5,6 +5,8 @@
 }
 
 .dash-energy-panel {
+  position: relative;
+  overflow: visible;
   margin: 0 0 14px;
   padding: 16px 14px 14px;
   border-radius: 22px;
@@ -27,6 +29,20 @@
   position: relative;
   width: 118px;
   height: 118px;
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dash-energy-ring.is-pop {
+  animation: dashRingPop 0.28s ease;
+}
+
+@keyframes dashRingPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
 
 .dash-energy-ring svg {
@@ -57,6 +73,22 @@
 
 .dash-energy-ring--remain .dash-energy-ring-value {
   filter: drop-shadow(0 0 6px rgba(37, 99, 235, 0.45));
+}
+
+.dash-energy-ring--remain {
+  animation: dashRemainGlow 2.4s ease-in-out infinite;
+}
+
+@keyframes dashRemainGlow {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(37, 99, 235, 0)); }
+  50% { filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.45)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-energy-ring--remain,
+  .dash-energy-ring.is-pop {
+    animation: none;
+  }
 }
 
 .dash-energy-ring-center {
