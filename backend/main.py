@@ -75,7 +75,7 @@ def ensure_users_table(conn):
 
 def ensure_app_tables(conn):
     ensure_users_table(conn)
-    ensure_app_tables(conn)
+    ensure_sync_table(conn)
 
 
 def ensure_sync_table(conn):
@@ -423,21 +423,24 @@ async def login(data: dict):
         cursor.close()
         conn.close()
 
-# --- 4. AI Analysis System (Random Forest + SVM + Gradient Boosting) ---
+# --- 4. AI Analysis System (Gradient Boosting only on the website) ---
 @app.get("/api/ml/models")
 async def ml_models_status():
     models = get_loaded_models()
     metrics = _ml().load_metrics()
+    engine = _ml()
+    serve_key = getattr(engine, "SERVE_MODEL_KEY", "gb")
+    serve_name = engine.MODEL_DISPLAY_NAMES.get(serve_key, "Gradient Boosting")
     return {
-        "ready": all(key in models for key in ("rf", "svm", "gb")),
+        "ready": serve_key in models,
+        "serveModelKey": serve_key,
+        "serveModel": serve_name,
         "models": {
-            "rf": "Random Forest" if "rf" in models else None,
-            "svm": "Support Vector Machines" if "svm" in models else None,
-            "gb": "Gradient Boosting" if "gb" in models else None,
+            serve_key: serve_name if serve_key in models else None,
         },
-        "metrics": metrics.get("metrics") or {},
-        "ranking": metrics.get("ranking") or [],
-        "bestModel": metrics.get("bestModel"),
+        "metrics": (metrics.get("metrics") or {}).get(serve_key) or {},
+        "ranking": [row for row in (metrics.get("ranking") or []) if row.get("key") == serve_key],
+        "bestModel": serve_name,
         "features": metrics.get("features") or [],
     }
 
@@ -446,6 +449,27 @@ async def ml_models_status():
 async def ml_metrics():
     get_loaded_models()
     return _ml().load_metrics()
+
+
+@app.get("/api/ml/training-rows")
+async def ml_training_rows():
+    """มื้อจริงจาก MySQL — เฉพาะ 13 ฟีเจอร์ตัวเลข ไม่มีชื่อบัญชี/รหัสผ่าน/รูป."""
+    from real_training_data import FEATURE_ROW_NAMES, fetch_mysql_feature_rows, label_feature_rows
+
+    X, meta = fetch_mysql_feature_rows()
+    y = label_feature_rows(X)
+    return {
+        "source": "mysql-meals",
+        "host": meta.get("host"),
+        "database": meta.get("database"),
+        "path": meta.get("path"),
+        "usersScanned": meta.get("usersScanned"),
+        "usersWithMeals": meta.get("usersWithMeals"),
+        "nRows": int(len(X)),
+        "features": FEATURE_ROW_NAMES,
+        "X": X.tolist() if len(X) else [],
+        "y": y.tolist(),
+    }
 
 
 @app.post("/api/ml/analyze-meal")

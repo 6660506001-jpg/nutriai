@@ -34,14 +34,36 @@ def _settings_from_mysql_url(url):
     }
 
 
+def _is_private_railway_host(host):
+    name = str(host or "").strip().lower()
+    return name.endswith(".railway.internal") or name.endswith(".rlwy.internal")
+
+
+def _running_on_railway():
+    return bool(_env("RAILWAY_ENVIRONMENT", "RAILWAY_PRIVATE_DOMAIN", "RAILWAY_PROJECT_ID"))
+
+
 def get_db_settings():
-    mysql_url = _env("MYSQL_URL", "DATABASE_URL", "MYSQL_PUBLIC_URL")
-    from_url = _settings_from_mysql_url(mysql_url)
-    if from_url:
+    url_candidates = []
+    if _running_on_railway():
+        url_candidates = ["MYSQL_URL", "DATABASE_URL", "MYSQL_PUBLIC_URL"]
+    else:
+        url_candidates = ["MYSQL_PUBLIC_URL", "DATABASE_URL", "MYSQL_URL"]
+
+    for name in url_candidates:
+        from_url = _settings_from_mysql_url(_env(name))
+        if not from_url:
+            continue
+        if not _running_on_railway() and _is_private_railway_host(from_url["host"]):
+            continue
         return from_url
 
+    host = _env("DB_HOST", "MYSQLHOST", "MYSQL_HOST", default="localhost")
+    if not _running_on_railway() and _is_private_railway_host(host):
+        host = "localhost"
+
     return {
-        "host": _env("DB_HOST", "MYSQLHOST", "MYSQL_HOST", default="localhost"),
+        "host": host,
         "port": int(_env("DB_PORT", "MYSQLPORT", "MYSQL_PORT", default="3306") or "3306"),
         "user": _env("DB_USER", "MYSQLUSER", "MYSQL_USER", default="root"),
         "password": _env("DB_PASSWORD", "MYSQLPASSWORD", "MYSQL_PASSWORD", default="1234"),
